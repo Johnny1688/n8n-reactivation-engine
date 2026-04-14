@@ -877,19 +877,22 @@ function buildAIContext(input) {
     };
 
     let whereStopped = '';
-    if (finalPurchaseStage === 'pricing') whereStopped = 'after pricing discussion';
+    if (stopPointAnalysis?.where_it_stopped) whereStopped = stopPointAnalysis.where_it_stopped;
+    else if (finalPurchaseStage === 'pricing') whereStopped = 'after pricing discussion';
     else if (finalPurchaseStage === 'selection') whereStopped = 'during model selection';
     else if (customerLastMessageType === 'question') whereStopped = 'after customer question';
     else whereStopped = 'after last interaction';
 
     let whyStopped = '';
-    if (hasNotNowSignal) whyStopped = 'timing not right';
+    if (stopPointAnalysis?.why_it_stopped_there) whyStopped = stopPointAnalysis.why_it_stopped_there;
+    else if (hasNotNowSignal) whyStopped = 'timing not right';
     else if (isCustomerSilentAfterMyMessage) whyStopped = 'no reply after my message';
     else whyStopped = 'no clear next step';
 
     const stopPointPayload = {
       where_it_stopped: whereStopped,
-      why_it_stopped: whyStopped
+      why_it_stopped: whyStopped,
+      smallest_reply_to_trigger: stopPointAnalysis?.smallest_reply_to_trigger || ''
     };
 
     const mustAvoid = [];
@@ -907,18 +910,17 @@ function buildAIContext(input) {
 
     const constraintsPayload = {
       must_avoid: mustAvoid,
-      must_follow: mustFollow
+      must_follow: mustFollow,
+      do_not_repeat: Array.isArray(forbiddenRepeatZone?.do_not_repeat)
+        ? forbiddenRepeatZone.do_not_repeat
+        : []
     };
 
-    let followUpType = 'lighten_touch';
-
-    if (customerLastMessageType === 'question') followUpType = 'answer';
-    else if (finalPurchaseStage === 'pricing') followUpType = 'clarify';
-    else if (customerLastMessageType === 'comparison_signal') followUpType = 'resend';
-
     const decisionPayload = {
-      should_follow_up: shouldReactivateNow === true,
-      follow_up_type: followUpType,
+      should_follow_up_now: reactivationDecisionBasis?.should_follow_up_now === true,
+      best_trigger_type: reactivationDecisionBasis?.best_trigger_type || '',
+      best_trigger_reason: reactivationDecisionBasis?.best_trigger_reason || '',
+      smallest_reply_goal: reactivationDecisionBasis?.smallest_reply_goal || '',
       primary_anchor: primaryReplyAnchor || 'generic'
     };
 

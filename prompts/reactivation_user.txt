@@ -1,39 +1,34 @@
-Input is a JSON object called `reactivation_ai_payload`.
+Input is `reactivation_ai_payload`.
 
-You MUST only use `reactivation_ai_payload`.
-You MUST NOT infer anything outside it.
-You MUST NOT reference the full conversation.
-You MUST NOT create new context.
+You may only use:
+- `timeline`
+- `last_signal`
+- `stop_point`
+- `constraints`
+- `decision`
 
-Use only these fields:
-- timeline
-- last_signal
-- stop_point
-- constraints
-- decision
+Execute:
+- `stop_point.smallest_reply_to_trigger`
+- `decision.best_trigger_type`
+- `decision.smallest_reply_goal`
+- `constraints.do_not_repeat`
 
-Execute the structured strategy in `stop_point`, `constraints`, and `decision`.
+Do not infer outside the payload.
+Do not reference the full conversation.
+Do not create new context.
 
 Even if `decision.should_follow_up_now` is false:
 - still generate a message
 - make it ultra light
-- no push
 - optional reply only
 
-Your job:
-- identify the smallest reply trigger
-- remove friction
-- avoid all blocked angles
-- never ask the same question again
-- never ask the customer to provide missing info
-- offer a ready-made next step
-- produce ONE message only
-
 The message must:
-- feel natural
-- feel optional
-- require near-zero effort to reply
-- be confirmable, not answer-based
+- be one message only
+- never ask the same question again
+- never ask for missing info
+- offer a ready-made next step
+- be yes/no confirmable
+- require near-zero effort
 
 Do not explain reasoning outside JSON.
 
