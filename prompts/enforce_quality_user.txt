@@ -1,0 +1,28 @@
+Input:
+- `whatsapp_message`
+- `reactivation_ai_payload`
+
+Validate only.
+Do not create a new strategy.
+Do not infer outside the payload.
+
+Check:
+- grounded in `last_signal` and `stop_point`
+- follows `decision`
+- avoids `constraints.do_not_repeat`
+- one reply path only
+- low-pressure
+- non-generic
+- near-zero effort to reply
+
+If it passes, return the original message as `final_message`.
+If it can be minimally tightened without changing strategy, return the tightened message.
+If not, return `pass: false`.
+
+Do not explain outside JSON.
+
+WhatsApp Message:
+{{whatsapp_message}}
+
+Reactivation AI Payload:
+{{reactivation_ai_payload}}

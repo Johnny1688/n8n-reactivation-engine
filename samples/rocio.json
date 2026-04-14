@@ -1,0 +1,16 @@
+{
+  "project_key": "rocio",
+  "customer_name": "Rocio",
+  "messages": [
+    {
+      "role": "me",
+      "message": "I can send a simple price starting point.",
+      "message_time": "2026-04-10T11:00:00Z"
+    },
+    {
+      "role": "customer",
+      "message": "What is the shipping time?",
+      "message_time": "2026-04-10T11:30:00Z"
+    }
+  ]
+}

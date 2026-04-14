@@ -1,0 +1,5 @@
+Ready to send
+Project: {{project_key}}
+Customer: {{customer_name}}
+
+{{whatsapp_message}}

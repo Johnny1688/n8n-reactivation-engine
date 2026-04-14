@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "n8n Reactivation Engine AI Outputs",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "reactivation_ai_output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["should_send", "why", "whatsapp_message"],
+      "properties": {
+        "should_send": { "type": "boolean" },
+        "why": { "type": "string" },
+        "whatsapp_message": { "type": "string" }
+      }
+    },
+    "quality_output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pass", "quality_reason", "final_message"],
+      "properties": {
+        "pass": { "type": "boolean" },
+        "quality_reason": { "type": "string" },
+        "final_message": { "type": "string" }
+      }
+    }
+  }
+}

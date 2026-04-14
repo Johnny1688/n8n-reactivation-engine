@@ -1,0 +1,16 @@
+{
+  "project_key": "neha",
+  "customer_name": "Neha",
+  "messages": [
+    {
+      "role": "customer",
+      "message": "Can you share the catalog?",
+      "message_time": "2026-04-10T10:00:00Z"
+    },
+    {
+      "role": "me",
+      "message": "Sure, I sent the catalog here.",
+      "message_time": "2026-04-10T10:10:00Z"
+    }
+  ]
+}

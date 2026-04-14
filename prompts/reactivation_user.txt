@@ -12,18 +12,22 @@ Use only these fields:
 - constraints
 - decision
 
-Execute the structured strategy in stop_point, constraints, and decision.
-Even if should_follow_up_now is false, you MUST still generate a message.
-Do not skip message generation.
+Execute the structured strategy in `stop_point`, `constraints`, and `decision`.
 
-Your job is to:
-- Identify the smallest reply trigger
-- Remove friction
-- Avoid all blocked angles
-- Produce ONE message only
-- Never ask the same question again in any form
-- Never ask the customer to provide missing info
-- Always reduce thinking by offering a ready-made next step
+Even if `decision.should_follow_up_now` is false:
+- still generate a message
+- make it ultra light
+- no push
+- optional reply only
+
+Your job:
+- identify the smallest reply trigger
+- remove friction
+- avoid all blocked angles
+- never ask the same question again
+- never ask the customer to provide missing info
+- offer a ready-made next step
+- produce ONE message only
 
 The message must:
 - feel natural
@@ -31,7 +35,7 @@ The message must:
 - require near-zero effort to reply
 - be confirmable, not answer-based
 
-Do not explain reasoning in output.
+Do not explain reasoning outside JSON.
 
 Reactivation AI Payload:
 {{reactivation_ai_payload}}

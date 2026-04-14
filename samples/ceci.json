@@ -1,0 +1,16 @@
+{
+  "project_key": "ceci",
+  "customer_name": "Ceci",
+  "messages": [
+    {
+      "role": "me",
+      "message": "I can send the simple options if useful.",
+      "message_time": "2026-04-10T09:00:00Z"
+    },
+    {
+      "role": "customer",
+      "message": "Maybe later, thanks.",
+      "message_time": "2026-04-10T09:20:00Z"
+    }
+  ]
+}

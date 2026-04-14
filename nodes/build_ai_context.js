@@ -1,18 +1,925 @@
+// Generated n8n Code node entry from src/context modules.
+// Keep source changes in src/context/*, then regenerate this file when needed.
+
 const {
   cleanAndDedup,
   cleanText,
   normalizeUnknown,
   uniqueNonEmpty
-} = require('./cleanAndDedup.js');
+} = (() => {
+function cleanText(text) {
+  if (!text) return '';
+
+  return String(text)
+    .replace(/media-cancel/gi, '')
+    .replace(/ic-videocam\d*:\d+/gi, '')
+    .replace(/instagram广告\s*查看详情/gi, '')
+    .replace(/instagram\s*广告查看详情/gi, '')
+    .replace(/instagram\s*广告/gi, '')
+    .replace(/自动问候消息/gi, '')
+    .replace(/(\D)\d{1,2}:\d{2}\b/g, '$1')
+    .replace(/\b\d{1,2}:\d{2}\b/g, '')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/[!！]{2,}/g, '!')
+    .replace(/[?？]{2,}/g, '?')
+    .replace(/[.。]{3,}/g, '...')
+    .trim();
+}
+
+function stripTrailingTimeArtifacts(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/([a-zA-Z])\d{1,2}:\d{2}\b/g, '$1')
+    .replace(/\s+\d{1,2}:\d{2}\b/g, '')
+    .trim();
+}
+
+function stripChinese(text) {
+  if (!text) return '';
+  return String(text).replace(/[\u4e00-\u9fff]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function stripEnglish(text) {
+  if (!text) return '';
+  return String(text).replace(/[A-Za-z0-9.,!?;:'"()/%&+\-]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function baseSemanticForm(text) {
+  const cleaned = cleanText(stripTrailingTimeArtifacts(text || ''));
+  const noChinese = stripChinese(cleaned);
+  return noChinese
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeForDedup(text) {
+  return cleanText(stripTrailingTimeArtifacts(text || ''))
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function compactForSimilarity(text) {
+  return normalizeForDedup(text)
+    .replace(/[^\p{L}\p{N}\s]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function scoreMessageQuality(text) {
+  const t = cleanText(text || '');
+  let score = t.length;
+
+  if (/[A-Za-z]/.test(t) && /[一-龥]/.test(t)) score += 8;
+  if (/\n/.test(t)) score += 4;
+  if (/^https?:\/\//i.test(t)) score -= 12;
+  if (/^(ok|okay|thanks|thank you|ah ok|got it)$/i.test(t)) score -= 8;
+
+  return score;
+}
+
+function stripQuotedPrefix(message, previousMyMessage = '') {
+  const msg = cleanText(message);
+  const prev = cleanText(previousMyMessage);
+
+  if (!msg || !prev) return msg;
+
+  const compactMsg = compactForSimilarity(msg);
+  const compactPrev = compactForSimilarity(prev);
+
+  if (
+    compactPrev.length >= 20 &&
+    compactMsg.startsWith(compactPrev.slice(0, Math.min(60, compactPrev.length)))
+  ) {
+    const rawIndex = msg.toLowerCase().indexOf(prev.toLowerCase().slice(0, 30));
+    if (rawIndex === 0) {
+      const stripped = msg.slice(prev.length).trim();
+      return stripped || msg;
+    }
+  }
+
+  return msg;
+}
+
+function isNearDuplicate(a, b) {
+  const aa = compactForSimilarity(a);
+  const bb = compactForSimilarity(b);
+
+  if (!aa || !bb) return false;
+  if (aa === bb) return true;
+
+  const aBase = baseSemanticForm(a);
+  const bBase = baseSemanticForm(b);
+
+  if (aBase && bBase && aBase === bBase) return true;
+
+  if (aBase.length >= 10 && bBase.includes(aBase)) return true;
+  if (bBase.length >= 10 && aBase.includes(bBase)) return true;
+
+  if (aa.length >= 10 && bb.includes(aa)) return true;
+  if (bb.length >= 10 && aa.includes(bb)) return true;
+
+  const ap = aa.slice(0, 28);
+  const bp = bb.slice(0, 28);
+  if (ap && bp && ap === bp) return true;
+
+  return false;
+}
+
+function normalizeUnknown(v) {
+  if (v == null) return '';
+  const s = String(v).trim().toLowerCase();
+  if (!s || s === 'unknown' || s === 'undefined' || s === 'null') return '';
+  return String(v).trim();
+}
+
+function uniqueNonEmpty(arr) {
+  return [...new Set(arr.filter(Boolean))];
+}
+
+function cleanAndDedup(input) {
+  // =========================
+  // 1) 原始消息
+  // =========================
+  const parsedMessages = Array.isArray(input.messages) ? input.messages : [];
+
+  // =========================
+  // 4) 清洗消息
+  // =========================
+  const cleanedMessages = parsedMessages
+    .map((m, idx, arr) => {
+      const role = m.role || '';
+      const previousMe =
+        role === 'customer'
+          ? [...arr.slice(0, idx)].reverse().find(x => (x.role || '') === 'me')?.message || ''
+          : '';
+
+      const cleanedMessage = cleanText(stripTrailingTimeArtifacts(m.message || ''));
+      const finalMessage =
+        role === 'customer'
+          ? stripQuotedPrefix(cleanedMessage, previousMe)
+          : cleanedMessage;
+
+      return {
+        ...m,
+        role,
+        message: finalMessage,
+        message_time: m.message_time || ''
+      };
+    })
+    .filter(m => m.message);
+
+  // =========================
+  // 5) 完全重复去重
+  // =========================
+  const exactSeen = new Set();
+  const exactUnique = cleanedMessages.filter(m => {
+    const key = `${m.role}__${normalizeForDedup(m.message)}__${baseSemanticForm(m.message)}`;
+    if (exactSeen.has(key)) return false;
+    exactSeen.add(key);
+    return true;
+  });
+
+  // =========================
+  // 6) 近重复压缩
+  // =========================
+  const grouped = [];
+
+  for (const m of exactUnique) {
+    let merged = false;
+
+    for (let i = 0; i < grouped.length; i++) {
+      const existing = grouped[i];
+
+      const sameRole = existing.role === m.role;
+      const sameTime = (existing.message_time || '') === (m.message_time || '');
+      const similar = isNearDuplicate(existing.message, m.message);
+
+      if (sameRole && sameTime && similar) {
+        const existingScore = scoreMessageQuality(existing.message);
+        const currentScore = scoreMessageQuality(m.message);
+
+        if (currentScore > existingScore) {
+          grouped[i] = m;
+        }
+        merged = true;
+        break;
+      }
+    }
+
+    if (!merged) grouped.push(m);
+  }
+
+  const uniqueMessages = grouped.sort((a, b) => {
+    const ta = a.message_time ? new Date(a.message_time).getTime() : 0;
+    const tb = b.message_time ? new Date(b.message_time).getTime() : 0;
+    return ta - tb;
+  });
+
+  return {
+    parsedMessages,
+    cleanedMessages,
+    exactUnique,
+    uniqueMessages
+  };
+}
+
+return { cleanAndDedup, cleanText, normalizeUnknown, uniqueNonEmpty };
+})();
+
 const {
   buildTimeline,
   formatDateDisplay
-} = require('./buildTimeline.js');
-const { analyzeStopPoint } = require('./analyzeStopPoint.js');
-const { detectForbiddenRepeats } = require('./detectForbiddenRepeats.js');
-const { buildReactivationDecisionBasis } = require('./buildReactivationDecisionBasis.js');
-const { buildReactivationV6Core } = require('./buildReactivationV6Core.js');
-const { buildReactivationAIPayload } = require('./buildReactivationAIPayload.js');
+} = (() => {
+function parseDateSafe(v) {
+  if (!v) return null;
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function formatGap(ms) {
+  if (ms == null || Number.isNaN(ms)) return '';
+  const minutes = Math.floor(ms / 60000);
+  const hours = Math.floor(ms / 3600000);
+  const days = Math.floor(ms / 86400000);
+
+  if (days > 0) return `${days}d`;
+  if (hours > 0) return `${hours}h`;
+  return `${minutes}m`;
+}
+
+function formatGapZh(ms) {
+  if (ms == null || Number.isNaN(ms)) return '未知';
+  const minutes = Math.floor(ms / 60000);
+  const hours = Math.floor(ms / 3600000);
+  const days = Math.floor(ms / 86400000);
+
+  if (days > 0) return `${days}天`;
+  if (hours > 0) return `${hours}小时`;
+  return `${minutes}分钟`;
+}
+
+function formatDateDisplay(v) {
+  const d = parseDateSafe(v);
+  if (!d) return 'unknown';
+
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+
+  return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
+}
+
+function diffDaysAbs(a, b) {
+  if (!a || !b) return null;
+  return Math.floor(Math.abs(a.getTime() - b.getTime()) / 86400000);
+}
+
+function diffHoursAbs(a, b) {
+  if (!a || !b) return null;
+  return Math.floor(Math.abs(a.getTime() - b.getTime()) / 3600000);
+}
+
+function diffMinutesAbs(a, b) {
+  if (!a || !b) return null;
+  return Math.floor(Math.abs(a.getTime() - b.getTime()) / 60000);
+}
+
+function hoursSince(nowObj, pastObj) {
+  if (!nowObj || !pastObj) return null;
+  return Math.floor((nowObj.getTime() - pastObj.getTime()) / 3600000);
+}
+
+function daysSince(nowObj, pastObj) {
+  if (!nowObj || !pastObj) return null;
+  return Math.floor((nowObj.getTime() - pastObj.getTime()) / 86400000);
+}
+
+function buildTimeline(input, uniqueMessages) {
+  // =========================
+  // 9) 关键消息提取
+  // =========================
+  const firstMessageObj = uniqueMessages[0] || null;
+  const lastMessageObj = uniqueMessages[uniqueMessages.length - 1] || null;
+
+  const lastCustomerMessageObj =
+    [...uniqueMessages].reverse().find(m => m.role === 'customer') || null;
+
+  const lastMyMessageObj =
+    [...uniqueMessages].reverse().find(m => m.role === 'me') || null;
+
+  // =========================
+  // 10) 时间结构
+  // =========================
+  const nowTime =
+    input.now_time ||
+    input.current_time ||
+    new Date().toISOString();
+
+  const nowTimeObj = parseDateSafe(nowTime);
+
+  const firstMessageTime =
+    firstMessageObj?.message_time ||
+    input.first_message_time ||
+    '';
+
+  const lastCustomerTime =
+    lastCustomerMessageObj?.message_time ||
+    input.last_customer_message_time ||
+    input.last_customer_message_time_normalized ||
+    '';
+
+  const lastMyTime =
+    lastMyMessageObj?.message_time ||
+    input.last_my_message_time ||
+    input.last_my_message_time_normalized ||
+    '';
+
+  const lastMessageTime =
+    lastMessageObj?.message_time ||
+    input.last_message_time ||
+    '';
+
+  const firstMessageTimeObj = parseDateSafe(firstMessageTime);
+  const lastCustomerTimeObj = parseDateSafe(lastCustomerTime);
+  const lastMyTimeObj = parseDateSafe(lastMyTime);
+  const lastMessageTimeObj = parseDateSafe(lastMessageTime);
+
+  let lastCustomerGapHint = '';
+  if (lastCustomerTimeObj && lastMyTimeObj) {
+    lastCustomerGapHint = formatGap(Math.abs(lastMyTimeObj.getTime() - lastCustomerTimeObj.getTime()));
+  }
+
+  function detectWhoStopped() {
+    if (!lastMessageObj) return 'unknown';
+    if (lastMessageObj.role === 'customer') return 'me';
+    if (lastMessageObj.role === 'me') return 'customer';
+    return 'unknown';
+  }
+
+  function detectWhoShouldReplyNext() {
+    if (!lastMessageObj) return 'unknown';
+    if (lastMessageObj.role === 'customer') return 'me';
+    if (lastMessageObj.role === 'me') return 'customer';
+    return 'unknown';
+  }
+
+  function deriveSequenceLabel() {
+    if (!lastMessageObj) return '无对话记录';
+    if (lastMessageObj.role === 'customer') return '客户最后发言，等待我方回复';
+    if (lastMessageObj.role === 'me') return '我方最后发言，等待客户回复';
+    return '最后发言方未知';
+  }
+
+  function deriveConversationStatusFromTimeline() {
+    if (!lastMessageObj) return 'open_no_messages';
+    if (lastMessageObj.role === 'customer') return 'waiting_me';
+    if (lastMessageObj.role === 'me') return 'waiting_customer';
+    return 'open_unknown';
+  }
+
+  function buildTimelineEvents(messages, limit = 8) {
+    return messages.slice(-limit).map(m => ({
+      role: m.role,
+      message_time: m.message_time || '',
+      message_time_display: formatDateDisplay(m.message_time || ''),
+      message: m.message
+    }));
+  }
+
+  function buildDatedHistorySummary(messages, limit = 6) {
+    const sliced = messages.slice(-limit);
+    if (!sliced.length) return '无可用沟通记录';
+
+    return sliced
+      .map(m => {
+        const roleZh = m.role === 'customer' ? '客户' : m.role === 'me' ? '我方' : '未知';
+        const timeZh = formatDateDisplay(m.message_time || '');
+        return `${timeZh}｜${roleZh}：${m.message}`;
+      })
+      .join('\n');
+  }
+
+  function buildTimelineSummary() {
+    if (!uniqueMessages.length) return '暂无对话记录';
+
+    const parts = [];
+
+    if (firstMessageTimeObj) {
+      parts.push(`首次记录：${formatDateDisplay(firstMessageTime)}`);
+    }
+
+    if (lastCustomerTimeObj) {
+      parts.push(`客户最后回复：${formatDateDisplay(lastCustomerTime)}`);
+    }
+
+    if (lastMyTimeObj) {
+      parts.push(`我方最后发送：${formatDateDisplay(lastMyTime)}`);
+    }
+
+    parts.push(`当前序列：${deriveSequenceLabel()}`);
+
+    if (lastCustomerTimeObj && lastMyTimeObj) {
+      parts.push(`最近双方消息间隔：${formatGapZh(Math.abs(lastMyTimeObj.getTime() - lastCustomerTimeObj.getTime()))}`);
+    }
+
+    return parts.join('；');
+  }
+
+  const whoStopped = detectWhoStopped();
+  const whoShouldReplyNext = detectWhoShouldReplyNext();
+  const timelineSequence = deriveSequenceLabel();
+  const timelineConversationStatus = deriveConversationStatusFromTimeline();
+
+  const gapDaysCustomerVsMe = diffDaysAbs(lastCustomerTimeObj, lastMyTimeObj);
+  const gapHoursCustomerVsMe = diffHoursAbs(lastCustomerTimeObj, lastMyTimeObj);
+  const gapMinutesCustomerVsMe = diffMinutesAbs(lastCustomerTimeObj, lastMyTimeObj);
+
+  const hoursSinceLastCustomerMessage = hoursSince(nowTimeObj, lastCustomerTimeObj);
+  const hoursSinceLastMyMessage = hoursSince(nowTimeObj, lastMyTimeObj);
+  const daysSinceLastCustomerMessage = daysSince(nowTimeObj, lastCustomerTimeObj);
+  const daysSinceLastMyMessage = daysSince(nowTimeObj, lastMyTimeObj);
+
+  const timelineEvents = buildTimelineEvents(uniqueMessages, 8);
+  const datedHistorySummary = buildDatedHistorySummary(uniqueMessages, 6);
+  const timelineSummary = buildTimelineSummary();
+
+  const timeline = {
+    now_time: nowTime,
+    now_time_display: formatDateDisplay(nowTime),
+    first_message_time: firstMessageTime || '',
+    first_message_time_display: formatDateDisplay(firstMessageTime || ''),
+    last_customer_message_time: lastCustomerTime || '',
+    last_customer_message_time_display: formatDateDisplay(lastCustomerTime || ''),
+    last_my_message_time: lastMyTime || '',
+    last_my_message_time_display: formatDateDisplay(lastMyTime || ''),
+    last_message_time: lastMessageTime || '',
+    last_message_time_display: formatDateDisplay(lastMessageTime || ''),
+    last_message_role: lastMessageObj?.role || 'unknown',
+    who_stopped: whoStopped,
+    who_should_reply_next: whoShouldReplyNext,
+    sequence: timelineSequence,
+    conversation_status: timelineConversationStatus,
+    gap_days_customer_vs_me: gapDaysCustomerVsMe == null ? 'unknown' : String(gapDaysCustomerVsMe),
+    gap_hours_customer_vs_me: gapHoursCustomerVsMe == null ? 'unknown' : String(gapHoursCustomerVsMe),
+    gap_minutes_customer_vs_me: gapMinutesCustomerVsMe == null ? 'unknown' : String(gapMinutesCustomerVsMe),
+    hours_since_last_customer_message: hoursSinceLastCustomerMessage == null ? 'unknown' : String(hoursSinceLastCustomerMessage),
+    hours_since_last_my_message: hoursSinceLastMyMessage == null ? 'unknown' : String(hoursSinceLastMyMessage),
+    days_since_last_customer_message: daysSinceLastCustomerMessage == null ? 'unknown' : String(daysSinceLastCustomerMessage),
+    days_since_last_my_message: daysSinceLastMyMessage == null ? 'unknown' : String(daysSinceLastMyMessage),
+    gap_hint: lastCustomerGapHint || '',
+    summary: timelineSummary,
+    events: timelineEvents
+  };
+
+  return {
+    firstMessageObj,
+    lastMessageObj,
+    lastCustomerMessageObj,
+    lastMyMessageObj,
+    nowTime,
+    nowTimeObj,
+    firstMessageTime,
+    lastCustomerTime,
+    lastMyTime,
+    lastMessageTime,
+    firstMessageTimeObj,
+    lastCustomerTimeObj,
+    lastMyTimeObj,
+    lastMessageTimeObj,
+    lastCustomerGapHint,
+    whoStopped,
+    whoShouldReplyNext,
+    timelineSequence,
+    timelineConversationStatus,
+    gapDaysCustomerVsMe,
+    gapHoursCustomerVsMe,
+    gapMinutesCustomerVsMe,
+    hoursSinceLastCustomerMessage,
+    hoursSinceLastMyMessage,
+    daysSinceLastCustomerMessage,
+    daysSinceLastMyMessage,
+    timelineEvents,
+    datedHistorySummary,
+    timelineSummary,
+    timeline
+  };
+}
+
+return { buildTimeline, formatDateDisplay };
+})();
+
+const { analyzeStopPoint } = (() => {
+function parseTime(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function isAfterOrSame(a, b) {
+  const aa = parseTime(a);
+  const bb = parseTime(b);
+
+  if (!aa || !bb) return false;
+  return aa.getTime() >= bb.getTime();
+}
+
+function isAfter(a, b) {
+  const aa = parseTime(a);
+  const bb = parseTime(b);
+
+  if (!aa || !bb) return false;
+  return aa.getTime() > bb.getTime();
+}
+
+function normalizeText(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function extractLastQuestion(text) {
+  const normalized = normalizeText(text);
+  if (!normalized) return '';
+
+  const explicitQuestions = normalized.match(/[^?？.!。！]*[?？]/g);
+  if (explicitQuestions?.length) {
+    return explicitQuestions[explicitQuestions.length - 1].trim();
+  }
+
+  const sentences = normalized
+    .split(/[.!。！\n]+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const questionStarter = /^(which|what|when|where|who|why|how|can|could|would|do|does|did|is|are|will|should|may|have|has)\b/i;
+  const questionLike = /\b(which|what|when|where|who|why|how much|how many)\b/i;
+
+  for (let i = sentences.length - 1; i >= 0; i--) {
+    if (questionStarter.test(sentences[i]) || questionLike.test(sentences[i])) {
+      return sentences[i];
+    }
+  }
+
+  return '';
+}
+
+function findMessageIndex(messages, target) {
+  if (!target) return -1;
+
+  const directIndex = messages.lastIndexOf(target);
+  if (directIndex >= 0) return directIndex;
+
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i];
+    if (
+      message?.role === target.role &&
+      (message?.message || '') === (target.message || '') &&
+      (message?.message_time || '') === (target.message_time || '')
+    ) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+function customerRepliedAfterMyMessage(messages, lastCustomerMessageObj, lastMyMessageObj) {
+  if (!lastCustomerMessageObj || !lastMyMessageObj) return false;
+
+  if (isAfter(lastCustomerMessageObj.message_time, lastMyMessageObj.message_time)) {
+    return true;
+  }
+
+  const myIndex = findMessageIndex(messages, lastMyMessageObj);
+  const customerIndex = findMessageIndex(messages, lastCustomerMessageObj);
+
+  return myIndex >= 0 && customerIndex > myIndex;
+}
+
+function isDirectAnswerToQuestion(question, answer) {
+  const q = normalizeText(question).toLowerCase();
+  const a = normalizeText(answer).toLowerCase();
+
+  if (!q || !a) return false;
+  if (extractLastQuestion(a)) return false;
+
+  const yesNoQuestion = /^(can|could|would|do|does|did|is|are|will|should|may|have|has)\b/.test(q);
+  if (yesNoQuestion && /\b(yes|yeah|yep|sure|ok|okay|no|not|maybe)\b/.test(a)) return true;
+
+  if (/\b(which|model|product)\b/.test(q)) {
+    return /\b(ar|mr|or|fr|mg|pr)\d{3}\b|\breformer\b|\bmegaformer\b|\blagree\b|\bfolding\b|\bfoldable\b|\baluminum\b|\baluminium\b|\bwood\b|\bwooden\b|\btower\b|\bcadillac\b|\bchair\b|\bbarrel\b/i.test(a);
+  }
+
+  if (/\b(price|cost|quote|budget|how much)\b/.test(q)) {
+    return /\b(price|cost|quote|budget|expensive|cheap|cheaper)\b|[$€£¥]|\b\d+(?:[.,]\d+)?\b/.test(a);
+  }
+
+  if (/\b(quantity|how many|units|pcs|pieces|machines|beds|reformers)\b/.test(q)) {
+    return /\b\d{1,3}\b|\b(one|two|three|four|five|six|seven|eight|nine|ten|sample)\b/.test(a);
+  }
+
+  if (/\b(when|timeline|delivery|ship|shipping|arrive|lead time)\b/.test(q)) {
+    return /\b(today|tomorrow|week|month|january|february|march|april|may|june|july|august|september|october|november|december|spring|summer|fall|autumn|winter)\b|\b\d{1,2}[./-]\d{1,2}\b/.test(a);
+  }
+
+  return false;
+}
+
+function analyzeStopPoint({
+  messages,
+  lastCustomerMessageObj,
+  lastMyMessageObj,
+  customerLastMessageType,
+  finalPurchaseStage,
+  hasTimingSignal,
+  hasNotNowSignal
+}) {
+  const safeMessages = Array.isArray(messages) ? messages : [];
+  const lastMessage = safeMessages[safeMessages.length - 1] || null;
+
+  const lastCustomerMessage = lastCustomerMessageObj?.message || '';
+  const lastCustomerTime = lastCustomerMessageObj?.message_time || '';
+  const lastMyMessage = lastMyMessageObj?.message || '';
+  const lastMyTime = lastMyMessageObj?.message_time || '';
+  const lastMyQuestion = extractLastQuestion(lastMyMessage);
+
+  const myLastPushIsUnanswered =
+    !!lastMyMessageObj &&
+    (!lastCustomerMessageObj || isAfterOrSame(lastMyTime, lastCustomerTime));
+  const customerAnsweredAfterMyLastPush =
+    customerRepliedAfterMyMessage(safeMessages, lastCustomerMessageObj, lastMyMessageObj);
+  const customerDirectlyAnsweredMyQuestion =
+    customerAnsweredAfterMyLastPush &&
+    isDirectAnswerToQuestion(lastMyQuestion, lastCustomerMessage);
+  const didMyLastPushFail =
+    !!lastMyQuestion && !customerDirectlyAnsweredMyQuestion;
+
+  let whereItStopped = '';
+  if (lastMessage?.role === 'customer') {
+    whereItStopped = 'customer_last_message';
+  } else if (lastMessage?.role === 'me') {
+    whereItStopped = 'my_last_message';
+  }
+
+  let whyItStoppedThere = '';
+  if (hasNotNowSignal) {
+    whyItStoppedThere = 'customer_not_now_signal';
+  } else if (customerLastMessageType === 'polite_close') {
+    whyItStoppedThere = 'customer_polite_close';
+  } else if (customerLastMessageType === 'comparison_signal') {
+    whyItStoppedThere = 'customer_price_comparison_signal';
+  } else if (customerLastMessageType === 'timing_delay' || hasTimingSignal) {
+    whyItStoppedThere = 'customer_timing_signal';
+  } else if (customerLastMessageType === 'question') {
+    whyItStoppedThere = 'customer_question_pending';
+  } else if (didMyLastPushFail) {
+    whyItStoppedThere = 'my_last_question_unanswered';
+  } else if (myLastPushIsUnanswered) {
+    whyItStoppedThere = 'my_last_message_unanswered';
+  } else if (lastMessage?.role === 'customer') {
+    whyItStoppedThere = 'customer_replied_last';
+  }
+
+  let smallestReplyToTrigger = '';
+  if (didMyLastPushFail) {
+    smallestReplyToTrigger = 'answer_simple_version_of_last_question';
+  } else if (customerLastMessageType === 'comparison_signal' || customerLastMessageType === 'price_reaction_soft' || finalPurchaseStage === 'pricing') {
+    smallestReplyToTrigger = 'confirm_price_step';
+  } else if (hasNotNowSignal) {
+    smallestReplyToTrigger = 'acknowledge_timing';
+  } else if (customerLastMessageType === 'question') {
+    smallestReplyToTrigger = 'answer_customer_question';
+  } else if (customerLastMessageType === 'timing_delay' || hasTimingSignal) {
+    smallestReplyToTrigger = 'ask_timing_update';
+  } else if (finalPurchaseStage === 'selection') {
+    smallestReplyToTrigger = 'confirm_model_selection';
+  } else if (myLastPushIsUnanswered) {
+    smallestReplyToTrigger = 'soft_reopen';
+  }
+
+  return {
+    where_it_stopped: whereItStopped,
+    why_it_stopped_there: whyItStoppedThere,
+    what_my_last_push_was: lastMyMessage,
+    what_customer_did_not_answer: didMyLastPushFail ? lastMyQuestion : '',
+    did_my_last_push_fail: didMyLastPushFail,
+    smallest_reply_to_trigger: smallestReplyToTrigger
+  };
+}
+
+return { analyzeStopPoint };
+})();
+
+const { detectForbiddenRepeats } = (() => {
+function normalizeText(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function uniqueNonEmpty(values) {
+  return [...new Set(values.filter(Boolean))];
+}
+
+function shortenQuestion(question) {
+  const text = normalizeText(question);
+  if (text.length <= 120) return text;
+  return `${text.slice(0, 117).trim()}...`;
+}
+
+function extractQuestions(text) {
+  const normalized = normalizeText(text);
+  if (!normalized) return [];
+
+  const explicitQuestions = normalized.match(/[^?？.!。！]*[?？]/g) || [];
+  const questions = explicitQuestions.map(q => q.trim());
+
+  const sentences = normalized
+    .split(/[.!。！\n]+/)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const questionStarter = /^(which|what|when|where|who|why|how|can|could|would|do|does|did|is|are|will|should|may|have|has)\b/i;
+  const questionLike = /\b(which|what|when|where|who|why|how much|how many)\b/i;
+
+  for (const sentence of sentences) {
+    if (questionStarter.test(sentence) || questionLike.test(sentence)) {
+      questions.push(sentence);
+    }
+  }
+
+  return uniqueNonEmpty(questions.map(shortenQuestion));
+}
+
+function detectSentTopics(text) {
+  const t = normalizeText(text).toLowerCase();
+  const topics = [];
+
+  if (/\bprice|cost|quote|how much|expensive|cheaper\b/.test(t)) topics.push('price');
+  if (/\bshipping|freight|ddp|tariff\b/.test(t)) topics.push('shipping');
+  if (/\bdelivery time|lead time|delivery|deliver|shipment|ship|arrive|transit time\b/.test(t)) topics.push('delivery time');
+  if (/\bwarranty|maintenance|after-sales|after sales\b/.test(t)) topics.push('warranty');
+  if (/\bpayment terms?|payment plans?|deposit|30%|70%|invoice|pi\b/.test(t)) topics.push('payment terms');
+  if (/\bcatalog|brochure\b/.test(t)) topics.push('catalog');
+  if (/\bphotos?|pictures?|videos?|video|image|images\b/.test(t)) topics.push('photos/videos');
+  if (/\bmodel recommendation|recommend|which model|help you choose|choose the right|best model|suitable model\b/.test(t)) topics.push('model recommendation');
+
+  return topics;
+}
+
+function detectUsedAngles(text) {
+  const t = normalizeText(text).toLowerCase();
+  const angles = [];
+
+  if (/\bprice|cost|quote|how much|lock price|secure price|hold price\b/.test(t)) {
+    angles.push('price push');
+  }
+
+  if (/\bwhich model|recommend|help you choose|choose the right|best model|suitable model|options?\b/.test(t)) {
+    angles.push('selection help');
+  }
+
+  if (/\btimeline|timing|check back|follow up|delivery time|lead time|opening|october|september|august|fall\b/.test(t)) {
+    angles.push('timing follow-up');
+  }
+
+  if (/\bjust checking|quick follow|no pressure|when you have time|when convenient|still interested|touch base\b/.test(t)) {
+    angles.push('low-pressure reopen');
+  }
+
+  if (/\bcompare|comparison|cheaper|expensive|better price|other supplier|other factory|match\b/.test(t)) {
+    angles.push('comparison framing');
+  }
+
+  return angles;
+}
+
+function detectForbiddenRepeats({ messages }) {
+  const safeMessages = Array.isArray(messages) ? messages : [];
+  const myMessages = safeMessages.filter(message => (message?.role || '') === 'me');
+  const myTexts = myMessages.map(message => message?.message || '');
+
+  const alreadyAskedQuestions = uniqueNonEmpty(
+    myTexts.flatMap(text => extractQuestions(text))
+  );
+
+  const alreadySentTopics = uniqueNonEmpty(
+    myTexts.flatMap(text => detectSentTopics(text))
+  );
+
+  const alreadyUsedAngles = uniqueNonEmpty(
+    myTexts.flatMap(text => detectUsedAngles(text))
+  );
+
+  const doNotRepeat = [];
+
+  if (alreadyAskedQuestions.length) doNotRepeat.push('repeat_same_question');
+  if (alreadyUsedAngles.includes('selection help')) doNotRepeat.push('repeat_selection_help');
+  if (alreadyUsedAngles.includes('price push')) doNotRepeat.push('repeat_price_push');
+  if (alreadySentTopics.includes('model recommendation')) doNotRepeat.push('repeat_model_recommendation');
+
+  return {
+    already_asked_questions: alreadyAskedQuestions,
+    already_sent_topics: alreadySentTopics,
+    already_used_angles: alreadyUsedAngles,
+    do_not_repeat: uniqueNonEmpty(doNotRepeat)
+  };
+}
+
+return { detectForbiddenRepeats };
+})();
+
+const { buildReactivationDecisionBasis } = (() => {
+function buildReactivationDecisionBasis({
+  shouldReactivateNow,
+  stopPointAnalysis,
+  forbiddenRepeatZone,
+  customerLastMessageType,
+  finalPurchaseStage,
+  hasTimingSignal,
+  hasNotNowSignal
+}) {
+  let bestTriggerType = '';
+
+  if (hasNotNowSignal) {
+    bestTriggerType = 'do_not_follow_up';
+  } else if (stopPointAnalysis?.smallest_reply_to_trigger === 'answer_simple_version_of_last_question') {
+    bestTriggerType = 'lower_friction_answer_path';
+  } else if (finalPurchaseStage === 'pricing') {
+    bestTriggerType = 'price_step';
+  } else if (hasTimingSignal) {
+    bestTriggerType = 'timing_reactivation';
+  } else {
+    bestTriggerType = 'soft_reopen';
+  }
+
+  const triggerReasons = {
+    do_not_follow_up: 'customer_not_now_signal_detected',
+    lower_friction_answer_path: 'last_question_was_not_answered',
+    price_step: 'purchase_stage_is_pricing',
+    timing_reactivation: 'timing_signal_detected',
+    soft_reopen: 'no_specific_trigger_detected'
+  };
+
+  return {
+    should_follow_up_now: !!shouldReactivateNow,
+    best_trigger_type: bestTriggerType,
+    best_trigger_reason: triggerReasons[bestTriggerType] || '',
+    must_avoid: Array.isArray(forbiddenRepeatZone?.do_not_repeat) ? forbiddenRepeatZone.do_not_repeat : [],
+    smallest_reply_goal: stopPointAnalysis?.smallest_reply_to_trigger || ''
+  };
+}
+
+return { buildReactivationDecisionBasis };
+})();
+
+const { buildReactivationV6Core } = (() => {
+function buildReactivationV6Core({
+  timeline,
+  lastExchange,
+  customerLastMessageType,
+  currentBlocker,
+  stopPointAnalysis,
+  forbiddenRepeatZone,
+  reactivationDecisionBasis
+}) {
+  return {
+    timeline_facts: {
+      last_customer_message_time: timeline?.last_customer_message_time || '',
+      last_my_message_time: timeline?.last_my_message_time || '',
+      who_should_reply_next: timeline?.who_should_reply_next || '',
+      days_since_last_customer_message: timeline?.days_since_last_customer_message || '',
+      days_since_last_my_message: timeline?.days_since_last_my_message || '',
+      conversation_status: timeline?.conversation_status || ''
+    },
+    last_customer_signal: {
+      last_customer_message: lastExchange?.last_customer_message || '',
+      last_customer_message_type: customerLastMessageType || ''
+    },
+    stop_point_analysis: stopPointAnalysis || {},
+    forbidden_repeat_zone: forbiddenRepeatZone || {},
+    reactivation_decision_basis: reactivationDecisionBasis || {}
+  };
+}
+
+return { buildReactivationV6Core };
+})();
+
+const { buildReactivationAIPayload } = (() => {
+function buildReactivationAIPayload({ reactivationV6Core }) {
+  return {
+    timeline: reactivationV6Core.timeline_facts,
+    last_signal: reactivationV6Core.last_customer_signal,
+    stop_point: reactivationV6Core.stop_point_analysis,
+    constraints: reactivationV6Core.forbidden_repeat_zone,
+    decision: reactivationV6Core.reactivation_decision_basis
+  };
+}
+
+return { buildReactivationAIPayload };
+})();
 
 function buildAIContext(input) {
   const CONTEXT_BUILDER_VERSION = "build_ai_context_v5.1_PRODUCTION_READY";
@@ -855,89 +1762,6 @@ function buildAIContext(input) {
   });
 
   // =========================
-  // 31) REACTIVATION PAYLOAD (NEW)
-  // =========================
-
-  function buildReactivationPayload() {
-    const timelinePayload = {
-      last_customer_message_time: lastCustomerTime || 'unknown',
-      last_my_message_time: lastMyTime || 'unknown',
-      gap_days: gapDaysCustomerVsMe == null ? 0 : gapDaysCustomerVsMe
-    };
-
-    let signalSummary = '';
-    if (lastCustomerMessageObj?.message) {
-      signalSummary = cleanText(lastCustomerMessageObj.message).slice(0, 80);
-    }
-
-    const lastSignalPayload = {
-      type: customerLastMessageType || 'unknown',
-      summary: signalSummary || 'no clear signal',
-      confidence: customerLastMessageType !== 'unknown' ? 'high' : 'medium'
-    };
-
-    let whereStopped = '';
-    if (finalPurchaseStage === 'pricing') whereStopped = 'after pricing discussion';
-    else if (finalPurchaseStage === 'selection') whereStopped = 'during model selection';
-    else if (customerLastMessageType === 'question') whereStopped = 'after customer question';
-    else whereStopped = 'after last interaction';
-
-    let whyStopped = '';
-    if (hasNotNowSignal) whyStopped = 'timing not right';
-    else if (isCustomerSilentAfterMyMessage) whyStopped = 'no reply after my message';
-    else whyStopped = 'no clear next step';
-
-    const stopPointPayload = {
-      where_it_stopped: whereStopped,
-      why_it_stopped: whyStopped
-    };
-
-    const mustAvoid = [];
-    const mustFollow = [];
-
-    mustAvoid.push('multi-question message');
-    mustAvoid.push('pushing decision');
-
-    if (hasNotNowSignal) {
-      mustAvoid.push('sales pressure');
-    }
-
-    mustFollow.push('single trigger');
-    mustFollow.push('low friction reply');
-
-    const constraintsPayload = {
-      must_avoid: mustAvoid,
-      must_follow: mustFollow
-    };
-
-    let followUpType = 'lighten_touch';
-
-    if (customerLastMessageType === 'question') followUpType = 'answer';
-    else if (finalPurchaseStage === 'pricing') followUpType = 'clarify';
-    else if (customerLastMessageType === 'comparison_signal') followUpType = 'resend';
-
-    const decisionPayload = {
-      should_follow_up: shouldReactivateNow === true,
-      follow_up_type: followUpType,
-      primary_anchor: primaryReplyAnchor || 'generic'
-    };
-
-    const payload = {
-      timeline: timelinePayload,
-      last_signal: lastSignalPayload,
-      stop_point: stopPointPayload,
-      constraints: constraintsPayload,
-      decision: decisionPayload
-    };
-
-    if (!payload.decision.primary_anchor) {
-      payload.decision.primary_anchor = 'generic';
-    }
-
-    return payload;
-  }
-
-  // =========================
   // 30) 输出
   // =========================
   return {
@@ -1042,15 +1866,40 @@ function buildAIContext(input) {
     secondary_context: secondaryContext,
     reply_risk: replyRisk,
 
-    reactivation_ai_payload: buildReactivationPayload(),
-
     _debug_source: input._debug_source || '',
     _project_signals: projectSignals,
     stop_point_analysis: stopPointAnalysis,
     forbidden_repeat_zone: forbiddenRepeatZone,
     reactivation_decision_basis: reactivationDecisionBasis,
-    reactivation_v6_core: reactivationV6Core
+    reactivation_v6_core: reactivationV6Core,
+    reactivation_ai_payload: aiPayload
   };
 }
 
-module.exports = { buildAIContext };
+function getInputJsons() {
+  if (typeof $input !== 'undefined' && $input.all) {
+    return $input.all().map(item => item.json || {});
+  }
+
+  if (typeof $json !== 'undefined') {
+    return [$json || {}];
+  }
+
+  return [];
+}
+
+function toN8nItems(items) {
+  return items.map(json => ({ json }));
+}
+
+function runBuildAIContext(input) {
+  return buildAIContext(input || {});
+}
+
+if (typeof module !== 'undefined') {
+  module.exports = { buildAIContext, runBuildAIContext };
+}
+
+if (typeof $input !== 'undefined' || typeof $json !== 'undefined') {
+  return toN8nItems(getInputJsons().map(runBuildAIContext));
+}

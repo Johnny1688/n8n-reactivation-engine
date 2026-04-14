@@ -1,0 +1,12 @@
+Reactivation Review
+Project: {{project_key}}
+Customer: {{customer_name}}
+
+Why:
+{{why}}
+
+WhatsApp message:
+{{whatsapp_message}}
+
+Payload summary:
+{{payload_summary}}
