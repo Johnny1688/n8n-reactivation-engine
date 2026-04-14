@@ -1,0 +1,21 @@
+{
+  "project_key": "marea",
+  "customer_name": "Marea",
+  "messages": [
+    {
+      "role": "customer",
+      "message": "Hi, I am interested in reformers.",
+      "message_time": "2026-04-10T09:00:00Z"
+    },
+    {
+      "role": "me",
+      "message": "Which model are you looking for?",
+      "message_time": "2026-04-10T09:15:00Z"
+    },
+    {
+      "role": "customer",
+      "message": "Can you send the price?",
+      "message_time": "2026-04-10T09:30:00Z"
+    }
+  ]
+}

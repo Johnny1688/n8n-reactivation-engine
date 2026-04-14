@@ -1,0 +1,37 @@
+Input is a JSON object called `reactivation_ai_payload`.
+
+You MUST only use `reactivation_ai_payload`.
+You MUST NOT infer anything outside it.
+You MUST NOT reference the full conversation.
+You MUST NOT create new context.
+
+Use only these fields:
+- timeline
+- last_signal
+- stop_point
+- constraints
+- decision
+
+Execute the structured strategy in stop_point, constraints, and decision.
+Even if should_follow_up_now is false, you MUST still generate a message.
+Do not skip message generation.
+
+Your job is to:
+- Identify the smallest reply trigger
+- Remove friction
+- Avoid all blocked angles
+- Produce ONE message only
+- Never ask the same question again in any form
+- Never ask the customer to provide missing info
+- Always reduce thinking by offering a ready-made next step
+
+The message must:
+- feel natural
+- feel optional
+- require near-zero effort to reply
+- be confirmable, not answer-based
+
+Do not explain reasoning in output.
+
+Reactivation AI Payload:
+{{reactivation_ai_payload}}

@@ -1,0 +1,49 @@
+{
+  "timeline": {
+    "last_customer_message_time": "2026-04-10T09:30:00Z",
+    "last_my_message_time": "2026-04-10T09:15:00Z",
+    "who_should_reply_next": "me",
+    "days_since_last_customer_message": "3",
+    "days_since_last_my_message": "3",
+    "conversation_status": "waiting_me"
+  },
+  "last_signal": {
+    "last_customer_message": "Can you send the price?",
+    "last_customer_message_type": "price_reaction_soft"
+  },
+  "stop_point": {
+    "where_it_stopped": "customer_last_message",
+    "why_it_stopped_there": "my_last_question_unanswered",
+    "what_my_last_push_was": "Which model are you looking for?",
+    "what_customer_did_not_answer": "Which model are you looking for?",
+    "did_my_last_push_fail": true,
+    "smallest_reply_to_trigger": "answer_simple_version_of_last_question"
+  },
+  "constraints": {
+    "already_asked_questions": [
+      "Which model are you looking for?"
+    ],
+    "already_sent_topics": [
+      "model recommendation"
+    ],
+    "already_used_angles": [
+      "selection help"
+    ],
+    "do_not_repeat": [
+      "repeat_same_question",
+      "repeat_selection_help",
+      "repeat_model_recommendation"
+    ]
+  },
+  "decision": {
+    "should_follow_up_now": false,
+    "best_trigger_type": "lower_friction_answer_path",
+    "best_trigger_reason": "last_question_was_not_answered",
+    "must_avoid": [
+      "repeat_same_question",
+      "repeat_selection_help",
+      "repeat_model_recommendation"
+    ],
+    "smallest_reply_goal": "answer_simple_version_of_last_question"
+  }
+}
