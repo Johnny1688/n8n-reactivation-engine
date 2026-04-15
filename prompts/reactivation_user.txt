@@ -1,4 +1,7 @@
-Input is `reactivation_ai_payload`.
+Input includes:
+- `reactivation_ai_payload`
+- `conversation_core`
+- `conversation`
 
 You may only use:
 - `timeline`
@@ -6,16 +9,21 @@ You may only use:
 - `stop_point`
 - `constraints`
 - `decision`
+- `conversation_core`
+- `conversation`
 
 Execute:
 - `stop_point.smallest_reply_to_trigger`
 - `decision.best_trigger_type`
 - `decision.smallest_reply_goal`
 - `constraints.do_not_repeat`
+- `anchor_object`
+- `allowed_micro_triggers`
 
-Do not infer outside the payload.
-Do not reference the full conversation.
+Do not infer outside the provided inputs.
 Do not create new context.
+Do not create a new strategy.
+Use the conversation only to ground the exact object.
 
 Before writing the message, identify the ONE strongest concrete anchor from the real conversation.
 
@@ -27,11 +35,7 @@ Prefer anchors such as:
 - photos/videos previously requested
 - shipping/ZIP/warranty/deposit/timeline already mentioned
 - cheaper option / other supplier comparison already mentioned
-
-Even if `decision.should_follow_up_now` is false:
-- still generate a message
-- make it ultra light
-- optional reply only
+- October timing already mentioned
 
 The candidate message must:
 - be one message only
@@ -39,19 +43,72 @@ The candidate message must:
 - never ask for missing info
 - offer a ready-made next step
 - contain a concrete object, not a vague action
+- use `anchor_object` and `allowed_micro_triggers`
 - be yes/no confirmable
 - require near-zero effort
+- be answerable with yes, ok, send, or sure
 
 Do not produce a candidate message that only asks for confirmation, interest, consideration, or readiness.
 
+Forbidden generic references:
+- the last point
+- that
+- details
+- information
+- something we discussed
+- more info
+- any updates
+- still interested
+- let me know
+
+Required style:
+- one concrete micro-action
+- one concrete object
+- one direction
+- one reply path
+
+Convert the allowed micro-trigger into a concrete action:
+- `resend_price_range_here` → resend the price range
+- `clarify_why_cheaper_here` → explain what is behind the cheaper option
+- `resend_catalog_here` → resend the catalog
+- `send_ar011_photos_here` → send the AR011 photos
+- `line_up_october_timing_here` → line up the October arrival timing
+
+If `hard_no_send` is true, return:
+{
+  "whatsapp_message": ""
+}
+
+If `decision.hard_no_send` is true, return:
+{
+  "whatsapp_message": ""
+}
+
+If `stop_point.hard_no_send` is true, return:
+{
+  "whatsapp_message": ""
+}
+
+Variation control:
+- Do not reuse the exact same sentence across customers with similar anchors.
+- Slightly vary wording while keeping the structure short and simple.
+- Do not sacrifice grounding for variation.
+
 Final self-check:
 1. What exact object is being referenced?
-2. Could this exact message be reused for another customer?
-3. Is the reply path just one ultra-short response?
+2. Is the object present in `conversation_core`, `conversation`, or `reactivation_ai_payload`?
+3. Could this exact message be reused for another customer?
+4. Is the reply path just one ultra-short response?
 
-If the object is unclear, reusable is yes, or reply path is not minimal: regenerate.
+If the object is unclear, not grounded, reusable is yes, or reply path is not minimal: regenerate.
 
 Do not explain reasoning outside JSON.
+
+Conversation Core:
+{{conversation_core}}
+
+Full Conversation:
+{{conversation}}
 
 Reactivation AI Payload:
 {{reactivation_ai_payload}}
