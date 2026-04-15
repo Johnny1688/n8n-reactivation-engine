@@ -30,7 +30,7 @@ English candidate:
 {{$json._en || ''}}
 
 Anchor object:
-{{$json.anchor_object || $json.reactivation_ai_payload?.decision?.anchor_object || ''}}
+{{$json.anchor_object || $json.reactivation_ai_payload?.decision?.anchor_object || $json.reactivation_ai_payload?.decision?.primary_anchor || ''}}
 
 Allowed micro-triggers:
 {{ JSON.stringify($json.allowed_micro_triggers || $json.reactivation_ai_payload?.decision?.allowed_micro_triggers || []) }}
@@ -81,29 +81,46 @@ Conversation:
 {{$json.conversation || ''}}
 
 --------------------------------
+REACTIVATION AI PAYLOAD
+--------------------------------
+
+{{ JSON.stringify($json.reactivation_ai_payload || {}) }}
+
+--------------------------------
 TASK
 --------------------------------
 
-1) First decide whether this case is a TRUE EMPTY case.
-2) If not empty, validate the candidate message against the real conversation.
-3) If invalid but sendable, rewrite it into a valid activation message.
-4) The final message MUST be grounded in the real conversation and MUST NOT be generic.
+1) Validate the candidate message against the real conversation.
+2) If valid, pass it.
+3) If invalid but fixable, rewrite it into a valid activation message.
+4) If there is no usable conversation history, use the generic fallback.
+5) Return empty only when the input is totally unusable or corrupt.
+
+The final message MUST be grounded in the real conversation whenever history exists.
+The final message MUST NOT be generic when any real anchor exists.
 
 --------------------------------
 EMPTY OUTPUT RULE
 --------------------------------
 
-Return EMPTY message ONLY if ANY of the following is true:
+Do NOT return empty just because:
 
 - hard_no_send = true
 - has_not_now_signal = true
 - is_my_turn_to_reply = false
+- should_reactivate_now = false
 
-DO NOT use should_reactivate_now as a blocking condition.
-DO NOT use general caution as a reason to empty.
-DO NOT empty a message only because it is imperfect.
+Those cases should be rewritten into ultra-light activation messages.
 
-If EMPTY applies, return:
+Use these conversions:
+- not-now -> keep the concrete item ready, line it up clearly, put it into one simple message for later
+- not-my-turn -> resend one exact object, put one exact point together clearly
+- low-priority -> use the strongest concrete prior object with lower pressure
+- no real history -> use the generic fallback
+
+Return EMPTY message ONLY if the input is totally unusable or corrupt and no candidate, name, project key, history, anchor, payload, or generic fallback can be used.
+
+If EMPTY is truly unavoidable, return:
 {
   "whatsapp_message": ""
 }
@@ -117,87 +134,121 @@ Do NOT ignore the parsed candidate message.
 
 If candidate message exists and is not empty:
 
-- If it is generic but fixable → REWRITE
-- If it is weak but anchored → REWRITE
-- If it has one action and one reply path → PASS or light rewrite
-- ONLY use EMPTY for true no-send conditions above
+- If it is generic but history exists -> REWRITE with a real anchor.
+- If it is generic and no usable history exists -> USE GENERIC FALLBACK.
+- If it is weak but anchored -> REWRITE.
+- If it lacks the customer name while a name exists -> REWRITE.
+- If it is too short and abrupt -> REWRITE into the 16-30 word target.
+- If it has one action and one reply path -> PASS or light rewrite.
+- Do NOT use EMPTY unless the input is totally unusable or corrupt.
 
-Examples that should NOT become empty:
+These should remain sendable, not empty:
 - price range resend
+- one-unit price summary
+- sample price summary
 - cheaper option clarification
 - catalog resend
 - AR011 photos resend
+- AR010 / AR012 comparison context
 - shipping summary resend
+- Houston / ZIP / delivery timing
+- warranty
+- deposit
 - October timing clarification
-
-These are valid sendable anchors and should be preserved or rewritten, not cleared.
+- setup for 8 or 10 units
+- PDF that failed to download
+- photos/videos previously requested
 
 --------------------------------
 MANDATORY REQUIREMENTS
 --------------------------------
 
-- If this is a true not-now / do-not-push / not-my-turn case, return:
-  {
-    "whatsapp_message": ""
-  }
-
-- If the candidate is weak but still sendable, rewrite it into a concrete micro-trigger instead of keeping it.
-- If the message is valid, you may keep it with minor polishing.
-- If invalid, rewrite it.
-- Do NOT empty weak but fixable messages.
-
 The final message MUST:
 
+- include the customer name whenever available
 - contain ONE action only
 - contain ONE direction only
+- contain ONE reply path only
 - be answerable instantly
 - require minimal thinking
-- include at least ONE concrete conversation anchor
-- reference one exact object already present in the conversation
+- include at least ONE exact concrete conversation anchor when history exists
+- reference one exact object already present in the conversation when history exists
 - feel like it could only be sent to this customer
 - make the next tiny action obvious
+- target roughly 16-30 words
+- stay low-pressure
 
 The final message MUST NOT:
 
 - use just checking / let me know / any update / still interested
 - ask broad questions
 - ask for readiness
-- ask for confirmation
+- ask for preference
+- ask for purchase confirmation
 - ask for consideration
 - ask for decisions
 - ask for comparison
+- use the word "or"
 - use vague phrases like "help with that" without a concrete object
-- be reusable for another customer
+- use vague objects like "details", "information", "something we discussed", or "the last point"
+- be reusable for another customer when history exists
+- feel like customer service
+- feel like a generic follow-up
 
 Prefer concrete objects over abstract ideas.
-Prefer rewrite actions: resend / line up / simplify / send here / make clear in one message.
+Prefer rewrite actions: resend / line up / simplify / send here / make clear in one message / keep ready for later.
+
+--------------------------------
+GENERIC FALLBACK RULE
+--------------------------------
+
+Only use the generic fallback when there is truly no usable conversation history.
+
+Generic fallback:
+"[Name], I can put the key point into one simple message here so it's easier to review — want me to send it?"
+
+If a name exists, include it.
+If no name exists but project key contains a reasonable name, use that name.
+If no name exists at all, omit the name.
+
+--------------------------------
+REWRITE PATTERN
+--------------------------------
+
+Preferred grounded rewrite:
+"[Name], I can [specific grounded action tied to the real conversation] so it's easier to [visible concrete outcome] — want me to send that here?"
+
+Preferred low-pressure not-now rewrite:
+"[Name], I can keep the [specific grounded object] ready in one simple message for later — want me to keep that here?"
+
+Examples:
+- "Marea, I can put the one-unit price into one clear message here so it's easier to review — want me to send that?"
+- "Ceci, I can break down what makes the cheaper option different in one simple message — want me to send it here?"
+- "Rocio, I can line the October delivery timing up clearly in one message so it's easier to plan — want me to send that here?"
+- "Neha, when a new client comes in, I can put the first suitable option into one simple message for you — want me to keep that ready here?"
+- "Johnny, I can put the key point into one simple message here so it's easier to review — want me to send it?"
 
 --------------------------------
 DO NOT OVER-BLOCK
 --------------------------------
 
-The Enforce layer is NOT a safety kill-switch for all imperfect messages.
+The Enforce layer is NOT a safety kill-switch for imperfect messages.
 
 Its job is:
 
 - pass strong trigger messages
 - rewrite weak but fixable trigger messages
-- empty only true no-send cases
-
-These should remain sendable, not empty:
-
-"I can resend the price range here — want me to send it?"
-"I can explain what’s behind the cheaper option you found — want me to send it here?"
-"I can send the AR011 photos here — want me to send them?"
-"I can resend the catalog here — want me to send it?"
-"I can resend the shipping delivery summary here — want me to send it?"
+- use generic fallback only when there is no usable history
+- empty only totally unusable or corrupt input
 
 DO NOT convert message to EMPTY because of:
 - caution
 - low confidence
-- lack of perfect specificity
+- hard_no_send
+- has_not_now_signal
+- is_my_turn_to_reply = false
 - should_reactivate_now = false
-- generic concern not tied to the no-send rule
+- lack of perfect specificity
 
 --------------------------------
 FINAL CHECK
@@ -205,19 +256,25 @@ FINAL CHECK
 
 Could this exact message be sent to another customer without changing anything?
 
-If YES:
-rewrite
+If YES and history exists:
+rewrite.
 
 If NO:
-pass
+pass.
 
-Mandatory final check:
-- Is this a true no-send case: hard_no_send, has_not_now_signal, or is_my_turn_to_reply false?
-- If not, is there a sendable candidate message in ai_parsed.whatsapp_message or _en?
-- What exact object from the conversation is used?
-- Is the message ultra-short-reply friendly?
-- Does the message reduce thinking instead of increasing it?
-- If not, rewrite again.
+Mandatory final validation:
+- Is the customer name present if available?
+- Is the message grounded in exact history if history exists?
+- Is it longer than the current short style but still one trigger only?
+- Does it contain one action only?
+- Does it contain one direction only?
+- Does it contain one reply path only?
+- Is it answerable in under 3 seconds?
+- Is it not reusable when history exists?
+- Is generic fallback used only when there is no usable history?
+- Is empty used only for totally unusable or corrupt input?
+
+If any answer fails, rewrite again.
 
 --------------------------------
 OUTPUT

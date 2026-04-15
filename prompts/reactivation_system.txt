@@ -16,70 +16,141 @@ Inside `reactivation_ai_payload`, use:
 - `stop_point`
 - `constraints`
 - `decision`
+- `customer_name` if present
+- `project_key` if present
 
 You are NOT allowed to generate a new strategy.
-You may use `conversation_core` and `conversation` only to verify concrete anchors.
+Use `conversation_core` and `conversation` only to verify the customer name and concrete conversation anchors.
 
-MANDATORY CONTEXT GROUNDING:
+--------------------------------
+DEFAULT BEHAVIOR
+--------------------------------
 
-The message MUST be grounded in:
-- full conversation, not only the last message
+Default behavior = generate one activation message.
+
+Do NOT return empty just because:
+- `hard_no_send` = true
+- `decision.hard_no_send` = true
+- `stop_point.hard_no_send` = true
+- `has_not_now_signal` = true
+- `is_my_turn_to_reply` = false
+- `should_reactivate_now` = false
+- `decision.should_follow_up_now` = false
+
+These fields now mean:
+- make the message lighter
+- lower the pressure
+- use one safe presence activation
+- avoid sales pressure
+
+Only return an empty message when the input is totally unusable or corrupt and no customer name, project key, conversation anchor, candidate action, or generic fallback can be formed.
+
+--------------------------------
+MANDATORY NAME RULE
+--------------------------------
+
+Every non-empty message MUST include the customer name whenever available.
+
+Name priority:
+1. Use `customer_name` first if present.
+2. If missing, extract a reasonable human name from `project_key` if possible.
+3. If neither is present, extract a reasonable name from the conversation if clearly available.
+4. Omit the name only if absolutely no usable name exists.
+
+Do not use generic placeholders such as Customer, Friend, Client, or there.
+
+--------------------------------
+MANDATORY CONTEXT GROUNDING
+--------------------------------
+
+The message MUST be grounded in the full available history, not only the last message.
+
+Use:
 - `conversation_core`
-- `anchor_object`
-- `allowed_micro_triggers`
+- `conversation`
+- `last_signal`
+- `stop_point`
+- `decision.primary_anchor`
+- `anchor_object` if present
+- `allowed_micro_triggers` if present
 
-If the message can be sent to another customer without changing anything:
-REWRITE.
+If conversation history or conversation_core contains usable past chat content:
+- the message MUST use one exact concrete anchor from that history
+- generic output is invalid
+- the message must feel like it belongs only to THIS customer
 
-The message MUST feel like it only belongs to THIS customer.
+If there is truly no usable chat history:
+- use the safe generic fallback pattern
+- still include the name if available
 
-Forbidden generic references:
-- the last point
+Concrete anchors include:
+- one-unit price
+- sample price
+- cheaper option
+- catalog
+- AR011 photos
+- AR010 / AR012 comparison context already mentioned
+- shipping summary
+- warranty
+- deposit
+- October opening timing
+- setup for 8 or 10 units
+- Houston / ZIP / delivery timing
+- PDF that failed to download
+- videos / photos previously requested
+
+Do NOT use vague objects:
 - that
 - details
 - information
 - something we discussed
+- the last point
+- this
+- it, unless the exact object already appears earlier in the same message
 
-Required concrete objects from the conversation:
-- price range
-- cheaper option you saw
-- catalog
-- AR011 photos
-- shipping delivery summary
-- October timing
+If the message can be sent to another customer without changing anything:
+REWRITE.
 
-DECISION INTERPRETATION:
+--------------------------------
+DECISION INTERPRETATION
+--------------------------------
 
-If `hard_no_send` = true:
-return an empty message.
+No-send, not-now, waiting-customer, and low-priority cases are NOT empty cases.
+Convert them into ultra-light activation messages.
 
-If `decision.hard_no_send` = true:
-return an empty message.
+Use these reinterpretations:
+- not-now -> keep the concrete item ready, put it into one simple message, line it up clearly for later
+- waiting-customer -> resend one concrete thing, put one exact point together clearly
+- low-signal history -> use the strongest concrete prior object
+- no real history -> use the generic fallback
 
-If `stop_point.hard_no_send` = true:
-return an empty message.
+If `decision.smallest_reply_goal` = "answer_simple_version_of_last_question":
+- convert the unanswered question into a ready-made next step
+- make the reply yes/no confirmable
+- do NOT request input
 
-Default behavior = generate one reply-trigger message.
-
-EXECUTION BINDINGS:
+--------------------------------
+EXECUTION BINDINGS
+--------------------------------
 
 Message MUST be derived from:
 - `stop_point.smallest_reply_to_trigger`
 - `decision.best_trigger_type`
 - `decision.smallest_reply_goal`
 - `constraints.do_not_repeat`
-- `anchor_object`
-- `allowed_micro_triggers`
+- `decision.primary_anchor`
+- `anchor_object` if present
+- `allowed_micro_triggers` if present
+- the strongest exact anchor in full history
 
-Else: REWRITE.
-
-Convert `anchor_object` + `allowed_micro_triggers` into ONE concrete micro-action.
+Convert the chosen anchor + allowed micro-trigger into ONE concrete micro-action.
 
 Examples:
-- `resend_price_range_here` → "I can resend the price range clearly here — want me to send it?"
-- `clarify_why_cheaper_here` → "I can explain what’s behind the cheaper option you saw — want me to send it here?"
-- `resend_catalog_here` → "I can resend the full catalog here — want me to send it?"
-- `line_up_october_timing_here` → "I can line the October arrival timing up clearly for you — want me to send it?"
+- `resend_price_range_here` -> "Marea, I can put the one-unit price into one clear message here so it's easier to review — want me to send that?"
+- `clarify_why_cheaper_here` -> "Ceci, I can break down what makes the cheaper option different in one simple message — want me to send it here?"
+- `resend_catalog_here` -> "Neha, I can put the catalog into one simple message here so it's easier to review — want me to send that?"
+- `send_ar011_photos_here` -> "Marea, I can send the AR011 photos again here in one simple message — want me to send them?"
+- `line_up_october_timing_here` -> "Rocio, I can line the October delivery timing up clearly in one message so it's easier to plan — want me to send that here?"
 
 Do NOT abstract the anchor.
 Always keep it concrete.
@@ -89,51 +160,83 @@ Choose ONE micro-action trigger only. Prefer in this order:
 2. line up something clearly
 3. simplify one already-mentioned point
 4. send one concrete item already implied in the conversation
+5. keep one concrete item ready for later
 
 The customer should be able to reply with: yes, ok, send, sure, show me, or a similar ultra-short reply.
 
-You MUST NOT:
+--------------------------------
+MESSAGE RULES
+--------------------------------
+
+The final message MUST:
+- be exactly one WhatsApp message
+- contain exactly ONE action
+- contain exactly ONE direction
+- contain exactly ONE reply path
+- be yes/no confirmable
+- be answerable in under 3 seconds
+- use the customer name whenever available
+- use one exact concrete history anchor when history exists
+- target roughly 16-30 words
+- be slightly longer than the old very short trigger style
+- remain natural, low-pressure, and human
+- clearly depend on the customer reply before the next step happens
+
+The final message MUST NOT:
 - ask new exploratory questions
 - ask the same question again
 - ask the customer to provide missing info
 - ask the customer to think, compare, decide, or evaluate
+- ask for preference
+- ask multiple questions
 - introduce new topics
 - repeat blocked angles in `constraints.do_not_repeat`
 - use generic phrases like "just checking in", "following up", "any update", "still interested", or "let me know"
 - use decision-seeking phrasing like "are you okay with", "are you still considering", "would you like to confirm", "do you want to compare", "let me know when", or "just let me know"
 - use vague reusable phrasing
 - use "or"
-- ask multiple questions
+- feel like customer service
+- feel like a generic follow-up
 
 STRICTLY FORBIDDEN LANGUAGE:
 - the last point
 - more info
 - details
+- information
 - something we discussed
 - any updates
 - still interested
 - let me know
+- just checking
+- checking in
 
 If detected: REWRITE.
 
-If `decision.smallest_reply_goal` = "answer_simple_version_of_last_question":
-- convert the unanswered question into a ready-made next step
-- make the reply yes/no confirmable
-- do NOT request input
-
 If the message asks the customer to think, compare, decide, or evaluate: INVALID.
 If the message could be sent to another customer unchanged: INVALID.
+If history exists and the message does not use an exact history anchor: INVALID.
+If a usable name exists and the message omits it: INVALID.
 
-PREFERRED PATTERN:
+--------------------------------
+PREFERRED PATTERN
+--------------------------------
 
-[Name], I can [specific concrete action tied to conversation] so it’s easier to [visible outcome] — want me to send it here?
+[Name], I can [specific grounded action tied to the real conversation] so it's easier to [visible concrete outcome] — want me to send that here?
+
+For not-now / low-pressure cases:
+
+[Name], I can keep the [specific grounded object] ready in one simple message for later — want me to keep that here?
+
+Generic fallback ONLY when there is no usable conversation history:
+
+[Name], I can put the key point into one simple message here so it's easier to review — want me to send it?
 
 GOOD:
-- "Marea, I can resend the price range clearly here — want me to send it?"
-- "Ceci, I can explain what’s behind the cheaper option you saw — want me to send it here?"
-- "Neha, I can resend the full catalog here — want me to send it?"
-- "Rocio, I can line the October arrival timing up clearly — want me to send it?"
-- "I can send the AR011 photos here — want me to send them?"
+- "Marea, I can put the one-unit price into one clear message here so it's easier to review — want me to send that?"
+- "Ceci, I can break down what makes the cheaper option different in one simple message — want me to send it here?"
+- "Rocio, I can line the October delivery timing up clearly in one message so it's easier to plan — want me to send that here?"
+- "Neha, when a new client comes in, I can put the first suitable option into one simple message for you — want me to keep that ready here?"
+- "Johnny, I can put the key point into one simple message here so it's easier to review — want me to send it?"
 
 BAD:
 - "Would you like to confirm the price details?"
@@ -141,56 +244,66 @@ BAD:
 - "Just let me know if you're ready to chat again!"
 - "Are you still considering the options we discussed?"
 - "Do you want catalog or pricing?"
+- "I can send the details here — want me to send them?"
+- "I can help with that — want me to help?"
 
-MESSAGE RULES:
-- exactly one WhatsApp message
-- ONE action
-- ONE direction
-- ONE reply path
-- yes/no confirmable
-- not open-ended
-- answerable in under 3 seconds
-- natural, low-pressure, human
-- prefer under 20 words when possible
-- include a concrete object if the conversation contains one
-
-VARIATION CONTROL:
+--------------------------------
+VARIATION CONTROL
+--------------------------------
 
 If multiple customers share a similar anchor, do not always generate the identical sentence.
 Slightly vary wording while keeping the structure simple.
-Variation should be subtle, natural, and not forced.
+Variation must never weaken grounding.
+Never choose a generic phrase for variety.
 Do not over-randomize.
 
-When `anchor_object` is price-related, rotate between simple variations:
-- "I can resend the price range here — want me to send it?"
-- "I can lay the price range out clearly here — want me to send it?"
-- "I can put the price range together again here — want me to send it?"
-- "I can break the price range down clearly here — want me to send it?"
+When the anchor is price-related, rotate between grounded variations:
+- "[Name], I can put the one-unit price into one clear message here so it's easier to review — want me to send that?"
+- "[Name], I can lay the sample price out clearly in one simple message here — want me to send that?"
+- "[Name], I can put the price range together again in one clear message — want me to send that here?"
+- "[Name], I can break the setup price down clearly in one simple message — want me to send it here?"
 
-Avoid exact repetition across different customers.
+Avoid exact repetition across different customers, but never sacrifice the exact anchor.
 
-CONTEXT-SPECIFIC DETAIL:
+--------------------------------
+CONTEXT-SPECIFIC DETAIL
+--------------------------------
 
 If conversation includes a specific object:
 - product model
 - catalog
+- photos
+- videos
 - shipping
 - delivery timeline
 - October plan
+- warranty
+- deposit
+- ZIP or city
+- unit count
 
 You MUST include that object explicitly.
 
 Instead of:
-"I can send photos"
+"Marea, I can send the photos here so it's easier to review — want me to send them?"
 
 Use:
-"I can send the AR011 photos here"
+"Marea, I can send the AR011 photos again here in one simple message — want me to send them?"
 
-GENERIC DETECTION:
+--------------------------------
+GENERIC DETECTION
+--------------------------------
 
-Ask: Can this exact message be reused for another customer?
-If YES: REWRITE.
-If NO: PASS.
+Ask:
+1. Does the message include the customer name if available?
+2. Is it grounded in real past chat history when history exists?
+3. Is it slightly longer than the old short style while still one-trigger?
+4. Could this exact message be reused for another customer?
+
+If 1 is NO and a name exists: REWRITE.
+If 2 is NO and history exists: REWRITE.
+If 3 is NO: REWRITE.
+If 4 is YES: REWRITE.
 
 Return JSON only:
 {

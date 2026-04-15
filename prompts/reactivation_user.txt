@@ -11,44 +11,77 @@ You may only use:
 - `decision`
 - `conversation_core`
 - `conversation`
+- `customer_name` if present
+- `project_key` if present
 
 Execute:
 - `stop_point.smallest_reply_to_trigger`
 - `decision.best_trigger_type`
 - `decision.smallest_reply_goal`
 - `constraints.do_not_repeat`
-- `anchor_object`
-- `allowed_micro_triggers`
+- `decision.primary_anchor`
+- `anchor_object` if present
+- `allowed_micro_triggers` if present
 
 Do not infer outside the provided inputs.
 Do not create new context.
 Do not create a new strategy.
-Use the conversation only to ground the exact object.
+Use the full conversation only to ground the exact object and verify the customer name.
 
-Before writing the message, identify the ONE strongest concrete anchor from the real conversation.
+Before writing the message, identify:
+1. the best available customer name
+2. the ONE strongest concrete anchor from the real conversation
+3. whether usable conversation history exists
 
-Prefer anchors such as:
-- price already discussed
+Name rule:
+- Use `customer_name` first if available.
+- If missing, extract a reasonable name from `project_key` if possible.
+- If missing, use a clearly available name from the conversation.
+- Omit the name only if absolutely no usable name exists.
+
+If conversation history exists:
+- the message MUST use the strongest real anchor from past chat history
+- generic output is invalid
+- the message must not be reusable across customers
+
+If no usable conversation history exists:
+- use the generic fallback
+- include the name if available
+
+Prefer exact anchors such as:
+- one-unit price
+- sample price
+- price range already discussed
+- cheaper option already mentioned
 - model already discussed
 - setup already discussed
+- setup for 8 or 10 units
 - PDF/catalog that failed to download
+- catalog previously requested
+- AR011 photos
+- AR010 / AR012 comparison context
 - photos/videos previously requested
-- shipping/ZIP/warranty/deposit/timeline already mentioned
-- cheaper option / other supplier comparison already mentioned
-- October timing already mentioned
+- shipping summary
+- Houston / ZIP / delivery timing
+- warranty
+- deposit
+- October opening timing
 
 The candidate message must:
 - be one message only
+- include the customer name whenever available
 - never ask the same question again
 - never ask for missing info
 - offer a ready-made next step
 - contain a concrete object, not a vague action
-- use `anchor_object` and `allowed_micro_triggers`
+- use `anchor_object`, `decision.primary_anchor`, or `allowed_micro_triggers` when present
 - be yes/no confirmable
 - require near-zero effort
 - be answerable with yes, ok, send, or sure
+- target roughly 16-30 words
+- be longer than the old very short style while staying one-trigger
 
-Do not produce a candidate message that only asks for confirmation, interest, consideration, or readiness.
+Do not produce a candidate message that only asks for confirmation, interest, consideration, readiness, preference, comparison, or a decision.
 
 Forbidden generic references:
 - the last point
@@ -60,55 +93,76 @@ Forbidden generic references:
 - any updates
 - still interested
 - let me know
+- just checking
+- checking in
 
 Required style:
 - one concrete micro-action
-- one concrete object
+- one exact concrete object
 - one direction
 - one reply path
+- low-pressure
+- not customer-service-like
+- not a generic follow-up
 
 Convert the allowed micro-trigger into a concrete action:
-- `resend_price_range_here` → resend the price range
-- `clarify_why_cheaper_here` → explain what is behind the cheaper option
-- `resend_catalog_here` → resend the catalog
-- `send_ar011_photos_here` → send the AR011 photos
-- `line_up_october_timing_here` → line up the October arrival timing
+- `resend_price_range_here` -> put the one-unit price, sample price, or price range into one clear message
+- `clarify_why_cheaper_here` -> break down what makes the cheaper option different
+- `resend_catalog_here` -> put the catalog into one simple message
+- `send_ar011_photos_here` -> send the AR011 photos again here
+- `line_up_october_timing_here` -> line up the October delivery or opening timing
+- `resend_shipping_summary_here` -> put the shipping summary into one clear message
+- `keep_ready_for_later` -> keep the exact grounded object ready in one simple message
 
-If `hard_no_send` is true, return:
-{
-  "whatsapp_message": ""
-}
+Do NOT return empty just because:
+- `hard_no_send` is true
+- `decision.hard_no_send` is true
+- `stop_point.hard_no_send` is true
+- `has_not_now_signal` is true
+- `is_my_turn_to_reply` is false
+- `should_reactivate_now` is false
+- `decision.should_follow_up_now` is false
 
-If `decision.hard_no_send` is true, return:
-{
-  "whatsapp_message": ""
-}
+Those cases still need one ultra-light activation message.
 
-If `stop_point.hard_no_send` is true, return:
-{
-  "whatsapp_message": ""
-}
+Use these conversions:
+- not-now -> keep the concrete item ready, line it up clearly, put it into one simple message for later
+- waiting-customer -> resend one exact object, put one exact point together clearly
+- low-priority -> use the strongest concrete prior object with lower pressure
+- no real history -> use the generic fallback
+
+Generic fallback ONLY if no usable history exists:
+"[Name], I can put the key point into one simple message here so it's easier to review — want me to send it?"
 
 Variation control:
 - Do not reuse the exact same sentence across customers with similar anchors.
-- Slightly vary wording while keeping the structure short and simple.
+- Slightly vary wording while keeping the structure simple.
 - Do not sacrifice grounding for variation.
-- If `anchor_object` is price-related, rotate subtly between:
-  "I can resend the price range here — want me to send it?"
-  "I can lay the price range out clearly here — want me to send it?"
-  "I can put the price range together again here — want me to send it?"
-  "I can break the price range down clearly here — want me to send it?"
+- If the anchor is price-related, rotate subtly between:
+  "[Name], I can put the one-unit price into one clear message here so it's easier to review — want me to send that?"
+  "[Name], I can lay the sample price out clearly in one simple message here — want me to send that?"
+  "[Name], I can put the price range together again in one clear message — want me to send that here?"
+  "[Name], I can break the setup price down clearly in one simple message — want me to send it here?"
 - Do not over-randomize or add complexity.
 
 Final self-check:
-1. What exact object is being referenced?
-2. Is the object present in `conversation_core`, `conversation`, or `reactivation_ai_payload`?
-3. Could this exact message be reused for another customer?
-4. Is the reply path just one ultra-short response?
+1. Does the message include the customer name if available?
+2. What exact object is being referenced?
+3. Is the object present in `conversation_core`, `conversation`, or `reactivation_ai_payload`?
+4. If history exists, is the message grounded in real past chat history?
+5. Is it longer than the current very short style but still one-trigger?
+6. Could this exact message be reused for another customer?
+7. Is the reply path just one ultra-short response?
 
-If the object is unclear, not grounded, reusable is yes, or reply path is not minimal: regenerate.
+If the name is missing while available, the object is unclear, grounding is weak, reusable is yes, or reply path is not minimal: regenerate.
 
 Do not explain reasoning outside JSON.
+
+Customer name if provided:
+{{customer_name}}
+
+Project key if provided:
+{{project_key}}
 
 Conversation Core:
 {{conversation_core}}
