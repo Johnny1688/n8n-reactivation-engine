@@ -1,28 +1,122 @@
-Input:
-- `whatsapp_message`
-- `reactivation_ai_payload`
+Candidate message:
+{{$json.ai_parsed?.final_message || $json._en || $json.telegram_messages?.[1] || ''}}
 
-Validate only.
-Do not create a new strategy.
-Do not infer outside the payload.
+Project:
+{{$json.project_key || ''}}
 
-Check:
-- grounded in `last_signal` and `stop_point`
-- follows `decision`
-- avoids `constraints.do_not_repeat`
-- one reply path only
-- low-pressure
-- non-generic
-- near-zero effort to reply
+Customer name:
+{{$json.customer_name || ''}}
 
-If it passes, return the original message as `final_message`.
-If it can be minimally tightened without changing strategy, return the tightened message.
-If not, return `pass: false`.
+--------------------------------
+SEND STATE
+--------------------------------
 
-Do not explain outside JSON.
+- has_not_now_signal: {{$json.has_not_now_signal}}
+- is_my_turn_to_reply: {{$json.is_my_turn_to_reply}}
+- should_reactivate_now: {{$json.should_reactivate_now}}
+- status: {{$json.status || ''}}
+- customer_last_message_type: {{$json.customer_last_message_type || ''}}
+- reply_risk: {{$json.reply_risk || ''}}
 
-WhatsApp Message:
-{{whatsapp_message}}
+--------------------------------
+LAST STOP POINT
+--------------------------------
 
-Reactivation AI Payload:
-{{reactivation_ai_payload}}
+Last customer message:
+{{$json.last_customer_message || ''}}
+
+Last my message:
+{{$json.last_my_message || ''}}
+
+Last exchange:
+{{ JSON.stringify($json.last_exchange || {}) }}
+
+--------------------------------
+KEY CONTEXT
+--------------------------------
+
+Primary reply anchor:
+{{$json.primary_reply_anchor || ''}}
+
+Secondary context:
+{{$json.secondary_context || ''}}
+
+Current blocker:
+{{$json.current_blocker || ''}}
+
+Reply angle:
+{{$json.reply_angle || ''}}
+
+Follow-up focus:
+{{$json.follow_up_focus || ''}}
+
+--------------------------------
+REAL CONVERSATION
+--------------------------------
+
+Conversation core:
+{{$json.conversation_core || ''}}
+
+Conversation:
+{{$json.conversation || ''}}
+
+--------------------------------
+TASK
+--------------------------------
+
+1) First decide whether this case should output an EMPTY message.
+2) If not empty, validate the candidate message against the real conversation.
+3) If invalid, rewrite it into a valid activation message.
+4) The final message MUST be grounded in the real conversation and MUST NOT be generic.
+
+--------------------------------
+MANDATORY REQUIREMENTS
+--------------------------------
+
+- If this is a not-now / do-not-push / waiting-customer case, return:
+  {
+    "whatsapp_message": ""
+  }
+
+- If the message is valid, you may keep it with minor polishing.
+- If invalid, rewrite it.
+
+The final message MUST:
+
+- contain ONE action only
+- contain ONE direction only
+- be answerable instantly
+- require minimal thinking
+- include at least ONE concrete conversation anchor
+- feel like it could only be sent to this customer
+
+The final message MUST NOT:
+
+- use just checking / let me know / any update / still interested
+- ask broad questions
+- ask for decisions
+- ask for comparison
+- use vague phrases like "help with that" without a concrete object
+- be reusable for another customer
+
+--------------------------------
+FINAL CHECK
+--------------------------------
+
+Could this exact message be sent to another customer without changing anything?
+
+If YES:
+rewrite
+
+If NO:
+pass
+
+--------------------------------
+OUTPUT
+--------------------------------
+
+Return ONLY:
+
+{
+  "whatsapp_message": "FINAL MESSAGE OR EMPTY STRING"
+}
