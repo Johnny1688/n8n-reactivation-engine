@@ -8,7 +8,13 @@ function normalizeInputItems(body) {
 
   return rawItems.map(item => {
     if (item && typeof item === 'object' && !Array.isArray(item) && item.json) {
-      return item;
+      return {
+        ...item,
+        json: {
+          ...item.json,
+          output: item.json.output || item.output
+        }
+      };
     }
 
     return {
@@ -24,7 +30,8 @@ function splitTelegramMessages(items) {
     const data = item?.json || {};
     const projectKey = toSafeString(data.project_key);
     const orderGroup = toSafeString(data.order_group);
-    const messages = Array.isArray(data.telegram_messages) ? data.telegram_messages : [];
+    const whatsapp_message = toSafeString(data.whatsapp_message);
+    const messages = whatsapp_message ? [whatsapp_message] : [];
 
     for (const message of messages) {
       const text = toSafeString(message);

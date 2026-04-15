@@ -64,10 +64,22 @@ function compressSummary(text, maxLen = 400) {
   return `${head} ... ${tail}`;
 }
 
-function getEnforceParsed(current) {
-  const raw = current.output?.[0]?.content?.[0]?.text || '';
-  const parsed = parseJsonSafe(raw);
-  return parsed && typeof parsed === 'object' ? parsed : {};
+function getEnforceParsed(item) {
+  const rawText = item.json?.output?.[0]?.content?.[0]?.text || '{}';
+
+  let parsed;
+  try {
+    parsed = JSON.parse(rawText);
+  } catch (e) {
+    parsed = {};
+  }
+
+  const whatsapp_message = (parsed.whatsapp_message || '').trim();
+
+  return {
+    ...(parsed && typeof parsed === 'object' ? parsed : {}),
+    whatsapp_message
+  };
 }
 
 function getOriginalAiParsed(current) {
@@ -239,7 +251,13 @@ function normalizeInputItems(body) {
 
   return rawItems.map(item => {
     if (item && typeof item === 'object' && !Array.isArray(item) && item.json) {
-      return item;
+      return {
+        ...item,
+        json: {
+          ...item.json,
+          output: item.json.output || item.output
+        }
+      };
     }
 
     return {
@@ -255,7 +273,7 @@ function filterAndFormatTelegramFinalItems(items) {
     const current = item.json || {};
 
     const aiParsed = getOriginalAiParsed(current);
-    const enforceParsed = getEnforceParsed(current);
+    const enforceParsed = getEnforceParsed(item);
 
     const projectKey = pick(current.project_key, aiParsed.project_key, '未命名客户');
     const customerName = pick(current.customer_name, aiParsed.customer_name, projectKey);
@@ -341,18 +359,7 @@ function filterAndFormatTelegramFinalItems(items) {
 
     const aiSummary = safe(aiParsed.analysis_text, '未输出');
 
-    const finalMessage = safe(
-      pick(
-        enforceParsed.whatsapp_message,
-        current.whatsapp_message,
-        current.whatsapp_text,
-        aiParsed.final_message,
-        aiParsed.whatsapp_text,
-        current._en,
-        current.telegram_messages?.[1]
-      ),
-      ''
-    );
+    const finalMessage = safe(enforceParsed.whatsapp_message, '');
 
     const finalMessageCn = safe(
       pick(
@@ -373,14 +380,7 @@ function filterAndFormatTelegramFinalItems(items) {
     const genericRisk = hasGenericRisk(finalMessage);
     const weakAnchorRisk = hasWeakAnchorRisk(finalMessage);
 
-    const shouldBlock =
-      emptyMessage ||
-      highRisk ||
-      multiQuestionRisk ||
-      orRisk ||
-      decisionRisk ||
-      genericRisk ||
-      weakAnchorRisk;
+    const shouldBlock = emptyMessage;
 
     const multiRisk = multiQuestionRisk || orRisk ? '高' : '低';
     const thinkRisk = decisionRisk ? '高' : '低';
