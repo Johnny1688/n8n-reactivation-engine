@@ -23,6 +23,17 @@ function firstNonEmptyString(...values) {
   return '';
 }
 
+function normalizeMessageValue(value) {
+  const cleaned = cleanupMessage(value);
+  const lower = cleaned.toLowerCase();
+
+  if (!cleaned) return '';
+  if (lower === 'undefined') return '';
+  if (lower === 'null') return '';
+
+  return cleaned;
+}
+
 function parseJsonSafe(raw) {
   if (raw && typeof raw === 'object' && !Array.isArray(raw)) return raw;
 
@@ -79,7 +90,7 @@ function buildChineseGloss(message) {
 
   if (/price|pricing|quote|cost/.test(lower)) {
     if (/resend|send/.test(lower)) return '我可以把之前的价格整理成一条清楚的信息发给你，要我发这里吗？';
-    if (/line|compare|difference/.test(lower)) return '我可以把价格差异整理成一条简单信息，要我发这里吗？';
+    if (/line|lay|put|break|compare|difference/.test(lower)) return '我可以把价格范围整理清楚发给你，要我发这里吗？';
     return '我可以把价格信息简单整理一下，要我发这里吗？';
   }
 
@@ -103,12 +114,12 @@ function buildChineseGloss(message) {
     return '我可以把付款信息简单整理一下，要我发这里吗？';
   }
 
-  if (/ar010|ar011|ar012|model|models|reformer|setup|option|shortlist/.test(lower)) {
-    return '我可以把相关选项整理成一条简单信息，要我发这里吗？';
-  }
-
   if (/cheaper|supplier|compare|comparison|difference/.test(lower)) {
     return '我可以把关键差异整理成一条简单信息，要我发这里吗？';
+  }
+
+  if (/ar010|ar011|ar012|model|models|reformer|setup|option|shortlist/.test(lower)) {
+    return '我可以把相关选项整理成一条简单信息，要我发这里吗？';
   }
 
   if (/send it|send that|want me to/.test(lower)) {
@@ -118,12 +129,63 @@ function buildChineseGloss(message) {
   return '';
 }
 
+function getNestedOutputText(source) {
+  return firstNonEmptyString(
+    source?.output?.[0]?.content?.[0]?.text,
+    source?.output_text,
+    source?.text,
+    source?.message
+  );
+}
+
+function normalizeAiParsed(data, item) {
+  const existingParsed = parseJsonSafe(data.ai_parsed);
+  const rawAiText = firstNonEmptyString(
+    getNestedOutputText(data),
+    getNestedOutputText(item)
+  );
+  const outputParsed = parseJsonSafe(rawAiText);
+
+  const aiParsed = {
+    ...outputParsed,
+    ...existingParsed
+  };
+
+  const whatsappMessage = normalizeMessageValue(
+    firstNonEmptyString(
+      aiParsed.whatsapp_message,
+      aiParsed.whatsapp_text,
+      aiParsed.final_message,
+      aiParsed.whatsapp_message_en,
+      aiParsed.message_text,
+      data.whatsapp_message,
+      data.whatsapp_text,
+      data.final_message,
+      data.message_text
+    )
+  );
+
+  return {
+    ...aiParsed,
+    whatsapp_message: whatsappMessage
+  };
+}
+
 function normalizeInputItems(body) {
   const rawItems = Array.isArray(body) ? body : [body || {}];
 
   return rawItems.map(item => {
     if (item && typeof item === 'object' && !Array.isArray(item) && item.json) {
-      return item;
+      return {
+        ...item,
+        json: {
+          ...item.json,
+          output: item.json.output || item.output,
+          output_text: item.json.output_text || item.output_text,
+          text: item.json.text || item.text,
+          message: item.json.message || item.message
+        }
+      };
     }
 
     return {
@@ -136,20 +198,8 @@ function formatTelegramMessageItems(items) {
   return items
     .map(item => {
       const data = item.json || {};
-
-      let aiParsed = {};
-
-      if (data.ai_parsed) {
-        aiParsed = parseJsonSafe(data.ai_parsed);
-      } else if (data.output?.[0]?.content?.[0]?.text) {
-        aiParsed = parseJsonSafe(data.output[0].content[0].text);
-      } else if (data.output_text) {
-        aiParsed = parseJsonSafe(data.output_text);
-      } else if (data.text) {
-        aiParsed = parseJsonSafe(data.text);
-      } else if (data.message) {
-        aiParsed = parseJsonSafe(data.message);
-      }
+      const aiParsed = normalizeAiParsed(data, item);
+      const en = normalizeMessageValue(aiParsed.whatsapp_message);
 
       const projectKey = firstNonEmptyString(
         data.project_key,
@@ -162,27 +212,18 @@ function formatTelegramMessageItems(items) {
         aiParsed.order_group
       );
 
-      const en = firstNonEmptyString(
-        data.whatsapp_text,
-        data.whatsapp_message,
-        data.final_message,
-        data.message_text,
-        aiParsed.whatsapp_text,
-        aiParsed.whatsapp_message,
-        aiParsed.final_message,
-        aiParsed.whatsapp_message_en,
-        aiParsed.message_text
-      );
+      const cn = en
+        ? firstNonEmptyString(
+            data.whatsapp_message_cn,
+            data.whatsapp_text_cn,
+            data.message_cn,
+            aiParsed.whatsapp_message_cn,
+            aiParsed.whatsapp_text_cn,
+            aiParsed.message_cn
+          )
+        : '';
 
-      const cn = firstNonEmptyString(
-        data.whatsapp_message_cn,
-        data.whatsapp_text_cn,
-        data.message_cn,
-        aiParsed.whatsapp_message_cn,
-        aiParsed.whatsapp_text_cn,
-        aiParsed.message_cn
-      );
-      const needsEnforceRewrite = isWeakCandidateMessage(en);
+      const needsEnforceRewrite = en ? isWeakCandidateMessage(en) : false;
 
       return {
         json: {
@@ -202,15 +243,9 @@ function formatTelegramMessageItems(items) {
 
       const projectKey = cleanupMessage(data.project_key);
       const orderGroup = cleanupMessage(data.order_group);
-      const en = cleanupMessage(data._en);
-      const enLower = en.toLowerCase();
 
       if (!projectKey) return false;
       if (!orderGroup) return false;
-      if (!en) return false;
-      if (en.length < 10) return false;
-      if (enLower === 'undefined') return false;
-      if (enLower === 'null') return false;
 
       return true;
     })
@@ -219,20 +254,10 @@ function formatTelegramMessageItems(items) {
 
       const projectKey = cleanupMessage(data.project_key);
       const orderGroup = cleanupMessage(data.order_group);
-      const en = cleanupMessage(data._en);
-      const cn = cleanupMessage(data._cn) || buildChineseGloss(en);
-
-      return {
-        json: {
-          ...data,
-          order_group: orderGroup,
-          project_key: projectKey,
-          ai_parsed: data.ai_parsed || {},
-          _en: en,
-          _cn: cn,
-          weak_candidate_message: data.weak_candidate_message || '',
-          needs_enforce_rewrite: data.needs_enforce_rewrite === true,
-          telegram_messages: [
+      const en = normalizeMessageValue(data._en);
+      const cn = en ? cleanupMessage(data._cn) || buildChineseGloss(en) : '';
+      const telegramMessages = en
+        ? [
             `【${projectKey}】
 
 English:
@@ -242,6 +267,22 @@ ${en}
 ${cn || '（AI未输出中文翻译）'}`,
             en
           ]
+        : [];
+
+      return {
+        json: {
+          ...data,
+          order_group: orderGroup,
+          project_key: projectKey,
+          ai_parsed: {
+            ...(data.ai_parsed || {}),
+            whatsapp_message: en
+          },
+          _en: en,
+          _cn: cn,
+          weak_candidate_message: en ? data.weak_candidate_message || '' : '',
+          needs_enforce_rewrite: en ? data.needs_enforce_rewrite === true : false,
+          telegram_messages: telegramMessages
         }
       };
     });
