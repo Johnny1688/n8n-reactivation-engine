@@ -17,18 +17,39 @@ Do not infer outside the payload.
 Do not reference the full conversation.
 Do not create new context.
 
+Before writing the message, identify the ONE strongest concrete anchor from the real conversation.
+
+Prefer anchors such as:
+- price already discussed
+- model already discussed
+- setup already discussed
+- PDF/catalog that failed to download
+- photos/videos previously requested
+- shipping/ZIP/warranty/deposit/timeline already mentioned
+- cheaper option / other supplier comparison already mentioned
+
 Even if `decision.should_follow_up_now` is false:
 - still generate a message
 - make it ultra light
 - optional reply only
 
-The message must:
+The candidate message must:
 - be one message only
 - never ask the same question again
 - never ask for missing info
 - offer a ready-made next step
+- contain a concrete object, not a vague action
 - be yes/no confirmable
 - require near-zero effort
+
+Do not produce a candidate message that only asks for confirmation, interest, consideration, or readiness.
+
+Final self-check:
+1. What exact object is being referenced?
+2. Could this exact message be reused for another customer?
+3. Is the reply path just one ultra-short response?
+
+If the object is unclear, reusable is yes, or reply path is not minimal: regenerate.
 
 Do not explain reasoning outside JSON.
 

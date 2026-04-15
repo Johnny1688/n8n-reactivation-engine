@@ -78,6 +78,7 @@ MANDATORY REQUIREMENTS
     "whatsapp_message": ""
   }
 
+- If the candidate is weak but still sendable, rewrite it into a concrete micro-trigger instead of keeping it.
 - If the message is valid, you may keep it with minor polishing.
 - If invalid, rewrite it.
 
@@ -88,16 +89,24 @@ The final message MUST:
 - be answerable instantly
 - require minimal thinking
 - include at least ONE concrete conversation anchor
+- reference one exact object already present in the conversation
 - feel like it could only be sent to this customer
+- make the next tiny action obvious
 
 The final message MUST NOT:
 
 - use just checking / let me know / any update / still interested
 - ask broad questions
+- ask for readiness
+- ask for confirmation
+- ask for consideration
 - ask for decisions
 - ask for comparison
 - use vague phrases like "help with that" without a concrete object
 - be reusable for another customer
+
+Prefer concrete objects over abstract ideas.
+Prefer rewrite actions: resend / line up / simplify / send here / make clear in one message.
 
 --------------------------------
 FINAL CHECK
@@ -110,6 +119,12 @@ rewrite
 
 If NO:
 pass
+
+Mandatory final check:
+- What exact object from the conversation is used?
+- Is the message ultra-short-reply friendly?
+- Does the message reduce thinking instead of increasing it?
+- If not, rewrite again.
 
 --------------------------------
 OUTPUT

@@ -42,6 +42,82 @@ function parseJsonSafe(raw) {
   }
 }
 
+function normalizeText(value) {
+  return cleanupMessage(value).toLowerCase();
+}
+
+function isWeakCandidateMessage(message) {
+  const text = normalizeText(message);
+  if (!text) return false;
+
+  const weakPatterns = [
+    'are you still considering',
+    'would you like to confirm',
+    'just let me know',
+    'ready to chat again',
+    'are you okay with',
+    'know how our prices compare',
+    'confirm the price details',
+    'would you like to know how our prices compare',
+    'would you like to know',
+    'are you ready',
+    'still interested',
+    'any update',
+    'following up',
+    'checking in',
+    'just checking'
+  ];
+
+  return weakPatterns.some(pattern => text.includes(pattern));
+}
+
+function buildChineseGloss(message) {
+  const text = cleanupMessage(message);
+  const lower = text.toLowerCase();
+
+  if (!text) return '';
+
+  if (/price|pricing|quote|cost/.test(lower)) {
+    if (/resend|send/.test(lower)) return '我可以把之前的价格整理成一条清楚的信息发给你，要我发这里吗？';
+    if (/line|compare|difference/.test(lower)) return '我可以把价格差异整理成一条简单信息，要我发这里吗？';
+    return '我可以把价格信息简单整理一下，要我发这里吗？';
+  }
+
+  if (/catalog|pdf/.test(lower)) {
+    return '我可以把目录链接重新发一遍，要我发这里吗？';
+  }
+
+  if (/photo|photos|video|videos|picture|pictures/.test(lower)) {
+    return '我可以把图片/视频整理成一条信息发给你，要我发这里吗？';
+  }
+
+  if (/shipping|ship|delivery|zip|houston/.test(lower)) {
+    return '我可以把运输信息整理成一条清楚的信息，要我发这里吗？';
+  }
+
+  if (/warranty/.test(lower)) {
+    return '我可以把质保信息简单整理一下，要我发这里吗？';
+  }
+
+  if (/deposit|payment/.test(lower)) {
+    return '我可以把付款信息简单整理一下，要我发这里吗？';
+  }
+
+  if (/ar010|ar011|ar012|model|models|reformer|setup|option|shortlist/.test(lower)) {
+    return '我可以把相关选项整理成一条简单信息，要我发这里吗？';
+  }
+
+  if (/cheaper|supplier|compare|comparison|difference/.test(lower)) {
+    return '我可以把关键差异整理成一条简单信息，要我发这里吗？';
+  }
+
+  if (/send it|send that|want me to/.test(lower)) {
+    return '我可以整理成一条简单信息发给你，要我发这里吗？';
+  }
+
+  return '';
+}
+
 function normalizeInputItems(body) {
   const rawItems = Array.isArray(body) ? body : [body || {}];
 
@@ -106,6 +182,7 @@ function formatTelegramMessageItems(items) {
         aiParsed.whatsapp_text_cn,
         aiParsed.message_cn
       );
+      const needsEnforceRewrite = isWeakCandidateMessage(en);
 
       return {
         json: {
@@ -114,7 +191,9 @@ function formatTelegramMessageItems(items) {
           order_group: orderGroup,
           project_key: projectKey,
           _en: en,
-          _cn: cn
+          _cn: cn,
+          weak_candidate_message: needsEnforceRewrite ? en : '',
+          needs_enforce_rewrite: needsEnforceRewrite
         }
       };
     })
@@ -141,7 +220,7 @@ function formatTelegramMessageItems(items) {
       const projectKey = cleanupMessage(data.project_key);
       const orderGroup = cleanupMessage(data.order_group);
       const en = cleanupMessage(data._en);
-      const cn = cleanupMessage(data._cn);
+      const cn = cleanupMessage(data._cn) || buildChineseGloss(en);
 
       return {
         json: {
@@ -151,6 +230,8 @@ function formatTelegramMessageItems(items) {
           ai_parsed: data.ai_parsed || {},
           _en: en,
           _cn: cn,
+          weak_candidate_message: data.weak_candidate_message || '',
+          needs_enforce_rewrite: data.needs_enforce_rewrite === true,
           telegram_messages: [
             `【${projectKey}】
 

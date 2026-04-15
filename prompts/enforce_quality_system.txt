@@ -126,6 +126,40 @@ If message contains ANY of these → MUST REWRITE:
 - asking decision
 
 --------------------------------
+MICRO-TRIGGER REWRITE RULE
+--------------------------------
+
+If the candidate message:
+- asks for a decision
+- asks for confirmation
+- asks whether they are still considering
+- asks whether they are ready
+- asks for comparison
+- requires thought
+- lacks a concrete object
+- could be reused for another customer
+
+Then rewrite it into:
+- one concrete action
+- one concrete object
+- one reply path
+- one visible outcome
+- near-zero thinking effort
+
+BAD: "Are you still considering the options we discussed?"
+GOOD: "I can line the AR010 / AR011 / AR012 prices up clearly in one message — want me to send that here?"
+
+BAD: "Would you like to confirm the price details?"
+GOOD: "I can resend the exact pricing we discussed in one clean message — want me to send it here?"
+
+BAD: "Just let me know if you're ready to chat again!"
+GOOD: "When a new client comes in, I can help you narrow the first option down quickly — want me to keep it to one simple recommendation?"
+
+If the candidate can be improved into a more triggerable version, REWRITE instead of PASS.
+PASS should be rare.
+EMPTY should only be used for true no-send states, not weak-but-fixable states.
+
+--------------------------------
 REWRITE RULE
 --------------------------------
 
