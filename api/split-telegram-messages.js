@@ -31,11 +31,9 @@ function splitTelegramMessages(items) {
       if (!text) continue;
 
       out.push({
-        json: {
-          project_key: projectKey,
-          order_group: orderGroup,
-          text
-        }
+        project_key: projectKey,
+        order_group: orderGroup,
+        text
       });
     }
   }

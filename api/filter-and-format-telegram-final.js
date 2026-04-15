@@ -457,21 +457,19 @@ function filterAndFormatTelegramFinalItems(items) {
       : [];
 
     out.push({
-      json: {
-        ...current,
-        ai_parsed: aiParsed,
-        enforce_parsed: enforceParsed,
-        project_key: projectKey,
-        customer_name: customerName,
-        order_group: has(current.order_group) ? String(current.order_group).trim() : '',
-        analysis_text: analysisText,
-        whatsapp_text: finalMessage,
-        whatsapp_message: finalMessage,
-        whatsapp_message_cn: finalMessageCn,
-        telegram_messages: telegramMessages,
-        enforce_status: enforceStatus,
-        auto_send_pass: !shouldBlock
-      }
+      ...current,
+      ai_parsed: aiParsed,
+      enforce_parsed: enforceParsed,
+      project_key: projectKey,
+      customer_name: customerName,
+      order_group: has(current.order_group) ? String(current.order_group).trim() : '',
+      analysis_text: analysisText,
+      whatsapp_text: finalMessage,
+      whatsapp_message: finalMessage,
+      whatsapp_message_cn: finalMessageCn,
+      telegram_messages: telegramMessages,
+      enforce_status: enforceStatus,
+      auto_send_pass: !shouldBlock
     });
   }
 
