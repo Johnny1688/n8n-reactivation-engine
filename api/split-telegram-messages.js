@@ -30,8 +30,7 @@ function splitTelegramMessages(items) {
     const data = item?.json || {};
     const projectKey = toSafeString(data.project_key);
     const orderGroup = toSafeString(data.order_group);
-    const whatsapp_message = toSafeString(data.whatsapp_message);
-    const messages = whatsapp_message ? [whatsapp_message] : [];
+    const messages = Array.isArray(data.telegram_messages) ? data.telegram_messages : [];
 
     for (const message of messages) {
       const text = toSafeString(message);
