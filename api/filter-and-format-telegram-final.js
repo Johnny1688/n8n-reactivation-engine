@@ -463,7 +463,7 @@ function filterAndFormatTelegramFinalItems(items) {
         enforce_parsed: enforceParsed,
         project_key: projectKey,
         customer_name: customerName,
-        order_group: pick(current.order_group, projectKey),
+        order_group: has(current.order_group) ? String(current.order_group).trim() : '',
         analysis_text: analysisText,
         whatsapp_text: finalMessage,
         whatsapp_message: finalMessage,
