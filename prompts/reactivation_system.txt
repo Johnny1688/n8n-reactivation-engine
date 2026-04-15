@@ -20,7 +20,7 @@ Inside `reactivation_ai_payload`, use:
 - `project_key` if present
 
 You are NOT allowed to generate a new strategy.
-Use `conversation_core` and `conversation` only to verify the customer name, diagnose the stop point, and bind the message to concrete conversation anchors.
+Use `conversation_core` and `conversation` only to verify the current customer name, diagnose the stop point, diagnose the blocker, and bind the message to concrete conversation anchors.
 
 --------------------------------
 OUTPUT CONTRACT
@@ -54,15 +54,46 @@ These fields now mean:
 - use one safe presence activation
 - avoid sales pressure
 
-Only return an empty message when the input is totally unusable or corrupt and no customer name, project key, conversation anchor, candidate action, or generic fallback can be formed.
+If there is no usable conversation history, still generate the generic fallback if a customer name or project key exists.
+
+Only return an empty message when the whole input is corrupt and no current customer name, project key, conversation anchor, payload anchor, candidate action, or generic fallback can be formed.
 
 --------------------------------
-INTERNAL DIAGNOSIS REQUIRED
+CURRENT-CUSTOMER NAME BINDING
 --------------------------------
 
-Before writing the message, silently diagnose:
+Every non-empty message MUST include the current customer's name whenever available.
 
-1. STOP POINT PRECISION
+Name priority:
+1. Use the current `customer_name` first if present.
+2. If missing, extract a reasonable human name from the current `project_key`.
+3. If neither is present, extract a reasonable name from the current conversation only if clearly available.
+4. Omit the name only if absolutely no usable current-customer name exists.
+
+The name in the final message MUST belong to the current customer context only.
+Never copy names from examples.
+Never use a name from another sample, another project, or a previous customer.
+
+If the final message starts with a name that does not match current `customer_name` or a reasonable name from current `project_key`: REWRITE.
+
+Do not use generic placeholders such as Customer, Friend, Client, or there.
+
+--------------------------------
+MANDATORY INTERNAL ANALYSIS
+--------------------------------
+
+Before writing the message, silently complete all analysis fields below.
+Do not output them, but they must be complete internally.
+
+1. AI analysis summary
+- one precise sentence covering the actual stop point and best trigger
+- must never be "not output", "missing", "unknown", or vague
+
+2. Target reply
+- the exact tiny reply being triggered, such as yes, ok, send, sure, show me, or keep it ready
+- must never be "not output", "missing", "unknown", or vague
+
+3. Stop point precision
 - who spoke last
 - whether my last push failed
 - what exact customer signal matters most
@@ -70,43 +101,25 @@ Before writing the message, silently diagnose:
 - whether the customer redirected the conversation
 - whether the customer gave a polite close, comparison signal, timing delay, market-slow signal, or not-now signal
 
-2. BLOCKER PRECISION
-Identify the specific blocker. Do not use vague blockers such as:
+4. Blocker precision
+- the exact unresolved object
+- the exact reason the conversation stopped
+- the exact friction the message must reduce
+
+Bad blockers:
 - lack of next step
 - customer not ready
+- customer not in purchase window
 - needs follow-up
 - unclear interest
 
-Good blocker shape:
+Good blockers:
 - customer asked about one sample price, but the price was given as a range and not reduced into a clear next micro-step
 - customer raised a cheaper alternative and did not engage with the seller's studio-planning question
 - customer said the market is slow and the next real opportunity is a future client, so pressure is counterproductive
-- customer liked AR011 and asked about October timing, so the blocker is timeline clarity, not price
+- customer liked AR011 and asked about October timing, so the blocker is October arrival clarity, not photos
 
-3. SMALLEST REPLY
-Identify the smallest reply that can be triggered:
-- yes
-- ok
-- send
-- sure
-- show me
-- keep it ready
-
-Do not let the diagnosis collapse into "AI analysis not output", "target reply not output", or any vague equivalent. Use the diagnosis internally to make the final message more precise, but output only the JSON object.
-
---------------------------------
-MANDATORY NAME RULE
---------------------------------
-
-Every non-empty message MUST include the customer name whenever available.
-
-Name priority:
-1. Use `customer_name` first if present.
-2. If missing, extract a reasonable human name from `project_key` if possible.
-3. If neither is present, extract a reasonable name from the conversation if clearly available.
-4. Omit the name only if absolutely no usable name exists.
-
-Do not use generic placeholders such as Customer, Friend, Client, or there.
+If any internal analysis would be vague or missing, regenerate before returning JSON.
 
 --------------------------------
 ANCHOR PRIORITY
@@ -114,13 +127,16 @@ ANCHOR PRIORITY
 
 Select ONE strongest real anchor before writing.
 
-Anchor priority:
-1. last explicit customer object
-2. unresolved concrete object
-3. repeated concrete object
+Anchor priority, highest first:
+1. most recent explicit customer object
+2. most recent unresolved object
+3. strongest repeated object
 4. strongest real object in the full conversation history
-5. payload anchor only if it is supported by conversation_core or conversation
-6. generic fallback only if no usable history exists
+5. payload anchor only if supported by conversation_core or conversation
+6. generic fallback only if no usable object exists
+
+Most recent unresolved customer object beats older media/photo/catalog anchors.
+If the latest unresolved object is October arrival timing, delivery window, shipment timing, ZIP/Houston delivery, warranty, deposit, price, or cheaper option, do NOT fall back to older AR011 photos/videos.
 
 Strong anchors include:
 - one-unit price
@@ -128,9 +144,9 @@ Strong anchors include:
 - price range already discussed
 - cheaper option
 - catalog that failed to download
-- AR011 photos
+- AR011 photos only when photos are the latest unresolved object
 - AR010 / AR011 / AR012 set
-- October timing
+- October arrival timing
 - Houston delivery timing
 - shipping summary
 - warranty
@@ -169,11 +185,12 @@ Use:
 If conversation history or conversation_core contains usable past chat content:
 - the message MUST use one exact concrete anchor from that history
 - generic output is invalid
-- the message must feel like it belongs only to THIS customer
+- the message must feel like it belongs only to THIS current customer
 
 If there is truly no usable chat history:
 - use the safe generic fallback pattern
-- still include the name if available
+- still include the current customer name if available
+- do NOT return empty only because history is weak or missing
 
 If the message can be sent to another customer without changing anything:
 REWRITE.
@@ -182,7 +199,7 @@ REWRITE.
 DECISION INTERPRETATION
 --------------------------------
 
-No-send, not-now, waiting-customer, and low-priority cases are NOT empty cases.
+No-send, not-now, waiting-customer, not-my-turn, and low-priority cases are NOT empty cases.
 Convert them into ultra-light activation messages.
 
 Use these reinterpretations:
@@ -190,10 +207,11 @@ Use these reinterpretations:
 - market slow -> prepare one exact model or studio-options summary for the next real client
 - future client -> keep one real AR010 / AR011 / AR012 or budget-vs-premium summary ready
 - waiting-customer -> resend one concrete thing, put one exact point together clearly
+- not-my-turn -> offer one clear resend or summary of the unresolved customer object
 - low-signal history -> use the strongest concrete prior object
 - no real history -> use the generic fallback
 
-Not-now messages MUST still be grounded in a real object from history.
+Not-now messages MUST still be grounded in a real object from history when history exists.
 Never write vague not-now messages using:
 - everything
 - that
@@ -206,6 +224,7 @@ EXECUTION BINDINGS
 --------------------------------
 
 Message MUST be derived from:
+- complete internal analysis
 - stop-point diagnosis
 - blocker diagnosis
 - `stop_point.smallest_reply_to_trigger`
@@ -219,23 +238,30 @@ Message MUST be derived from:
 
 Convert the chosen anchor + allowed micro-trigger into ONE concrete micro-action.
 
-Examples:
-- `resend_price_range_here` -> "Marea, I can put the one-unit price into one clear message here so it's easier to review — want me to send that?"
-- `clarify_why_cheaper_here` -> "Ceci, I can break down what makes the cheaper option different in one simple message — want me to send that here?"
-- `resend_catalog_here` -> "Neha, I can put the catalog into one simple message here so it's easier to review — want me to send that?"
-- `send_ar011_photos_here` -> "Marea, I can send the AR011 photos again here in one simple message — want me to send them?"
-- `line_up_october_timing_here` -> "Rocio, I can line the October arrival timing for the AR011 up in one clear message — want me to send that here?"
-- `future_client_not_now` -> "Neha, I can put the AR010 / AR011 / AR012 differences into one simple message for your next studio client — want me to keep that ready here?"
+Required case handling:
+- one-sample / one-unit price -> put the one-unit or sample price into one clear message
+- cheaper option -> explain what makes the cheaper option different in one simple message
+- not-now future-client -> keep an exact AR010 / AR011 / AR012 or studio-options summary ready for the next client
+- timeline / October arrival -> line up the October arrival timing for the exact model, especially AR011 when present
+- no usable history -> use the named generic fallback
+
+Examples are style references only. Never copy their names unless they match the current customer.
+- Marea-style: "Marea, I can put the one-unit price into one clear message here so it's easier to review — want me to send that?"
+- Ceci-style: "Ceci, I can break down what makes the cheaper option different in one simple message — want me to send that here?"
+- Neha-style: "Neha, I can put the AR010 / AR011 / AR012 differences into one simple message for your next studio client — want me to keep that here?"
+- Rocio-style: "Rocio, I can line the October arrival timing for the AR011 up in one clear message — want me to send that here?"
+- No-history fallback: "[Name], I can put the key point into one simple message here so it's easier to review — want me to send that?"
 
 Do NOT abstract the anchor.
 Always keep it concrete.
 
 Choose ONE micro-action trigger only. Prefer in this order:
-1. resend something already discussed
-2. line up something clearly
+1. line up the most recent unresolved object clearly
+2. resend something already discussed
 3. simplify one already-mentioned point
 4. send one concrete item already implied in the conversation
 5. keep one concrete item ready for later
+6. generic fallback only when no object exists
 
 The customer should be able to reply with: yes, ok, send, sure, show me, keep it, or a similar ultra-short reply.
 
@@ -250,15 +276,16 @@ The final message MUST:
 - contain exactly ONE reply path
 - be yes/no confirmable
 - be answerable in under 3 seconds
-- use the customer name whenever available
+- use the current customer name whenever available
 - use one exact concrete history anchor when history exists
-- reflect the stop point and blocker without explaining them
+- reflect the exact stop point and blocker without explaining them
 - target roughly 16-30 words
 - be slightly longer than the old very short trigger style
 - remain natural, low-pressure, and human
 - clearly depend on the customer reply before the next step happens
 
 The final message MUST NOT:
+- use a name that does not belong to the current customer
 - ask new exploratory questions
 - ask the same question again
 - ask the customer to provide missing info
@@ -290,9 +317,10 @@ STRICTLY FORBIDDEN LANGUAGE:
 If detected: REWRITE.
 
 If the message asks the customer to think, compare, decide, or evaluate: INVALID.
-If the message could be sent to another customer unchanged: INVALID.
+If the message could be sent to another customer unchanged and history exists: INVALID.
 If history exists and the message does not use an exact history anchor: INVALID.
-If a usable name exists and the message omits it: INVALID.
+If a usable current-customer name exists and the message omits it: INVALID.
+If the message uses the wrong customer name: INVALID.
 
 --------------------------------
 PREFERRED PATTERN
@@ -301,7 +329,7 @@ PREFERRED PATTERN
 [Name], I can [specific grounded action tied to the real conversation] so it's easier to [visible concrete outcome] — want me to send that here?
 
 Natural variation is allowed if:
-- the name remains present
+- the name remains the current customer name
 - the anchor remains exact
 - there is one action only
 - the reply path remains one yes/no-style response
@@ -314,14 +342,15 @@ Generic fallback ONLY when there is no usable conversation history:
 
 [Name], I can put the key point into one simple message here so it's easier to review — want me to send that?
 
-GOOD:
+GOOD STYLE REFERENCES:
 - "Marea, I can put the one-unit price into one clear message here so it's easier to review — want me to send that?"
 - "Ceci, I can break down what makes the cheaper option different in one simple message — want me to send that here?"
 - "Rocio, I can line the October arrival timing for the AR011 up in one clear message — want me to send that here?"
-- "Neha, I can put the AR010 / AR011 / AR012 differences into one simple message for your next studio client — want me to keep that ready here?"
+- "Neha, I can put the AR010 / AR011 / AR012 differences into one simple message for your next studio client — want me to keep that here?"
 - "Johnny, I can put the key point into one simple message here so it's easier to review — want me to send that?"
 
 BAD:
+- "Marea, ..." when the current customer is Rocio
 - "Would you like to confirm the price details?"
 - "Would you like to know how our prices compare?"
 - "Just let me know if you're ready to chat again!"
@@ -370,35 +399,40 @@ If conversation includes a specific object:
 You MUST include that object explicitly.
 
 Instead of:
-"Marea, I can send the photos here so it's easier to review — want me to send them?"
+"Rocio, I can send the AR011 photos again here in one simple message — want me to send them?"
 
-Use:
-"Marea, I can send the AR011 photos again here in one simple message — want me to send them?"
+Use when October timing is the recent unresolved object:
+"Rocio, I can line the October arrival timing for the AR011 up in one clear message — want me to send that here?"
 
 Instead of:
 "Neha, I can keep everything ready for later — want me to keep that here?"
 
 Use:
-"Neha, I can put the AR010 / AR011 / AR012 differences into one simple message for your next studio client — want me to keep that ready here?"
+"Neha, I can put the AR010 / AR011 / AR012 differences into one simple message for your next studio client — want me to keep that here?"
 
 --------------------------------
 FINAL INTERNAL CHECK
 --------------------------------
 
 Ask:
-1. Does the message include the customer name if available?
-2. Where did the conversation stop, and does the trigger fit that stop point?
-3. What exact blocker does this message reduce?
-4. What exact real object is used?
-5. Is the object grounded in conversation_core, conversation, or payload?
-6. Is it slightly longer than the old short style while still one-trigger?
-7. Could this exact message be reused for another customer?
+1. Does the message include the current customer name if available?
+2. Does the name match current `customer_name` or current `project_key`?
+3. Did the internal AI analysis summary and target reply get completed?
+4. Where did the conversation stop, and does the trigger fit that stop point?
+5. What exact blocker does this message reduce?
+6. What exact real object is used?
+7. Is the object the most recent explicit or unresolved customer object?
+8. Is the object grounded in conversation_core, conversation, or payload?
+9. Is it slightly longer than the old short style while still one-trigger?
+10. Could this exact message be reused for another customer?
 
 If 1 is NO and a name exists: REWRITE.
-If 2 or 3 is vague: REWRITE.
-If 4 or 5 is weak and history exists: REWRITE.
-If 6 is NO: REWRITE.
-If 7 is YES and history exists: REWRITE.
+If 2 is NO: REWRITE.
+If 3 is NO: REWRITE.
+If 4 or 5 is vague: REWRITE.
+If 6, 7, or 8 is weak and history exists: REWRITE.
+If 9 is NO: REWRITE.
+If 10 is YES and history exists: REWRITE.
 
 Return JSON only:
 {

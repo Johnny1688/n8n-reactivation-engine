@@ -100,21 +100,43 @@ REACTIVATION AI PAYLOAD
 TASK
 --------------------------------
 
-1) Validate the candidate message against the real conversation.
-2) Diagnose whether it fits the exact stop point and blocker.
-3) If valid, pass it.
-4) If invalid but fixable, rewrite it into a valid activation message.
-5) If there is no usable conversation history, use the generic fallback.
-6) Return empty only when the input is totally unusable or corrupt.
+1) Validate the candidate message against the current customer context.
+2) Validate the candidate message against the real conversation.
+3) Diagnose whether it fits the exact stop point and blocker.
+4) If valid, pass it.
+5) If invalid but fixable, rewrite it into a valid activation message.
+6) If there is no usable conversation history, use the generic fallback.
+7) Return empty only when the entire input is unusable or corrupt.
 
 The final message MUST be grounded in the real conversation whenever history exists.
 The final message MUST NOT be generic when any real anchor exists.
+
+--------------------------------
+CURRENT-CUSTOMER NAME CHECK
+--------------------------------
+
+The final message must use the current customer name only.
+
+Name priority:
+1. `customer_name`
+2. a reasonable name extracted from `project_key`
+3. a clearly available name from the current conversation
+
+If candidate uses a name that does not match current `customer_name` or current `project_key`, rewrite it.
+
+Examples:
+- Current customer Rocio + candidate starts "Marea," -> rewrite to Rocio.
+- Current customer Marea + candidate starts "Rocio," -> rewrite to Marea.
+
+Never preserve names copied from style examples.
 
 --------------------------------
 STOP POINT AND BLOCKER CHECK
 --------------------------------
 
 Before rewriting, identify silently:
+- complete AI analysis summary
+- complete target reply
 - who spoke last
 - whether my last push failed
 - what exact customer signal matters most
@@ -128,12 +150,33 @@ The final message must reduce the exact blocker.
 Bad blocker:
 - lack of next step
 - customer not ready
+- customer not in purchase window
 
 Good blocker examples:
 - customer asked about one sample price, but the price was given as a range and not reduced into a clear next micro-step
 - customer raised a cheaper alternative and did not engage with the seller's studio-planning question
 - customer said the market is slow and the next real opportunity is a future client, so pressure is counterproductive
-- customer liked AR011 and asked about October timing, so the blocker is timeline clarity, not price
+- customer liked AR011 and asked about October timing, so the blocker is October arrival clarity, not photos
+
+--------------------------------
+ANCHOR PRIORITY CHECK
+--------------------------------
+
+Use this priority:
+1. most recent explicit customer object
+2. most recent unresolved object
+3. strongest repeated object
+4. strongest real object in the full conversation
+5. payload anchor only if supported by current history
+6. generic fallback only if no usable object exists
+
+If the candidate uses a weaker older anchor while a stronger recent unresolved anchor exists, rewrite it.
+
+Examples:
+- Rocio has October arrival timing for AR011 -> use October arrival timing, not AR011 photos/video.
+- Customer asked about one sample price -> use one-sample or one-unit price, not broad pricing details.
+- Customer raised cheaper option -> use cheaper-option difference, not catalog.
+- Not-now future-client context -> use AR010 / AR011 / AR012 or studio-options summary, not "everything".
 
 --------------------------------
 EMPTY OUTPUT RULE
@@ -153,9 +196,10 @@ Use these conversions:
 - future client -> keep one real AR010 / AR011 / AR012 or budget-vs-premium summary ready
 - not-my-turn -> resend one exact object, put one exact point together clearly
 - low-priority -> use the strongest concrete prior object with lower pressure
+- weak history -> use the strongest available payload or project anchor
 - no real history -> use the generic fallback
 
-Return EMPTY message ONLY if the input is totally unusable or corrupt and no candidate, name, project key, history, anchor, payload, or generic fallback can be used.
+Return EMPTY message ONLY if the entire input is unusable or corrupt and no candidate, name, project key, history, anchor, payload, or generic fallback can be used.
 
 If EMPTY is truly unavoidable, return:
 {
@@ -170,23 +214,26 @@ If candidate message exists in `ai_parsed.whatsapp_message` or `_en`, evaluate t
 Do NOT ignore the parsed candidate message.
 
 If candidate message exists and is not empty:
+- If it uses the wrong customer name -> REWRITE.
+- If it is missing the current customer name while a name exists -> REWRITE.
 - If it is generic but history exists -> REWRITE with a real anchor.
 - If it is generic and no usable history exists -> USE GENERIC FALLBACK.
-- If it is weak but anchored -> REWRITE.
-- If it lacks the customer name while a name exists -> REWRITE.
 - If it uses a vague object while history exists -> REWRITE.
+- If it uses a weaker older anchor while a stronger recent anchor exists -> REWRITE.
 - If it weakly reflects the blocker -> REWRITE.
 - If it is too short and abrupt -> REWRITE into the 16-30 word target.
 - If it has one action and one reply path -> PASS or light rewrite.
-- Do NOT use EMPTY unless the input is totally unusable or corrupt.
+- Do NOT use EMPTY unless the entire input is unusable or corrupt.
 
 These should remain sendable, not empty:
+- no-history fallback with a usable name
+- weak-history fallback with a usable name or project key
 - price range resend
 - one-unit price summary
 - sample price summary
 - cheaper option clarification
-- catalog resend
-- AR011 photos resend
+- catalog resend when catalog is the unresolved object
+- AR011 photos resend when photos are the unresolved object
 - AR010 / AR011 / AR012 summary
 - shipping summary resend
 - Houston / ZIP / delivery timing
@@ -203,14 +250,15 @@ MANDATORY REQUIREMENTS
 --------------------------------
 
 The final message MUST:
-- include the customer name whenever available
+- include the current customer name whenever available
 - contain ONE action only
 - contain ONE direction only
 - contain ONE reply path only
 - be answerable instantly
 - require minimal thinking
 - include at least ONE exact concrete conversation anchor when history exists
-- reference one exact object already present in the conversation when history exists
+- reference one exact object already present in the current conversation when history exists
+- use the strongest recent anchor when one exists
 - fit the exact stop point and blocker
 - feel like it could only be sent to this customer
 - make the next tiny action obvious
@@ -218,6 +266,7 @@ The final message MUST:
 - stay low-pressure
 
 The final message MUST NOT:
+- use the wrong customer name
 - use just checking / let me know / any update / still interested
 - ask broad questions
 - ask for readiness
@@ -245,9 +294,11 @@ Only use the generic fallback when there is truly no usable conversation history
 Generic fallback:
 "[Name], I can put the key point into one simple message here so it's easier to review — want me to send that?"
 
-If a name exists, include it.
+If a current customer name exists, include it.
 If no name exists but project key contains a reasonable name, use that name.
 If no name exists at all, omit the name.
+
+Do not empty no-history cases when this fallback can be formed.
 
 --------------------------------
 REWRITE PATTERN
@@ -259,11 +310,11 @@ Preferred grounded rewrite:
 Preferred low-pressure not-now rewrite:
 "[Name], I can keep the [specific grounded object] ready in one simple message for [future-client context] — want me to keep that here?"
 
-Examples:
+Examples are style references only. Never copy their names unless they match the current customer.
 - "Marea, I can put the one-unit price into one clear message here so it's easier to review — want me to send that?"
 - "Ceci, I can break down what makes the cheaper option different in one simple message — want me to send that here?"
 - "Rocio, I can line the October arrival timing for the AR011 up in one clear message — want me to send that here?"
-- "Neha, I can put the AR010 / AR011 / AR012 differences into one simple message for your next studio client — want me to keep that ready here?"
+- "Neha, I can put the AR010 / AR011 / AR012 differences into one simple message for your next studio client — want me to keep that here?"
 - "Johnny, I can put the key point into one simple message here so it's easier to review — want me to send that?"
 
 --------------------------------
@@ -276,9 +327,13 @@ Its job is:
 - pass strong trigger messages
 - rewrite weak but fixable trigger messages
 - use generic fallback only when there is no usable history
-- empty only totally unusable or corrupt input
+- empty only entirely unusable or corrupt input
 
 DO NOT convert message to EMPTY because of:
+- no candidate message
+- weak candidate
+- weak history
+- missing history
 - caution
 - low confidence
 - hard_no_send
@@ -300,11 +355,14 @@ If NO:
 pass.
 
 Mandatory final validation:
-- Is the customer name present if available?
-- Is the message grounded in exact history if history exists?
+- Is the current customer name present if available?
+- Does the name match current customer_name or project_key?
+- Is the message grounded in exact current history if history exists?
+- Does it use the strongest recent anchor when one exists?
 - Does it avoid vague objects like everything, that, it, details, and information?
 - Does it fit the exact stop point?
 - Does it reduce the exact blocker?
+- Is the blocker specific rather than generic?
 - Is it longer than the current short style but still one trigger only?
 - Does it contain one action only?
 - Does it contain one direction only?
@@ -312,7 +370,7 @@ Mandatory final validation:
 - Is it answerable in under 3 seconds?
 - Is it not reusable when history exists?
 - Is generic fallback used only when there is no usable history?
-- Is empty used only for totally unusable or corrupt input?
+- Is empty used only for entirely unusable or corrupt input?
 
 If any answer fails, rewrite again.
 
