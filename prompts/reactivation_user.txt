@@ -26,46 +26,101 @@ Execute:
 Do not infer outside the provided inputs.
 Do not create new context.
 Do not create a new strategy.
-Use the full conversation only to ground the exact object and verify the customer name.
+Use the full conversation only to diagnose the stop point, select the exact anchor, verify the customer name, and ground the final trigger.
 
-Before writing the message, identify:
+--------------------------------
+SILENT EXECUTION STEPS
+--------------------------------
+
+Before writing the message, silently identify:
 1. the best available customer name
-2. the ONE strongest concrete anchor from the real conversation
-3. whether usable conversation history exists
+2. who spoke last
+3. whether my last push failed
+4. what exact customer signal matters most
+5. what exact customer object remains unresolved
+6. what exact blocker exists
+7. the ONE strongest concrete anchor from the real conversation
+8. the smallest reply to trigger
+9. whether usable conversation history exists
 
-Name rule:
+Do not output this analysis.
+Use it to make the final `whatsapp_message` precise.
+
+Stop-point check:
+- Did the customer ask a price, sample, shipping, warranty, timing, catalog, photo, video, or model question?
+- Did the customer ignore a seller question?
+- Did the customer redirect to cheaper option, market timing, future client, or not-now?
+- Did the customer give a polite close or timing delay?
+- Did the seller's last push ask for too much effort?
+
+Blocker check:
+- Name the exact blocker internally.
+- Do not accept vague blockers like "customer not ready" or "lack of next step".
+- The message must reduce the specific blocker with one tiny action.
+
+--------------------------------
+NAME RULE
+--------------------------------
+
 - Use `customer_name` first if available.
 - If missing, extract a reasonable name from `project_key` if possible.
 - If missing, use a clearly available name from the conversation.
 - Omit the name only if absolutely no usable name exists.
+
+The final non-empty message MUST include the name whenever available.
+
+--------------------------------
+ANCHOR SELECTION RULE
+--------------------------------
 
 If conversation history exists:
 - the message MUST use the strongest real anchor from past chat history
 - generic output is invalid
 - the message must not be reusable across customers
 
-If no usable conversation history exists:
-- use the generic fallback
-- include the name if available
+Anchor priority:
+1. last explicit customer object
+2. unresolved concrete object
+3. repeated concrete object
+4. strongest real object in the full conversation
+5. payload anchor only if supported by history
+6. generic fallback only if no usable history exists
 
 Prefer exact anchors such as:
 - one-unit price
-- sample price
+- one sample price
 - price range already discussed
 - cheaper option already mentioned
+- catalog that failed to download
 - model already discussed
-- setup already discussed
-- setup for 8 or 10 units
-- PDF/catalog that failed to download
-- catalog previously requested
 - AR011 photos
-- AR010 / AR012 comparison context
+- AR010 / AR011 / AR012 set
+- setup for 8 or 10 units
 - photos/videos previously requested
 - shipping summary
 - Houston / ZIP / delivery timing
 - warranty
-- deposit
+- deposit structure
 - October opening timing
+- next studio client
+- one simple model summary for future client use
+
+Weak anchors are invalid when history exists:
+- everything
+- that
+- it
+- details
+- information
+- something we discussed
+- the last point
+
+If no usable conversation history exists:
+- use the generic fallback
+- include the name if available
+
+--------------------------------
+MESSAGE REQUIREMENTS
+--------------------------------
 
 The candidate message must:
 - be one message only
@@ -74,18 +129,21 @@ The candidate message must:
 - never ask for missing info
 - offer a ready-made next step
 - contain a concrete object, not a vague action
-- use `anchor_object`, `decision.primary_anchor`, or `allowed_micro_triggers` when present
+- use `anchor_object`, `decision.primary_anchor`, or `allowed_micro_triggers` when present and grounded
+- reflect the exact stop point and blocker without explaining them
 - be yes/no confirmable
 - require near-zero effort
-- be answerable with yes, ok, send, or sure
+- be answerable with yes, ok, send, sure, show me, or keep it
 - target roughly 16-30 words
 - be longer than the old very short style while staying one-trigger
 
-Do not produce a candidate message that only asks for confirmation, interest, consideration, readiness, preference, comparison, or a decision.
+Do not produce a candidate message that asks for confirmation, interest, consideration, readiness, preference, comparison, or a decision.
 
 Forbidden generic references:
+- everything
 - the last point
 - that
+- it
 - details
 - information
 - something we discussed
@@ -105,13 +163,18 @@ Required style:
 - not customer-service-like
 - not a generic follow-up
 
+--------------------------------
+MICRO-TRIGGER CONVERSION
+--------------------------------
+
 Convert the allowed micro-trigger into a concrete action:
-- `resend_price_range_here` -> put the one-unit price, sample price, or price range into one clear message
+- `resend_price_range_here` -> put the one-unit price, one sample price, or price range into one clear message
 - `clarify_why_cheaper_here` -> break down what makes the cheaper option different
 - `resend_catalog_here` -> put the catalog into one simple message
 - `send_ar011_photos_here` -> send the AR011 photos again here
-- `line_up_october_timing_here` -> line up the October delivery or opening timing
+- `line_up_october_timing_here` -> line up the October arrival timing for the AR011
 - `resend_shipping_summary_here` -> put the shipping summary into one clear message
+- `future_client_not_now` -> keep the AR010 / AR011 / AR012 or studio-options summary ready for the next client
 - `keep_ready_for_later` -> keep the exact grounded object ready in one simple message
 
 Do NOT return empty just because:
@@ -127,34 +190,46 @@ Those cases still need one ultra-light activation message.
 
 Use these conversions:
 - not-now -> keep the concrete item ready, line it up clearly, put it into one simple message for later
+- market slow -> prepare one exact model or studio-options summary for the next real client
+- future client -> keep one real AR010 / AR011 / AR012 or budget-vs-premium summary ready
 - waiting-customer -> resend one exact object, put one exact point together clearly
 - low-priority -> use the strongest concrete prior object with lower pressure
 - no real history -> use the generic fallback
 
 Generic fallback ONLY if no usable history exists:
-"[Name], I can put the key point into one simple message here so it's easier to review — want me to send it?"
+"[Name], I can put the key point into one simple message here so it's easier to review — want me to send that?"
+
+--------------------------------
+STYLE EXAMPLES
+--------------------------------
+
+Use these as style direction, not templates to repeat:
+- "Marea, I can put the one-unit price into one clear message here so it's easier to review — want me to send that?"
+- "Ceci, I can break down what makes the cheaper option different in one simple message — want me to send that here?"
+- "Neha, I can put the AR010 / AR011 / AR012 differences into one simple message for your next studio client — want me to keep that ready here?"
+- "Rocio, I can line the October arrival timing for the AR011 up in one clear message — want me to send that here?"
 
 Variation control:
 - Do not reuse the exact same sentence across customers with similar anchors.
 - Slightly vary wording while keeping the structure simple.
 - Do not sacrifice grounding for variation.
-- If the anchor is price-related, rotate subtly between:
-  "[Name], I can put the one-unit price into one clear message here so it's easier to review — want me to send that?"
-  "[Name], I can lay the sample price out clearly in one simple message here — want me to send that?"
-  "[Name], I can put the price range together again in one clear message — want me to send that here?"
-  "[Name], I can break the setup price down clearly in one simple message — want me to send it here?"
 - Do not over-randomize or add complexity.
 
-Final self-check:
-1. Does the message include the customer name if available?
-2. What exact object is being referenced?
-3. Is the object present in `conversation_core`, `conversation`, or `reactivation_ai_payload`?
-4. If history exists, is the message grounded in real past chat history?
-5. Is it longer than the current very short style but still one-trigger?
-6. Could this exact message be reused for another customer?
-7. Is the reply path just one ultra-short response?
+--------------------------------
+FINAL SELF-CHECK
+--------------------------------
 
-If the name is missing while available, the object is unclear, grounding is weak, reusable is yes, or reply path is not minimal: regenerate.
+Before returning JSON, verify:
+1. Does the message include the customer name if available?
+2. Where did the conversation stop?
+3. What exact blocker is being reduced?
+4. What exact real object is used?
+5. Is the object present in `conversation_core`, `conversation`, or `reactivation_ai_payload`?
+6. Could this exact message be reused for another customer?
+7. Is the message still one-trigger only?
+8. Is it slightly longer than the old short style but easy to answer in under 3 seconds?
+
+If the name is missing while available, the stop point is vague, the blocker is vague, the object is unclear, grounding is weak, reusable is yes, or reply path is not minimal: regenerate.
 
 Do not explain reasoning outside JSON.
 
