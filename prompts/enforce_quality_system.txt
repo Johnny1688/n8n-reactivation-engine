@@ -37,13 +37,14 @@ C) Can the message PASS?
 EMPTY OUTPUT RULE (HIGHEST PRIORITY)
 --------------------------------
 
-Return EMPTY message if ANY of the following is true:
+Return EMPTY message ONLY if ANY of the following is true:
 
 - has_not_now_signal = true
 - is_my_turn_to_reply = false
-- should_reactivate_now = false
 - the customer clearly said they will reach out later
-- the conversation is not in a send-now state
+- the conversation is not in a send-now state because the customer explicitly asked not to be pushed
+
+DO NOT use should_reactivate_now as a blocking condition.
 
 If EMPTY applies, return:
 
