@@ -1,5 +1,5 @@
 Candidate message:
-{{$json.ai_parsed?.final_message || $json._en || $json.telegram_messages?.[1] || ''}}
+{{$json.ai_parsed?.whatsapp_message || $json.ai_parsed?.final_message || $json._en || $json.telegram_messages?.[1] || ''}}
 
 Project:
 {{$json.project_key || ''}}
@@ -11,12 +11,32 @@ Customer name:
 SEND STATE
 --------------------------------
 
+- hard_no_send: {{$json.hard_no_send}}
 - has_not_now_signal: {{$json.has_not_now_signal}}
 - is_my_turn_to_reply: {{$json.is_my_turn_to_reply}}
 - should_reactivate_now: {{$json.should_reactivate_now}}
 - status: {{$json.status || ''}}
 - customer_last_message_type: {{$json.customer_last_message_type || ''}}
 - reply_risk: {{$json.reply_risk || ''}}
+
+--------------------------------
+PRIMARY EXECUTION FIELDS
+--------------------------------
+
+Parsed candidate:
+{{$json.ai_parsed?.whatsapp_message || ''}}
+
+English candidate:
+{{$json._en || ''}}
+
+Anchor object:
+{{$json.anchor_object || $json.reactivation_ai_payload?.decision?.anchor_object || ''}}
+
+Allowed micro-triggers:
+{{ JSON.stringify($json.allowed_micro_triggers || $json.reactivation_ai_payload?.decision?.allowed_micro_triggers || []) }}
+
+Needs enforce rewrite:
+{{$json.needs_enforce_rewrite}}
 
 --------------------------------
 LAST STOP POINT
@@ -64,16 +84,59 @@ Conversation:
 TASK
 --------------------------------
 
-1) First decide whether this case should output an EMPTY message.
+1) First decide whether this case is a TRUE EMPTY case.
 2) If not empty, validate the candidate message against the real conversation.
-3) If invalid, rewrite it into a valid activation message.
+3) If invalid but sendable, rewrite it into a valid activation message.
 4) The final message MUST be grounded in the real conversation and MUST NOT be generic.
+
+--------------------------------
+EMPTY OUTPUT RULE
+--------------------------------
+
+Return EMPTY message ONLY if ANY of the following is true:
+
+- hard_no_send = true
+- has_not_now_signal = true
+- is_my_turn_to_reply = false
+
+DO NOT use should_reactivate_now as a blocking condition.
+DO NOT use general caution as a reason to empty.
+DO NOT empty a message only because it is imperfect.
+
+If EMPTY applies, return:
+{
+  "whatsapp_message": ""
+}
+
+--------------------------------
+REWRITE VS EMPTY
+--------------------------------
+
+If candidate message exists in `ai_parsed.whatsapp_message` or `_en`, evaluate that message.
+Do NOT ignore the parsed candidate message.
+
+If candidate message exists and is not empty:
+
+- If it is generic but fixable → REWRITE
+- If it is weak but anchored → REWRITE
+- If it has one action and one reply path → PASS or light rewrite
+- ONLY use EMPTY for true no-send conditions above
+
+Examples that should NOT become empty:
+- price range resend
+- cheaper option clarification
+- catalog resend
+- AR011 photos resend
+- shipping summary resend
+- October timing clarification
+
+These are valid sendable anchors and should be preserved or rewritten, not cleared.
 
 --------------------------------
 MANDATORY REQUIREMENTS
 --------------------------------
 
-- If this is a not-now / do-not-push / waiting-customer case, return:
+- If this is a true not-now / do-not-push / not-my-turn case, return:
   {
     "whatsapp_message": ""
   }
@@ -81,6 +144,7 @@ MANDATORY REQUIREMENTS
 - If the candidate is weak but still sendable, rewrite it into a concrete micro-trigger instead of keeping it.
 - If the message is valid, you may keep it with minor polishing.
 - If invalid, rewrite it.
+- Do NOT empty weak but fixable messages.
 
 The final message MUST:
 
@@ -109,6 +173,33 @@ Prefer concrete objects over abstract ideas.
 Prefer rewrite actions: resend / line up / simplify / send here / make clear in one message.
 
 --------------------------------
+DO NOT OVER-BLOCK
+--------------------------------
+
+The Enforce layer is NOT a safety kill-switch for all imperfect messages.
+
+Its job is:
+
+- pass strong trigger messages
+- rewrite weak but fixable trigger messages
+- empty only true no-send cases
+
+These should remain sendable, not empty:
+
+"I can resend the price range here — want me to send it?"
+"I can explain what’s behind the cheaper option you found — want me to send it here?"
+"I can send the AR011 photos here — want me to send them?"
+"I can resend the catalog here — want me to send it?"
+"I can resend the shipping delivery summary here — want me to send it?"
+
+DO NOT convert message to EMPTY because of:
+- caution
+- low confidence
+- lack of perfect specificity
+- should_reactivate_now = false
+- generic concern not tied to the no-send rule
+
+--------------------------------
 FINAL CHECK
 --------------------------------
 
@@ -121,6 +212,8 @@ If NO:
 pass
 
 Mandatory final check:
+- Is this a true no-send case: hard_no_send, has_not_now_signal, or is_my_turn_to_reply false?
+- If not, is there a sendable candidate message in ai_parsed.whatsapp_message or _en?
 - What exact object from the conversation is used?
 - Is the message ultra-short-reply friendly?
 - Does the message reduce thinking instead of increasing it?
