@@ -158,11 +158,14 @@ VARIATION CONTROL:
 
 If multiple customers share a similar anchor, do not always generate the identical sentence.
 Slightly vary wording while keeping the structure simple.
+Variation should be subtle, natural, and not forced.
+Do not over-randomize.
 
-Examples:
+When `anchor_object` is price-related, rotate between simple variations:
 - "I can resend the price range here — want me to send it?"
 - "I can lay the price range out clearly here — want me to send it?"
 - "I can put the price range together again here — want me to send it?"
+- "I can break the price range down clearly here — want me to send it?"
 
 Avoid exact repetition across different customers.
 

@@ -93,6 +93,12 @@ Variation control:
 - Do not reuse the exact same sentence across customers with similar anchors.
 - Slightly vary wording while keeping the structure short and simple.
 - Do not sacrifice grounding for variation.
+- If `anchor_object` is price-related, rotate subtly between:
+  "I can resend the price range here — want me to send it?"
+  "I can lay the price range out clearly here — want me to send it?"
+  "I can put the price range together again here — want me to send it?"
+  "I can break the price range down clearly here — want me to send it?"
+- Do not over-randomize or add complexity.
 
 Final self-check:
 1. What exact object is being referenced?
