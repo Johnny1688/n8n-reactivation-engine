@@ -32,6 +32,16 @@ Choose exactly one:
 Do not over-empty. When in doubt, REWRITE.
 
 --------------------------------
+SPECIAL CASE — Generator Returned Empty
+--------------------------------
+
+If the candidate message is exactly "[GENERATOR_RETURNED_EMPTY_NEEDS_FALLBACK]":
+- Do NOT pass it through.
+- The Generator failed to produce output. You must compensate.
+- Use GENERIC FALLBACK with the available customer name (or "Hi" if no clean name).
+- The output must be a real grounded activation message — never the placeholder string.
+
+--------------------------------
 CORE VALIDATION
 --------------------------------
 

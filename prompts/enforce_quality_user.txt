@@ -11,6 +11,9 @@ Customer name:
 SEND STATE
 --------------------------------
 
+Values are "true", "false", or "unknown".
+"unknown" means the field could not be determined — do not treat it as false.
+
 - hard_no_send: {{$json.hard_no_send}}
 - has_not_now_signal: {{$json.has_not_now_signal}}
 - is_my_turn_to_reply: {{$json.is_my_turn_to_reply}}

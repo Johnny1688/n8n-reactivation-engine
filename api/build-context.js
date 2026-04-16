@@ -25,18 +25,16 @@ function toNumber(value, fallback = 0) {
 }
 
 function buildContextText(result) {
-  return normalizeText([
+  const parts = [
     result.customer_only_text,
     result.customer_recent_only_text,
     result.last_customer_message,
-    result.last_my_message,
-    result.conversation_core,
-    result.conversation,
     result.project_key,
     result.product_interest,
     result.concerns,
     result.key_signals
-  ].join('\n'));
+  ];
+  return parts.filter(Boolean).join('\n').toLowerCase();
 }
 
 function detectHardNoSend(result, text) {

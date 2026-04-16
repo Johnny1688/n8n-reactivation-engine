@@ -105,23 +105,35 @@ return items
   })
   .filter(item => {
     const data = item.json || {};
-
     const projectKey = cleanupMessage(data.project_key);
-    const orderGroup = cleanupMessage(data.order_group);
-    const en = cleanupMessage(data._en);
-    const enLower = en.toLowerCase();
-
     if (!projectKey) return false;
-    if (!orderGroup) return false;
-    if (!en) return false;
-    if (en.length < 10) return false;
-    if (enLower === 'undefined') return false;
-    if (enLower === 'null') return false;
-
     return true;
   })
   .map(item => {
     const data = item.json || {};
+    const en = cleanupMessage(data._en);
+    const enLower = en.toLowerCase();
+    const isWeakCandidate = !en || en.length < 10 || enLower === 'undefined' || enLower === 'null';
+
+    if (isWeakCandidate) {
+      return {
+        json: {
+          ...data,
+          _en: '[GENERATOR_RETURNED_EMPTY_NEEDS_FALLBACK]',
+          weak_candidate_message: '',
+          needs_enforce_rewrite: true
+        }
+      };
+    }
+
+    return item;
+  })
+  .map(item => {
+    const data = item.json || {};
+
+    if (data.needs_enforce_rewrite === true) {
+      return item;
+    }
 
     const projectKey = cleanupMessage(data.project_key);
     const orderGroup = cleanupMessage(data.order_group);
