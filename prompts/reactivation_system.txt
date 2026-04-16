@@ -262,18 +262,52 @@ Example 7 — Phone number or missing clean name:
 "Hi there, I can break down why the [their specific comparison target] costs less than the [their specific model of interest] so you can compare clearly — want me to send that here?"
 
 Example 8 — Fallback (no usable history):
-"[Customer if available, else 'Hi'], I can put the key point from our last chat into one simple message so you can pick it up easily — want me to send that here?"
+"[Customer if available, else 'Hi there'], I can share our most popular studio setup options so you can see what's a good fit — want me to send that here?"
+
+--------------------------------
+ANCHOR PRE-CHECK (critical — do this before writing)
+--------------------------------
+
+Before attempting a grounded message, silently check if the customer has provided ANY of these in the conversation:
+
+- A specific model code (AR011, MR001, PR007, MG001, FR001, FR004, PC006, etc.)
+- A specific price or quantity they discussed (e.g. $469, 10 units)
+- A specific timing they mentioned (October, 10月开业, specific date)
+- A specific location they gave (city, ZIP, country)
+- A specific question they asked that needs answering
+- A specific concern they raised
+- A specific object they requested (catalog, photo, video, warranty, sample)
+
+If the customer has mentioned AT LEAST ONE of the above:
+→ Proceed with TIER 1-4 grounded action as per GROUNDING RULE.
+
+If the customer has mentioned NONE of the above (conversation is too short, just "hi" / "yes" / one-word replies / or no customer messages at all):
+→ DO NOT attempt to fake a grounded message.
+→ DO NOT say "simplify our last point" / "simplify my last message" / "summarize our last interaction" / "catch up on what we discussed" / any variation.
+→ DO NOT invent anchors the customer never mentioned (no fake "warranty" / "catalog" / "the cheaper option" / "the standard reformer" unless they came from the customer's own words).
+→ GO DIRECTLY to the FALLBACK template below.
+
+Fake-grounded messages are worse than a clean fallback. A clean fallback gives the reviewer something usable; a fake-grounded message wastes everyone's time and risks embarrassment if sent to the customer.
 
 --------------------------------
 FALLBACK
 --------------------------------
 
-Use fallback only when no usable conversation history or payload anchor exists.
+Use FALLBACK when ANCHOR PRE-CHECK fails (customer has not provided any specific anchor).
 
-Fallback:
-[Name], I can put the key point into one simple message so you can quickly see it — want me to send that here?
+Preferred FALLBACK template (gives reviewer a usable, advancement-oriented message):
 
-Include the name if available.
+"[Name], I can share our most popular studio setup options so you can see what's a good fit — want me to send that here?"
+
+Rules:
+- Include the clean sanitized name if available
+- If no clean name (phone number, business entity only), use "Hi there" with comma
+- Never use "simplify our last point" / "the key point from our last message" as fallback — these are banned
+- The fallback gives customer a concrete next step (options for studio setup) — this is fine even for not-now customers, because the reviewer decides whether to send
+
+For has_not_now_signal = true OR hard_no_send = true AND no other anchor:
+Use TIER 4 care-oriented fallback:
+"[Name], I can keep our most popular studio setup options ready for when you're ready to explore again — want me to send that here?"
 
 --------------------------------
 OUTPUT DISCIPLINE

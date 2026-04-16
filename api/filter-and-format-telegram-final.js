@@ -44,6 +44,31 @@ function truncate(str, max = 3500) {
   return s.length > max ? s.slice(0, max) + '\n\n...(truncated)' : s;
 }
 
+// Banned phrase detection — hard-coded regex since AI doesn't reliably follow prompt-level bans
+const BANNED_PATTERNS = [
+  { name: 'simplify_last', regex: /simplify\s+(my|our|the)\s+last\s+(point|message|interaction|chat|reply|exchange|response)/i },
+  { name: 'summarize_last', regex: /summarize\s+(my|our|the)\s+last\s+(point|message|interaction)/i },
+  { name: 'pick_up_where', regex: /pick\s+up\s+where\s+we\s+left\s+off/i },
+  { name: 'catch_up_on', regex: /catch\s+up\s+on\s+(what\s+we|where\s+we|our|the\s+key)/i },
+  { name: 'last_point', regex: /\b(my|our|the)\s+last\s+point\b/i },
+  { name: 'last_interaction', regex: /\b(my|our|the)\s+last\s+interaction\b/i },
+  { name: 'latest_models_vague', regex: /(the\s+latest|our\s+latest)\s+(equipment\s+)?(options|models|updates)(?!\s+(of|for|that|which|such))/i },
+  { name: 'new_model_options_vague', regex: /(line\s+up|keep)\s+(the\s+)?new\s+model\s+options/i },
+  { name: 'see_whats_available', regex: /see\s+what[''\u2019]?s\s+available/i },
+  { name: 'make_informed_choice', regex: /make\s+(an|a)\s+informed\s+choice/i },
+  { name: 'at_your_convenience', regex: /at\s+your\s+convenience/i }
+];
+
+function detectBannedPhrases(message) {
+  if (!message || typeof message !== 'string') return [];
+  const hits = [];
+  for (const { name, regex } of BANNED_PATTERNS) {
+    const match = message.match(regex);
+    if (match) hits.push({ name, matched: match[0] });
+  }
+  return hits;
+}
+
 function compressSummary(text, maxLen = 400) {
   if (!text) return '信息不足';
 
@@ -449,9 +474,15 @@ function filterAndFormatTelegramFinalItems(items) {
       finalMessageCn ? `✅ ${finalMessageCn}` : '⛔ 未提供中文对照'
     ].join('\n'), 3500);
 
+    const bannedHits = detectBannedPhrases(finalMessage);
+
+    const reviewHeader = bannedHits.length > 0
+      ? `⚠️ BANNED_PHRASE_DETECTED ⚠️\nMatched: "${bannedHits.map(h => h.matched).join('" / "')}"\n请在 Telegram 审核时手动改写后再发送。\n\n`
+      : '';
+
     const telegramMessages = !shouldBlock
       ? [
-          `【${projectKey}】\n\nEnglish:\n${finalMessage}\n\n中文翻译:\n${finalMessageCn || '（未提供中文对照）'}`,
+          `${reviewHeader}【${projectKey}】\n\nEnglish:\n${finalMessage}\n\n中文翻译:\n${finalMessageCn || '（未提供中文对照）'}`,
           finalMessage
         ]
       : [];
@@ -470,7 +501,8 @@ function filterAndFormatTelegramFinalItems(items) {
       whatsapp_message_cn: finalMessageCn,
       telegram_messages: telegramMessages,
       enforce_status: enforceStatus,
-      auto_send_pass: !shouldBlock
+      auto_send_pass: !shouldBlock,
+      banned_phrase_hits: bannedHits
     });
   }
 
