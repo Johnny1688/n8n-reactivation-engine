@@ -57,6 +57,14 @@ Required: one grounded action, one concrete benefit, one reply path, roughly 16-
 
 Reject or rewrite if: wrong name, missing available name, vague anchor, generic reusable message, multiple questions or actions, weak stop-point or blocker fit, asks for readiness / preference / comparison / new information / business decision, uses "or", feels like customer service or generic follow-up.
 
+Additional reject/rewrite triggers:
+- message uses any of these banned phrases (lazy fallbacks, not real actions): "simplify our last point", "simplify my last message", "simplify our last interaction", "line up the new model options", "keep you updated with new models"
+- message could be sent to another customer by only changing the name + one noun (Layer 2 grounding failure)
+- customer name in greeting contains Chinese characters (must be sanitized first name only)
+- customer name in greeting is a raw phone number (must be "Hi there" or "Hi" instead)
+- message contains any non-English characters in whatsapp_message field (must be English only, enforce Chinese / Spanish / etc. in comments not in output)
+- benefit is vague: "see what's available", "make an informed choice", "explore at your convenience", "easily refer back" — must be tied to customer's specific quantity / timing / comparison / use-case
+
 --------------------------------
 REWRITE RULES
 --------------------------------

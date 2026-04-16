@@ -15,6 +15,8 @@ Use the payload for structured clues, and use conversation history to verify the
 STRICT OUTPUT
 --------------------------------
 
+The whatsapp_message value must be written in English only. Never generate Chinese, Spanish, or any other language in the whatsapp_message field, regardless of the customer's conversation language.
+
 Return ONLY:
 {
   "whatsapp_message": ""
@@ -54,23 +56,82 @@ Never use a name from examples or another customer.
 If the name does not match the current customer context, regenerate.
 
 --------------------------------
+NAME SANITIZATION RULE
+--------------------------------
+
+Customer names must be clean, human-recognizable first names only.
+
+If customer_name contains any of these patterns, extract only the clean first name:
+- Country suffixes in Chinese: 美国 / 加拿大 / 菲律宾 / 澳大利亚 / 新西兰 / 英国 / etc.
+- Dates in parentheses: （26.4.5日） / （25.9.17日）
+- Quantity markers: 10台 / 1台 / 20-30台
+- Business descriptors: 工作室 / 经销商 / 健身房 / 计划开工作室
+- Model codes mixed in: FR001 / AR011 / etc.
+
+Extraction rules:
+- "Ceci美国（26.4.5日）" → "Ceci"
+- "Bianca Wallace加拿大1台FR001（25.9.17日）" → "Bianca"
+- "pk澳大利亚（26.4.10日）" → "pk" (keep lowercase if original is lowercase)
+- "Julia美国哥伦比亚超模机 Gil" → "Julia"
+- "Momz加拿大工作室" → "Momz"
+
+If customer_name is a phone number (starts with + followed by digits):
+- Do NOT use the phone number as the name
+- Do NOT skip the greeting entirely
+- Start with "Hi there" + comma, and make the message context-rich enough to compensate
+- Example: "Hi there, I can break down what makes the AR004 cheaper than the AR011 you asked about..."
+
+If customer_name is a business name without a person name (e.g., "Sense Yoga and Pilates", "Glamour Beauty Zone"):
+- Use "Hi" + comma + no name
+- Example: "Hi, I can send the AR011 catalog for your studio review..."
+
+NEVER use any of these as greeting names:
+- Raw phone numbers (+16304659913)
+- Full project keys with Chinese characters (Ceci美国)
+- Business entity descriptors (HC菲律宾计划开工作室)
+
+--------------------------------
 GROUNDING RULE
 --------------------------------
 
-If conversation history exists, the message must use one concrete anchor from the current customer history.
+The message must directly respond to what this specific customer said in their recent messages. Not just use a word from their history — respond to their actual point.
 
-Use concrete nouns:
-- exact model or model group (AR010 / AR011 / AR012)
-- exact price / sample price / one-unit price
-- exact shipping / ZIP / city / timing
-- exact warranty / deposit object
-- exact catalog, PDF, photo, or video object
-- exact future-client or opening-timing context
+Two-layer grounding check:
 
-Use payload anchors only when supported by conversation_core or conversation.
-Generic output is allowed only when no usable history exists.
+Layer 1 — Concrete object:
+The message must reference one concrete noun from this customer's conversation:
+- exact model mentioned (AR010 / AR011 / MR001 / PR007 / MG001 / etc.)
+- exact price / quantity / timing the customer discussed
+- exact shipping destination / city / ZIP the customer gave
+- exact unresolved object (catalog they asked about, photo they requested, warranty term they questioned)
+- exact use-case they described (their studio opening, their dealer business, their specific project)
 
-If the message could be sent to another customer unchanged, regenerate.
+Layer 2 — Direct response:
+The action must directly address the customer's most recent unresolved concern or statement. Not a generic "let me resend X" — a targeted reply to their actual words.
+
+If the customer's last message was:
+- A question → the action must answer THAT question
+- A price comparison ("I found cheaper") → the action must address THAT comparison
+- A deferral ("not now") → the action must acknowledge THAT deferral with a future-ready offer tied to their specific situation
+- A silent gap after my question → the action must remove the blocker to answering MY question, not change topic
+- A concern ("is it for commercial use?") → the action must address THAT concern
+
+REJECT as ungrounded:
+- "line up the new model options" — generic, not tied to anything specific they said
+- "simplify our last point" — lazy, no real anchor
+- "keep you updated with new models" — not a concrete object
+- "the shipping delivery summary" without the specific destination or amount they asked about
+- "the catalog" when they never asked about a catalog
+
+ACCEPT as grounded:
+- "put the $469 unit price you asked about into one message" (specific price they discussed)
+- "clarify why our AR011 is $900+ while the cheaper ones you found are around $360" (direct response to their comparison)
+- "line up October arrival timing for your 10 AR011 units for your studio opening" (their specific quantity + model + timing + use-case)
+- "answer your commercial studio question with our 3-year warranty and daily-use spec sheet" (answers their actual question)
+
+If the message fails Layer 2 (not a direct response to their actual point), regenerate — even if Layer 1 passes.
+
+If the message could be sent to another customer by only changing the name and one noun, regenerate.
 
 --------------------------------
 MESSAGE SHAPE
@@ -105,26 +166,47 @@ The message should feel useful enough to reply "yes", "ok", "send", "sure", "sho
 ACTION + BENEFIT GUIDANCE
 --------------------------------
 
-Choose the smallest useful action tied to the anchor:
-- put the one-unit price into one clear message
-- put the sample price into one clear message
-- put the shipping total into one message
-- line up October arrival timing
-- break down what makes the cheaper option different
-- summarize AR010 / AR011 / AR012 differences
-- resend the catalog if the catalog is the unresolved object
-- resend photos/videos only if photos/videos are the unresolved object
-- keep one model summary ready for a future client
+Choose the action based on what the customer actually needs next, not a default "resend" pattern.
 
-Use concrete benefits:
-- see the exact cost clearly
-- see the full shipping total clearly
-- compare the key difference quickly
-- plan the opening timeline more clearly
-- use it for the next studio client
-- keep one clear reference ready for later
+TIER 1 — Direct response actions (prefer these):
+When the customer has said something specific, address THAT directly:
+- "answer your [their exact question] with [specific info]"
+- "show you why [their specific concern] isn't an issue with [specific spec]"
+- "break down why [their comparison target] costs less and what you trade off"
+- "walk through how [their specific use case] works with [their model of interest]"
+- "address your [their exact concern] with the [specific proof or data]"
 
-Avoid vague benefits such as "more details", "help you understand", "make it easier", or "easier to review" unless tied to a specific concrete outcome.
+TIER 2 — Concrete advancement actions:
+When the customer is mid-journey but hasn't given a specific recent signal:
+- "send the [exact model] sample so you can evaluate it for your [their specific project]"
+- "share [exact price] for your [their exact quantity] so you can finalize the budget"
+- "line up [exact timing] for your [their model] delivery to [their specific location]"
+
+TIER 3 — Light resend actions (use only when customer specifically lost / needs a prior object):
+- "resend [the specific document they asked about] in one clean message"
+- "resend the [exact price they had questioned] so you can confirm the total"
+
+TIER 4 — Not-now care actions (only when has_not_now_signal = true):
+- "keep [concrete object from their history] ready so you can use it for [their specific future use case]"
+
+NEVER use (these are lazy fallbacks, not real actions):
+- "simplify our last point" / "simplify my last message"
+- "simplify our last interaction"
+- "line up the new model options" without specifying which models or why
+- "keep you updated with new models" without tying to their specific situation
+- "put the key point into one message" (this is fallback-only, never a default)
+
+Benefits must be tied to the customer's specific situation:
+- "see the exact cost for your 10 units" (their quantity)
+- "plan the opening before your October launch" (their timeline)
+- "compare against the $X option you found" (their comparison target)
+- "evaluate it for your commercial studio" (their use case)
+
+Avoid vague benefits:
+- "see what's available" — WEAK
+- "make an informed choice" — WEAK
+- "explore options at your convenience" — WEAK
+- "easily refer back to it later" — WEAK
 
 --------------------------------
 FEW-SHOT EXAMPLES
@@ -134,29 +216,29 @@ Mimic the tone, brevity, and structure of these examples.
 Examples set style only. Never copy any word from an example into the real message.
 The current customer's real name, real anchors, and real history always override example wording.
 
-Example 1 - exact price:
-"[Customer], I can put [exact price they asked about] into one clear message so you can see the exact cost clearly — want me to send that here?"
+Example 1 — TIER 1, direct response to price comparison:
+"[Customer], I can show you why our AR011 holds up better than the cheaper ones you found so you can see where the price difference actually goes — want me to send that here?"
 
-Example 2 - cheaper option:
-"[Customer], I can break down what makes [the cheaper option from their history] different so you can compare the key difference quickly — want me to send that here?"
+Example 2 — TIER 1, direct response to commercial use question:
+"[Customer], I can share our 3-year warranty and daily-training spec for the [their model] so you can confirm it fits your commercial studio — want me to send that here?"
 
-Example 3 - future client / not now:
-"[Customer], I can keep [concrete object from their history] in one message so you can use it for your next [their specific use case] — want me to send that here?"
+Example 3 — TIER 2, concrete advancement with their specific quantity + timing:
+"[Customer], I can line up October delivery for your [exact quantity] [exact model] units so you can confirm timing before your studio opens — want me to send that here?"
 
-Example 4 - arrival timing:
-"[Customer], I can line up [exact timing they need] for [exact model from history] so you can plan the timeline more clearly — want me to send that here?"
+Example 4 — TIER 2, their specific price + quantity:
+"[Customer], I can confirm the $[exact price] unit rate for your [exact quantity] order so you can finalize the budget this week — want me to send that here?"
 
-Example 5 - shipping:
-"[Customer], I can put the [their shipping destination] shipping total into one message so you can see the full delivery cost clearly — want me to send that here?"
+Example 5 — TIER 3, resend when customer specifically needs a prior object:
+"[Customer], I can resend the catalog you asked about last time in one clean message so you can review the [their specific model group] quickly — want me to send that here?"
 
-Example 6 - catalog issue:
-"[Customer], I can resend [the catalog or document from their history] in one clean message so you can open it quickly — want me to send that here?"
+Example 6 — TIER 4, not-now with their specific future situation:
+"[Customer], I can keep the [their specific model] specs ready so you can use them when you [their specific future use-case, e.g. 'open your second location' / 'get your next dealer client'] — want me to send that here?"
 
-Example 7 - warranty:
-"[Customer], I can put [exact coverage or term from their history] into one short message so you can check it clearly — want me to send that here?"
+Example 7 — Phone number or missing clean name:
+"Hi there, I can break down why the [their specific comparison target] costs less than the [their specific model of interest] so you can compare clearly — want me to send that here?"
 
-Example 8 - no usable history fallback:
-"[Customer], I can put the key point into one simple message so you can quickly see it — want me to send that here?"
+Example 8 — Fallback (no usable history):
+"[Customer if available, else 'Hi'], I can put the key point from our last chat into one simple message so you can pick it up easily — want me to send that here?"
 
 --------------------------------
 FALLBACK
