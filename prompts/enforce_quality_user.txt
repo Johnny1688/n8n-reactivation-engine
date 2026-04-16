@@ -8,6 +8,31 @@ Customer name:
 {{$json.customer_name || ''}}
 
 --------------------------------
+HIDDEN-ANALYSIS UPSTREAM NOTE
+--------------------------------
+
+The upstream Reactivation layer may now output only:
+{
+  "whatsapp_message": "..."
+}
+
+Visible analysis may be absent by design.
+That is NOT an error.
+Do NOT fail, block, or empty only because no visible analysis exists.
+
+Judge candidate quality based on:
+- the candidate message itself
+- conversation history
+- payload grounding
+- stop-point fit
+- blocker fit
+- anchor quality
+- customer type fit
+- signal-weight priority
+- benefit quality
+- current-customer name binding
+
+--------------------------------
 SEND STATE
 --------------------------------
 
@@ -34,8 +59,14 @@ PRIMARY EXECUTION FIELDS
 Parsed candidate:
 {{$json.ai_parsed?.whatsapp_message || ''}}
 
+Parsed final message:
+{{$json.ai_parsed?.final_message || ''}}
+
 English candidate:
 {{$json._en || ''}}
+
+Telegram English candidate:
+{{$json.telegram_messages?.[1] || ''}}
 
 Anchor object:
 {{$json.anchor_object || $json.reactivation_ai_payload?.decision?.anchor_object || $json.reactivation_ai_payload?.decision?.primary_anchor || ''}}
@@ -100,16 +131,39 @@ REACTIVATION AI PAYLOAD
 TASK
 --------------------------------
 
-1) Validate the candidate message against the current customer context.
-2) Validate the candidate message against the real conversation.
-3) Diagnose whether it fits the exact stop point and blocker.
-4) If valid, pass it.
-5) If invalid but fixable, rewrite it into a valid activation message.
-6) If there is no usable conversation history, use the generic fallback.
-7) Return empty only when the entire input is unusable or corrupt.
+1. Validate the candidate message against the current customer context.
+2. Validate the candidate message against the real conversation.
+3. Internally diagnose whether it fits the exact stop point and blocker.
+4. Internally identify the dominant customer type.
+5. Internally identify the highest-weight unresolved signal.
+6. Validate the concrete immediate benefit.
+7. If valid, pass it.
+8. If invalid but fixable, rewrite it into a valid high-reply activation message.
+9. If there is no usable conversation history, use the generic fallback.
+10. Return empty only when the entire input is unusable or corrupt.
 
 The final message MUST be grounded in the real conversation whenever history exists.
 The final message MUST NOT be generic when any real anchor exists.
+
+--------------------------------
+MANDATORY MESSAGE STRUCTURE
+--------------------------------
+
+Every non-empty final message MUST follow this structure:
+
+[Name], I can [specific grounded action] so you can [clear immediate concrete benefit] — want me to send that here?
+
+If missing any of these, rewrite:
+- current customer name when available
+- specific grounded action
+- concrete immediate benefit
+- one reply path
+
+The message must have:
+- one action only
+- one benefit only
+- one direction only
+- one reply path only
 
 --------------------------------
 CURRENT-CUSTOMER NAME CHECK
@@ -123,6 +177,7 @@ Name priority:
 3. a clearly available name from the current conversation
 
 If candidate uses a name that does not match current `customer_name` or current `project_key`, rewrite it.
+If candidate omits an available current customer name, rewrite it.
 
 Examples:
 - Current customer Rocio + candidate starts "Marea," -> rewrite to Rocio.
@@ -134,9 +189,7 @@ Never preserve names copied from style examples.
 STOP POINT AND BLOCKER CHECK
 --------------------------------
 
-Before rewriting, identify silently:
-- complete AI analysis summary
-- complete target reply
+Before rewriting, internally identify:
 - who spoke last
 - whether my last push failed
 - what exact customer signal matters most
@@ -145,7 +198,7 @@ Before rewriting, identify silently:
 - what exact blocker exists
 - what smallest reply can be triggered
 
-The final message must reduce the exact blocker.
+The final message must reduce the exact blocker with one action and one concrete benefit.
 
 Bad blocker:
 - lack of next step
@@ -157,6 +210,98 @@ Good blocker examples:
 - customer raised a cheaper alternative and did not engage with the seller's studio-planning question
 - customer said the market is slow and the next real opportunity is a future client, so pressure is counterproductive
 - customer liked AR011 and asked about October timing, so the blocker is October arrival clarity, not photos
+
+--------------------------------
+CUSTOMER TYPE CHECK
+--------------------------------
+
+Select ONE dominant customer type only.
+Never mix type logic.
+Never ask the customer type.
+
+TYPE A: PRICE-DRIVEN
+
+Signals:
+- asked price / quote / cost / total
+- stopped after pricing
+- reacted to price range
+- asked shipping + price together
+- asked for exact one-unit / sample / setup cost
+
+Valid benefit must clarify:
+- cost
+- pricing
+- total
+- one-unit price
+- sample price
+- setup cost
+- shipping cost
+
+TYPE B: COMPARISON-DRIVEN
+
+Signals:
+- asked model difference
+- multiple models were discussed
+- redirected to cheaper option
+- asked about best option / which model / what is the difference
+- hesitation between similar choices
+
+Valid benefit must clarify:
+- key difference
+- cheaper-option distinction
+- model fit
+- option match
+- setup match
+
+TYPE C: WAIT / NOT-NOW / OBSERVING
+
+Signals:
+- paused after receiving info
+- future timing
+- later / not now / next client / market slow
+- polite close without real rejection
+- engagement dropped after materials were sent
+
+Valid benefit must support:
+- later ease
+- future re-entry
+- ready reference
+- next client use
+- project restart
+
+If the candidate message uses the wrong customer type trigger, rewrite it.
+
+--------------------------------
+SIGNAL-WEIGHT PRIORITY CHECK
+--------------------------------
+
+Use this priority:
+1. most recent explicit customer question
+2. most recent unresolved customer object
+3. most recent decision-friction signal
+4. strongest repeated signal
+5. strongest payload-supported signal
+6. generic fallback only if no usable signal exists
+
+HIGH WEIGHT:
+- asked exact price
+- asked exact model difference
+- asked shipping / timing / warranty / deposit
+- raised cheaper option
+- gave future timing context
+- named model / quantity / city / ZIP / opening date
+
+MEDIUM WEIGHT:
+- discussed catalog / photos / videos
+- acknowledged message but did not decide
+- broad interest around options
+
+LOW WEIGHT:
+- generic greeting
+- generic pause
+- vague prior interest with no object
+
+If the candidate uses a weaker lower-weight anchor while a stronger higher-weight unresolved signal exists, rewrite it.
 
 --------------------------------
 ANCHOR PRIORITY CHECK
@@ -179,10 +324,41 @@ Examples:
 - Not-now future-client context -> use AR010 / AR011 / AR012 or studio-options summary, not "everything".
 
 --------------------------------
+BENEFIT QUALITY CHECK
+--------------------------------
+
+The final message must contain a concrete immediate benefit tied to the anchor.
+
+Reject vague benefits:
+- easier to review
+- more details
+- help you understand
+- check it easily
+- make it easier
+- easier to check
+- see it clearly
+
+Accept only benefits like:
+- see the exact price clearly
+- see the exact one-unit cost clearly
+- quickly understand the total setup cost
+- see the full shipping total in one message
+- understand the cheaper-option difference quickly
+- compare the key difference quickly
+- see which model fits your setup better
+- plan the opening timing more clearly
+- keep one useful summary ready for later
+- use it for your next studio client
+
+If benefit is weak, generic, reusable, mismatched to customer type, or not tied to the anchor:
+REWRITE.
+
+--------------------------------
 EMPTY OUTPUT RULE
 --------------------------------
 
 Do NOT return empty just because:
+- visible upstream analysis is absent
 - hard_no_send = true
 - has_not_now_signal = true
 - is_my_turn_to_reply = false
@@ -191,10 +367,10 @@ Do NOT return empty just because:
 Those cases should be rewritten into ultra-light activation messages.
 
 Use these conversions:
-- not-now -> keep the concrete item ready, line it up clearly, put it into one simple message for later
+- not-now -> keep the concrete item ready so the customer has one clear reference later
 - market slow -> prepare one exact model or studio-options summary for the next real client
 - future client -> keep one real AR010 / AR011 / AR012 or budget-vs-premium summary ready
-- not-my-turn -> resend one exact object, put one exact point together clearly
+- not-my-turn -> resend one exact object so the customer can see the unresolved point clearly
 - low-priority -> use the strongest concrete prior object with lower pressure
 - weak history -> use the strongest available payload or project anchor
 - no real history -> use the generic fallback
@@ -210,19 +386,27 @@ If EMPTY is truly unavoidable, return:
 REWRITE VS EMPTY
 --------------------------------
 
-If candidate message exists in `ai_parsed.whatsapp_message` or `_en`, evaluate that message.
+If candidate message exists in `ai_parsed.whatsapp_message`, `ai_parsed.final_message`, `_en`, or `telegram_messages[1]`, evaluate that message.
 Do NOT ignore the parsed candidate message.
 
 If candidate message exists and is not empty:
+- If it does not follow the mandatory structure -> REWRITE.
 - If it uses the wrong customer name -> REWRITE.
 - If it is missing the current customer name while a name exists -> REWRITE.
+- If it lacks a concrete anchor while history exists -> REWRITE.
+- If it uses a lower-weight signal while a higher-weight unresolved signal exists -> REWRITE.
+- If it mismatches the customer type -> REWRITE.
+- If it lacks a concrete immediate benefit -> REWRITE.
+- If the benefit is weak or generic -> REWRITE.
+- If the benefit is not tied to the anchor -> REWRITE.
+- If the benefit is not useful to the customer -> REWRITE.
 - If it is generic but history exists -> REWRITE with a real anchor.
 - If it is generic and no usable history exists -> USE GENERIC FALLBACK.
 - If it uses a vague object while history exists -> REWRITE.
 - If it uses a weaker older anchor while a stronger recent anchor exists -> REWRITE.
 - If it weakly reflects the blocker -> REWRITE.
 - If it is too short and abrupt -> REWRITE into the 16-30 word target.
-- If it has one action and one reply path -> PASS or light rewrite.
+- If it has one action, one benefit, and one reply path -> PASS or light rewrite.
 - Do NOT use EMPTY unless the entire input is unusable or corrupt.
 
 These should remain sendable, not empty:
@@ -250,8 +434,10 @@ MANDATORY REQUIREMENTS
 --------------------------------
 
 The final message MUST:
+- follow the mandatory structure
 - include the current customer name whenever available
 - contain ONE action only
+- contain ONE concrete immediate benefit only
 - contain ONE direction only
 - contain ONE reply path only
 - be answerable instantly
@@ -259,9 +445,11 @@ The final message MUST:
 - include at least ONE exact concrete conversation anchor when history exists
 - reference one exact object already present in the current conversation when history exists
 - use the strongest recent anchor when one exists
+- use the highest-weight unresolved signal when one exists
+- match the dominant customer type
 - fit the exact stop point and blocker
 - feel like it could only be sent to this customer
-- make the next tiny action obvious
+- make the next tiny action feel worthwhile
 - target roughly 16-30 words
 - stay low-pressure
 
@@ -275,9 +463,11 @@ The final message MUST NOT:
 - ask for consideration
 - ask for decisions
 - ask for comparison
+- ask for missing information
 - use the word "or"
 - use vague phrases like "help with that" without a concrete object
 - use vague objects like "everything", "details", "information", "something we discussed", "that", "it", or "the last point"
+- use weak benefits like "easier to review", "more details", "help you understand", "check it easily", or "make it easier"
 - be reusable for another customer when history exists
 - feel like customer service
 - feel like a generic follow-up
@@ -292,7 +482,7 @@ GENERIC FALLBACK RULE
 Only use the generic fallback when there is truly no usable conversation history and no real object can be grounded from conversation_core, conversation, or payload.
 
 Generic fallback:
-"[Name], I can put the key point into one simple message here so it's easier to review — want me to send that?"
+"[Name], I can put the key point into one simple message so you can quickly see it — want me to send that here?"
 
 If a current customer name exists, include it.
 If no name exists but project key contains a reasonable name, use that name.
@@ -304,18 +494,15 @@ Do not empty no-history cases when this fallback can be formed.
 REWRITE PATTERN
 --------------------------------
 
-Preferred grounded rewrite:
-"[Name], I can [specific grounded action tied to the real conversation] so it's easier to [visible concrete outcome] — want me to send that here?"
-
-Preferred low-pressure not-now rewrite:
-"[Name], I can keep the [specific grounded object] ready in one simple message for [future-client context] — want me to keep that here?"
+Required grounded rewrite:
+"[Name], I can [specific grounded action] so you can [clear immediate concrete benefit] — want me to send that here?"
 
 Examples are style references only. Never copy their names unless they match the current customer.
-- "Marea, I can put the one-unit price into one clear message here so it's easier to review — want me to send that?"
-- "Ceci, I can break down what makes the cheaper option different in one simple message — want me to send that here?"
-- "Rocio, I can line the October arrival timing for the AR011 up in one clear message — want me to send that here?"
-- "Neha, I can put the AR010 / AR011 / AR012 differences into one simple message for your next studio client — want me to keep that here?"
-- "Johnny, I can put the key point into one simple message here so it's easier to review — want me to send that?"
+- "Marea, I can put the one-unit price into one clear message so you can see the exact cost clearly — want me to send that here?"
+- "Ceci, I can break down what makes the cheaper option different so you can compare the key difference quickly — want me to send that here?"
+- "Rocio, I can line up the October arrival timing for the AR011 so you can plan the opening timeline more clearly — want me to send that here?"
+- "Neha, I can keep the AR010 / AR011 / AR012 differences in one message so you can use it for your next studio client — want me to send that here?"
+- "Johnny, I can put the key point into one simple message so you can quickly see it — want me to send that here?"
 
 --------------------------------
 DO NOT OVER-BLOCK
@@ -330,6 +517,7 @@ Its job is:
 - empty only entirely unusable or corrupt input
 
 DO NOT convert message to EMPTY because of:
+- no visible upstream analysis
 - no candidate message
 - weak candidate
 - weak history
@@ -357,20 +545,29 @@ pass.
 Mandatory final validation:
 - Is the current customer name present if available?
 - Does the name match current customer_name or project_key?
+- Is there a concrete anchor?
 - Is the message grounded in exact current history if history exists?
+- Is that anchor the highest-weight unresolved signal?
 - Does it use the strongest recent anchor when one exists?
+- Is the customer type correctly matched?
+- Is there a concrete immediate benefit?
+- Is the benefit tied to the anchor?
+- Is the benefit actually useful to the customer?
+- Does the benefit match the customer type?
 - Does it avoid vague objects like everything, that, it, details, and information?
+- Does it avoid weak benefits like easier to review, more details, help you understand, check it easily, and make it easier?
 - Does it fit the exact stop point?
 - Does it reduce the exact blocker?
 - Is the blocker specific rather than generic?
-- Is it longer than the current short style but still one trigger only?
 - Does it contain one action only?
+- Does it contain one benefit only?
 - Does it contain one direction only?
 - Does it contain one reply path only?
 - Is it answerable in under 3 seconds?
 - Is it not reusable when history exists?
-- Is generic fallback used only when there is no usable history?
+- Is fallback used only when there is no usable history?
 - Is empty used only for entirely unusable or corrupt input?
+- Is output strict JSON only?
 
 If any answer fails, rewrite again.
 

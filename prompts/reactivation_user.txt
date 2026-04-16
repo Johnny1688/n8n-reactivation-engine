@@ -14,23 +14,66 @@ You may only use:
 - `customer_name` if present
 - `project_key` if present
 
-Execute in this exact order:
+This is hidden-analysis single-message generation.
+Analyze internally, then output only the final JSON object.
+
+Execute in this exact internal order:
 1. identify the stop point
 2. identify the exact blocker
-3. choose the strongest real anchor
-4. generate one activation message
-5. validate current-customer name, anchor, blocker, and one-trigger fit
+3. identify the strongest real anchor
+4. identify the dominant customer type
+5. identify the highest-weight signal
+6. identify the smallest reply to trigger
+7. generate one activation message
+8. validate name, anchor, blocker, benefit, type-fit, signal-weight, and one-trigger fit
 
 Do not infer outside the provided inputs.
 Do not create new context.
 Do not create a new strategy.
-Use the full conversation only to diagnose the stop point, select the exact anchor, verify the current customer name, and ground the final trigger.
+Use the full conversation only to diagnose the stop point, select the exact anchor, verify the current customer name, classify the customer type, identify the highest-weight signal, and ground the final trigger.
+
+--------------------------------
+STRICT OUTPUT CONTRACT
+--------------------------------
+
+Return ONLY:
+{
+  "whatsapp_message": ""
+}
+
+Do NOT output:
+- visible analysis
+- summaries
+- notes
+- reasoning
+- markdown
+- extra keys
+
+--------------------------------
+MANDATORY MESSAGE STRUCTURE
+--------------------------------
+
+Every non-empty final message MUST follow this structure:
+
+[Name], I can [specific grounded action] so you can [clear immediate concrete benefit] — want me to send that here?
+
+The message is invalid unless it has:
+- one current customer name when available
+- one specific grounded action
+- one concrete immediate benefit
+- one reply path
+
+Convert the selected anchor into:
+[action] + so you can [specific immediate benefit]
+
+Do not use an action without a benefit.
+Do not use a benefit that is generic, vague, or reusable across anchors.
 
 --------------------------------
 SILENT EXECUTION STEPS
 --------------------------------
 
-Before writing the message, silently identify:
+Before writing the message, silently determine:
 1. the current customer name from `customer_name`
 2. a fallback current customer name from `project_key` if needed
 3. who spoke last
@@ -41,15 +84,15 @@ Before writing the message, silently identify:
 8. the most recent explicit customer object
 9. the most recent unresolved object
 10. the strongest repeated object
-11. the smallest reply to trigger
-12. whether usable conversation history exists
-13. a complete AI analysis summary
-14. a complete target reply
+11. the strongest real anchor
+12. the dominant customer type
+13. the highest-weight signal
+14. the smallest reply to trigger
+15. the concrete immediate benefit
+16. whether usable conversation history exists
 
 Do not output this analysis.
-Use it to make the final `whatsapp_message` precise.
-
-The internal AI analysis summary and target reply must never be missing, vague, or equivalent to "not output".
+Use it only to make the final `whatsapp_message` precise.
 
 Stop-point check:
 - Did the customer ask a price, sample, shipping, warranty, timing, catalog, photo, video, or model question?
@@ -62,7 +105,7 @@ Blocker check:
 - Name the exact blocker internally.
 - Reference the exact stop point and exact unresolved object.
 - Do not accept vague blockers like "customer not ready", "customer not in purchase window", or "lack of next step".
-- The message must reduce the specific blocker with one tiny action.
+- The message must reduce the specific blocker with one tiny action and one concrete benefit.
 
 --------------------------------
 CURRENT-CUSTOMER NAME RULE
@@ -77,6 +120,118 @@ The final non-empty message MUST include the current customer's name whenever av
 The final message MUST NOT use a name from examples, previous customers, or another project.
 
 If the name in the final message does not match current `customer_name` or a reasonable name from current `project_key`, the message is invalid.
+
+--------------------------------
+CUSTOMER TYPE TRIGGER MODEL
+--------------------------------
+
+Select ONE dominant customer type only.
+Never mix type logic.
+Never ask the customer type.
+Prefer the most recent strong signal over older weak signals.
+
+TYPE A: PRICE-DRIVEN
+
+Signals:
+- asked price / quote / cost / total
+- stopped after pricing
+- reacted to price range
+- asked shipping + price together
+- asked for exact one-unit / sample / setup cost
+
+Trigger:
+- reduce price ambiguity
+- reduce cost uncertainty
+- make cost easier to grasp quickly
+
+Benefit must clarify:
+- cost
+- pricing
+- total
+- one-unit price
+- sample price
+- setup cost
+- shipping cost
+
+TYPE B: COMPARISON-DRIVEN
+
+Signals:
+- asked model difference
+- multiple models were discussed
+- redirected to cheaper option
+- asked about best option / which model / what is the difference
+- hesitation between similar choices
+
+Trigger:
+- reduce comparison effort
+- reduce confusion between options
+- isolate one key difference
+
+Benefit must clarify:
+- key difference
+- fit
+- option match
+- cheaper-option distinction
+- model suitability
+- setup match
+
+TYPE C: WAIT / NOT-NOW / OBSERVING
+
+Signals:
+- paused after receiving info
+- future timing
+- later / not now / next client / market slow
+- polite close without real rejection
+- engagement dropped after materials were sent
+
+Trigger:
+- reduce future effort
+- keep one useful object ready
+- make later re-entry easier
+
+Benefit must support:
+- later ease
+- future re-entry
+- ready reference
+- next client use
+- project restart
+
+If multiple types appear:
+1. choose the type tied to the most recent unresolved object
+2. if tied, choose by signal weight priority
+3. if still tied, choose the type with the clearest instant reply trigger
+
+--------------------------------
+SIGNAL-WEIGHT PRIORITY MODEL
+--------------------------------
+
+Use this priority:
+1. most recent explicit customer question
+2. most recent unresolved customer object
+3. most recent decision-friction signal
+4. strongest repeated signal
+5. strongest payload-supported signal
+6. generic fallback only if no usable signal exists
+
+HIGH WEIGHT:
+- asked exact price
+- asked exact model difference
+- asked shipping / timing / warranty / deposit
+- raised cheaper option
+- gave future timing context
+- named model / quantity / city / ZIP / opening date
+
+MEDIUM WEIGHT:
+- discussed catalog / photos / videos
+- acknowledged message but did not decide
+- broad interest around options
+
+LOW WEIGHT:
+- generic greeting
+- generic pause
+- vague prior interest with no object
+
+If a lower-weight anchor is used while a higher-weight unresolved signal exists, the message is invalid.
 
 --------------------------------
 ANCHOR SELECTION RULE
@@ -127,9 +282,38 @@ Weak anchors are invalid when history exists:
 - the last point
 
 If no usable conversation history exists:
-- use the generic fallback
+- use the named generic fallback
 - include the current customer name if available
 - do NOT return empty only because history is missing
+
+--------------------------------
+BENEFIT QUALITY RULE
+--------------------------------
+
+The benefit must be concrete, immediate, and tied to the selected anchor.
+
+Reject weak benefits:
+- easier to review
+- more details
+- help you understand
+- make it easier
+- see it clearly
+- check again
+- check it easily
+
+Accept benefits like:
+- see the exact one-unit cost clearly
+- quickly understand the total setup cost
+- see the full shipping total in one message
+- compare the key difference quickly
+- understand what makes the cheaper option different
+- see which option fits your setup better
+- plan the opening timeline more clearly
+- keep the right model summary ready for later
+- use it for your next studio client
+
+If the benefit could work with any anchor, it is invalid.
+If the benefit does not match the dominant customer type, it is invalid.
 
 --------------------------------
 MESSAGE REQUIREMENTS
@@ -137,13 +321,17 @@ MESSAGE REQUIREMENTS
 
 The candidate message must:
 - be one message only
+- follow the mandatory message structure
 - include the current customer name whenever available
 - never ask the same question again
 - never ask for missing info
 - offer a ready-made next step
 - contain a concrete object, not a vague action
+- contain one concrete immediate benefit
 - use `anchor_object`, `decision.primary_anchor`, or `allowed_micro_triggers` only when present and grounded in current history
-- reflect the exact stop point and blocker without explaining them
+- fit the exact stop point and blocker without explaining them
+- match the dominant customer type
+- use the highest-weight unresolved signal
 - be yes/no confirmable
 - require near-zero effort
 - be answerable with yes, ok, send, sure, show me, or keep it
@@ -170,6 +358,7 @@ Forbidden generic references:
 Required style:
 - one concrete micro-action
 - one exact concrete object
+- one concrete immediate benefit
 - one direction
 - one reply path
 - low-pressure
@@ -180,15 +369,16 @@ Required style:
 MICRO-TRIGGER CONVERSION
 --------------------------------
 
-Convert the allowed micro-trigger into a concrete action:
-- `resend_price_range_here` -> put the one-unit price, one sample price, or price range into one clear message
-- `clarify_why_cheaper_here` -> break down what makes the cheaper option different
-- `resend_catalog_here` -> put the catalog into one simple message
-- `send_ar011_photos_here` -> send the AR011 photos again here only if photos are the most recent unresolved object
-- `line_up_october_timing_here` -> line up the October arrival timing for the AR011
-- `resend_shipping_summary_here` -> put the shipping summary into one clear message
-- `future_client_not_now` -> keep the AR010 / AR011 / AR012 or studio-options summary ready for the next client
-- `keep_ready_for_later` -> keep the exact grounded object ready in one simple message
+Convert the selected anchor into action + benefit:
+
+- `resend_price_range_here` -> put the one-unit price, one sample price, or price range into one clear message so the customer can see the exact cost clearly
+- `clarify_why_cheaper_here` -> break down what makes the cheaper option different so the customer can compare the key difference quickly
+- `resend_catalog_here` -> put the catalog into one simple message so the customer can find the right model faster
+- `send_ar011_photos_here` -> send the AR011 photos again only if photos are the strongest unresolved object so the customer can see the exact model reference
+- `line_up_october_timing_here` -> line up the October arrival timing for the AR011 so the customer can plan the opening timeline more clearly
+- `resend_shipping_summary_here` -> put the shipping summary into one message so the customer can see the full shipping total clearly
+- `future_client_not_now` -> keep the AR010 / AR011 / AR012 or studio-options summary ready so the customer can use it for the next client
+- `keep_ready_for_later` -> keep the exact grounded object ready so the customer has one clear reference later
 
 Do NOT return empty just because:
 - `hard_no_send` is true
@@ -202,16 +392,16 @@ Do NOT return empty just because:
 Those cases still need one ultra-light activation message.
 
 Use these conversions:
-- not-now -> keep the concrete item ready, line it up clearly, put it into one simple message for later
+- not-now -> keep the concrete item ready so the customer has one clear reference later
 - market slow -> prepare one exact model or studio-options summary for the next real client
 - future client -> keep one real AR010 / AR011 / AR012 or budget-vs-premium summary ready
-- waiting-customer -> resend one exact object, put one exact point together clearly
+- waiting-customer -> resend one exact object so the customer can see the unresolved point clearly
 - not-my-turn -> offer one clear resend or summary of the unresolved customer object
 - low-priority -> use the strongest concrete prior object with lower pressure
 - no real history -> use the generic fallback
 
 Generic fallback ONLY if no usable history exists:
-"[Name], I can put the key point into one simple message here so it's easier to review — want me to send that?"
+"[Name], I can put the key point into one simple message so you can quickly see it — want me to send that here?"
 
 --------------------------------
 STYLE EXAMPLES
@@ -220,36 +410,42 @@ STYLE EXAMPLES
 Use these as style direction, not templates to repeat.
 Never copy the example name unless it matches the current customer.
 
-- "Marea, I can put the one-unit price into one clear message here so it's easier to review — want me to send that?"
-- "Ceci, I can break down what makes the cheaper option different in one simple message — want me to send that here?"
-- "Neha, I can put the AR010 / AR011 / AR012 differences into one simple message for your next studio client — want me to keep that here?"
-- "Rocio, I can line the October arrival timing for the AR011 up in one clear message — want me to send that here?"
-- "[Name], I can put the key point into one simple message here so it's easier to review — want me to send that?"
+- "Marea, I can put the one-unit price into one clear message so you can see the exact cost clearly — want me to send that here?"
+- "Ceci, I can break down what makes the cheaper option different so you can compare the key difference quickly — want me to send that here?"
+- "Neha, I can keep the AR010 / AR011 / AR012 differences in one message so you can use it for your next studio client — want me to send that here?"
+- "Rocio, I can line up the October arrival timing for the AR011 so you can plan the opening timeline more clearly — want me to send that here?"
+- "[Name], I can put the key point into one simple message so you can quickly see it — want me to send that here?"
 
 Variation control:
 - Do not reuse the exact same sentence across customers with similar anchors.
-- Slightly vary wording while keeping the structure simple.
-- Do not sacrifice grounding for variation.
+- Slightly vary wording while keeping the mandatory structure.
+- Do not sacrifice grounding, type-fit, signal weight, or benefit quality for variation.
 - Do not over-randomize or add complexity.
 
 --------------------------------
-FINAL SELF-CHECK
+FINAL HIDDEN SELF-CHECK
 --------------------------------
 
-Before returning JSON, verify:
-1. Does the message include the current customer name if available?
-2. Is the name from current `customer_name` or current `project_key`?
-3. Is the anchor from the current conversation?
-4. Where did the conversation stop?
-5. What exact blocker is being reduced?
-6. Is the blocker specifically reflected by the action?
-7. Is the object the most recent explicit or unresolved object when one exists?
-8. Could this exact message be reused for another customer?
-9. Is the message still one-trigger only?
-10. Is it slightly longer than the old short style but easy to answer in under 3 seconds?
-11. Is generic fallback used only when no usable object exists?
+Before returning JSON, silently verify:
+1. Does the message follow the mandatory structure?
+2. Does the message include the current customer name if available?
+3. Is the name from current `customer_name` or current `project_key`?
+4. Is the anchor from the current conversation?
+5. Is the anchor the highest-weight unresolved signal?
+6. What dominant customer type was selected?
+7. Does the action match that type?
+8. Does the benefit match that type?
+9. Where did the conversation stop?
+10. What exact blocker is being reduced?
+11. Is the blocker specifically reflected by the action and benefit?
+12. Could this exact message be reused for another customer?
+13. Is the message still one-trigger only?
+14. Is it one action, one benefit, one direction, and one reply path?
+15. Is it easy to answer in under 3 seconds?
+16. Is generic fallback used only when no usable object exists?
+17. Does the output contain only strict JSON with `whatsapp_message`?
 
-If the name is missing while available, the name is from the wrong customer, the stop point is vague, the blocker is vague, the object is unclear, grounding is weak, reusable is yes, or reply path is not minimal: regenerate.
+If the name is missing while available, the name is from the wrong customer, the stop point is vague, the blocker is vague, the object is unclear, the customer type is mismatched, the signal is weak, the benefit is generic, grounding is weak, reusable is yes, reply path is not minimal, or output contains anything outside JSON: regenerate internally.
 
 Do not explain reasoning outside JSON.
 
