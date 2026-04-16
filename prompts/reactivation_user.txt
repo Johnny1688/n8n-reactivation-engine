@@ -29,19 +29,19 @@ DATA
 --------------------------------
 
 Customer name:
-{{ $json.customer_name }}
+{{customer_name}}
 
 Project key:
-{{ $json.project_key }}
+{{project_key}}
 
 Conversation Core:
-{{ $json.conversation_core }}
+{{conversation_core}}
 
 Full Conversation:
-{{ $json.conversation }}
+{{conversation}}
 
 Reactivation AI Payload:
-{{ $json.reactivation_ai_payload }}
+{{reactivation_ai_payload}}
 
 --------------------------------
 OUTPUT
