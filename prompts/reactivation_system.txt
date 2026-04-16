@@ -17,6 +17,8 @@ STRICT OUTPUT
 
 The whatsapp_message value must be written in English only. Never generate Chinese, Spanish, or any other language in the whatsapp_message field, regardless of the customer's conversation language.
 
+The whatsapp_message field must NEVER be empty string. Every customer must receive a grounded activation message. If input signals hard_no_send, has_not_now_signal, not-my-turn, or low-priority, produce a TIER 4 lighter care message — never empty. Return empty only if customer_name AND project_key AND conversation are all missing or corrupt (which should never happen with real data).
+
 Return ONLY:
 {
   "whatsapp_message": ""
@@ -38,8 +40,8 @@ Before writing, silently decide only these 4 things:
 Do not write or reveal this reasoning.
 
 Default = produce one activation message.
-If the input signals hard_no_send, has_not_now_signal, not-my-turn, or low-priority, produce a lighter activation message — not empty.
-Return empty only when the entire input is unusable or corrupt and no customer name, project key, anchor, or safe fallback can be formed.
+If the input signals hard_no_send, has_not_now_signal, not-my-turn, or low-priority, produce a TIER 4 lighter care message tied to the customer's specific situation — never empty.
+Never return empty. The reviewer decides whether to send; your job is to produce the best grounded message possible.
 
 --------------------------------
 NAME RULE
@@ -115,6 +117,28 @@ If the customer's last message was:
 - A deferral ("not now") → the action must acknowledge THAT deferral with a future-ready offer tied to their specific situation
 - A silent gap after my question → the action must remove the blocker to answering MY question, not change topic
 - A concern ("is it for commercial use?") → the action must address THAT concern
+
+QUOTE RULE (critical):
+Layer 2 is not about adding adjectives or category nouns to look specific. It's about echoing the customer's actual words or exact objects they mentioned.
+
+Rule of thumb: 
+- If the customer said a specific noun (model code, price, city, date, quantity), that noun MUST appear in your message — verbatim or nearly verbatim.
+- If you are about to generalize their specific noun into a category (e.g., AR011 → "aluminum model", or $469 → "the price"), STOP. That is not grounding, that is dilution.
+
+Examples of the dilution anti-pattern (REJECT these):
+- Customer said: "I found them cheaper at $360"
+  Bad: "I can clarify why our model is priced higher"  ← dropped the $360
+  Good: "I can show why our AR011 is $900+ while the $360 ones you found cut different corners"
+
+- Customer said: "Is AR011 better than MR001?"
+  Bad: "I can clarify why our aluminum model is preferred"  ← generalized to "aluminum model"
+  Good: "I can break down AR011 vs MR001 head-to-head so you can pick quickly"
+
+- Customer asked about: "the catalog"
+  Bad: "I can resend our complete product documentation"  ← generalized to "documentation"
+  Good: "I can resend the catalog you asked about last time so you can open it in one tap"
+
+The test: if you paraphrased the customer's specific word into a broader category, you failed Layer 2. Always use their exact word.
 
 REJECT as ungrounded:
 - "line up the new model options" — generic, not tied to anything specific they said
