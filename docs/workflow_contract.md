@@ -66,27 +66,31 @@ The AI must not receive or re-analyze the full conversation.
 
 ## 2. Main Reactivation AI Output
 
-Produced by the main AI node using:
+Produced by the main AI (Generator) node using:
 
 - `prompts/reactivation_system.txt`
 - `prompts/reactivation_user.txt`
 - `reactivation_ai_payload`
+- `conversation_core`
+- `conversation`
+- `customer_name`
+- `project_key`
 
 Output must be JSON only:
 
 ```json
 {
-  "should_send": true,
-  "why": "",
   "whatsapp_message": ""
 }
 ```
 
 Notes:
 
-- `should_follow_up_now = false` in the payload does not mean "do not send".
-- It means generate an ultra-light optional message.
-- `should_send = false` should be rare and used only when there is no valid trigger.
+- The Generator outputs only `whatsapp_message`. No `should_send`, no `why`, no visible analysis.
+- The Generator never decides whether to send. That decision belongs to the Enforce node.
+- Default behavior is to produce a message. Empty output is reserved for cases where the entire input is unusable or corrupt.
+- Lighter messages (not empty) are produced when input signals `hard_no_send`, `has_not_now_signal`, not-my-turn, or low-priority states. The Enforce node makes the final empty/non-empty decision.
+- `should_send` and `why` are legacy fields. The Generator no longer produces them. `nodes/parse_ai_output.js` handles their absence gracefully.
 
 ## 3. Parse AI Output
 
@@ -96,11 +100,11 @@ Expected parsed fields:
 
 ```json
 {
-  "should_send": true,
-  "why": "",
   "whatsapp_message": ""
 }
 ```
+
+Legacy fields `should_send` and `why` are extracted if present (older outputs) and default to `should_send: false`, `why: ''` when absent.
 
 Fallback on invalid JSON:
 
@@ -114,24 +118,34 @@ Fallback on invalid JSON:
 
 ## 4. Enforce Message Quality Output
 
-Produced by the quality AI node using:
+Produced by the quality AI (Enforce) node using:
 
 - `prompts/enforce_quality_system.txt`
 - `prompts/enforce_quality_user.txt`
-- `whatsapp_message`
+- candidate `whatsapp_message` (resolved from `ai_parsed.whatsapp_message || _en || ''`)
 - `reactivation_ai_payload`
+- `conversation_core`
+- `conversation`
+- `customer_name`
+- `project_key`
+- send-state flags: `hard_no_send`, `has_not_now_signal`, `is_my_turn_to_reply`, `should_reactivate_now`
 
 Output must be JSON only:
 
 ```json
 {
-  "pass": true,
-  "quality_reason": "",
-  "final_message": ""
+  "whatsapp_message": ""
 }
 ```
 
-The quality node validates or minimally tightens the message. It must not create a new strategy.
+The Enforce node validates or rewrites the candidate message. It is the single source of truth for the final outbound message. It chooses one of:
+
+- **PASS** — candidate is valid, output unchanged
+- **REWRITE** — candidate is fixable, output improved (default action)
+- **GENERIC FALLBACK** — no usable history, use generic safe message
+- **EMPTY** — `hard_no_send = true` only
+
+`has_not_now_signal = true` and `is_my_turn_to_reply = false` trigger lighter rewrites, never empty. `hard_no_send = true` is the only flag that produces empty output.
 
 ## 5. Telegram Outputs
 
@@ -139,10 +153,11 @@ The quality node validates or minimally tightens the message. It must not create
 
 - `telegram_review_text`
 
-`nodes/filter_and_format_telegram_final.js` adds:
+`api/filter-and-format-telegram-final.js` adds:
 
-- `sendable`
+- `sendable` / `auto_send_pass`
 - `telegram_final_text`
+- Overwrites `whatsapp_message`, `whatsapp_text`, and `_en` with the post-Enforce final message. After this node, `_en` is the validated message — no pre-Enforce candidate text can leak downstream.
 
 `nodes/split_telegram_messages.js` adds:
 

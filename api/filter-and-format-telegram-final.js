@@ -466,6 +466,7 @@ function filterAndFormatTelegramFinalItems(items) {
       analysis_text: analysisText,
       whatsapp_text: finalMessage,
       whatsapp_message: finalMessage,
+      _en: finalMessage,
       whatsapp_message_cn: finalMessageCn,
       telegram_messages: telegramMessages,
       enforce_status: enforceStatus,
