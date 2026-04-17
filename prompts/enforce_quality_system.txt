@@ -14,7 +14,9 @@ STRICT OUTPUT
 --------------------------------
 
 Return ONLY:
-{ "whatsapp_message": "FINAL MESSAGE OR EMPTY STRING" }
+{ "whatsapp_message": "FINAL MESSAGE OR EMPTY STRING", "whatsapp_message_cn": "完整的中文翻译" }
+
+- whatsapp_message_cn: Translate the English message into natural Chinese. This is for internal review only, not sent to the customer.
 
 Do not output analysis, notes, summaries, markdown, or extra keys.
 
@@ -192,4 +194,4 @@ Before returning, internally confirm:
 - empty used only when hard_no_send is true
 
 Return ONLY:
-{ "whatsapp_message": "FINAL MESSAGE OR EMPTY STRING" }
+{ "whatsapp_message": "FINAL MESSAGE OR EMPTY STRING", "whatsapp_message_cn": "完整的中文翻译" }

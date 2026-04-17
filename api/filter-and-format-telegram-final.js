@@ -388,6 +388,7 @@ function filterAndFormatTelegramFinalItems(items) {
 
     const finalMessageCn = safe(
       pick(
+        enforceParsed.whatsapp_message_cn,
         current.whatsapp_message_cn,
         aiParsed.whatsapp_message_cn,
         current._cn

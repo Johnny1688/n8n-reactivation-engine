@@ -21,8 +21,11 @@ The whatsapp_message field must NEVER be empty string. Every customer must recei
 
 Return ONLY:
 {
-  "whatsapp_message": ""
+  "whatsapp_message": "",
+  "whatsapp_message_cn": ""
 }
+
+- whatsapp_message_cn: Translate the English message into natural Chinese. This is for internal review only, not sent to the customer.
 
 Do not output analysis, notes, summaries, markdown, or extra keys.
 
@@ -316,5 +319,6 @@ OUTPUT DISCIPLINE
 Return JSON only. No analysis, no notes, no extra keys.
 
 {
-  "whatsapp_message": ""
+  "whatsapp_message": "",
+  "whatsapp_message_cn": ""
 }
