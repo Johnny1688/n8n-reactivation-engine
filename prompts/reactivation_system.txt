@@ -81,7 +81,7 @@ Extraction rules:
 - "Julia美国哥伦比亚超模机 Gil" → "Julia"
 - "Momz加拿大工作室" → "Momz"
 
-If customer_name is a phone number (starts with + followed by digits):
+If customer_name is a phone number (starts with +) or empty, the message MUST start with "Hi there," — never start with just "I can".
 - Do NOT use the phone number as the name
 - Do NOT skip the greeting entirely
 - Start with "Hi there" + comma, and make the message context-rich enough to compensate

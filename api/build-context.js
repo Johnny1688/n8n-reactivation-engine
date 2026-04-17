@@ -7,6 +7,22 @@ function safeString(value) {
   return '';
 }
 
+function cleanCustomerName(raw) {
+  if (!raw) return '';
+  if (/^\+\d/.test(raw.trim())) return '';
+  let name = raw
+    .replace(/[\u4e00-\u9fff]+/g, '')
+    .replace(/[（()）]+/g, '')
+    .replace(/\d{1,4}[\.\-\/]\d{1,2}[\.\-\/]?\d{0,2}日?/g, '')
+    .replace(/\d+台/g, '')
+    .replace(/\b[A-Z]{2}\d{3}\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const words = name.split(/\s+/).filter(w => w.length > 0);
+  if (words.length === 0) return '';
+  return words[0];
+}
+
 function normalizeText(value) {
   return safeString(value).replace(/\s+/g, ' ').trim().toLowerCase();
 }
@@ -438,6 +454,7 @@ function enhanceBuildContextResult(result) {
 
   return {
     ...result,
+    customer_name_clean: cleanCustomerName(result.customer_name || result.project_key),
     has_not_now_signal: result.has_not_now_signal === true || guidance.hardNoSend,
     // Legacy/debug compatibility only. Downstream execution should use send_state and hard_no_send.
     should_reactivate_now: result.should_reactivate_now,

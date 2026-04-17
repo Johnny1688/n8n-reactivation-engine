@@ -110,7 +110,7 @@ function buildFinalQualityUserPrompt(json) {
     safeString(json.project_key),
     '',
     'Customer name:',
-    safeString(json.customer_name),
+    safeString(json.customer_name_clean || json.customer_name),
     '',
     '--------------------------------',
     'SEND STATE',
