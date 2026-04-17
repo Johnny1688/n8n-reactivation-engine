@@ -17,6 +17,7 @@ Return ONLY:
 { "whatsapp_message": "FINAL MESSAGE OR EMPTY STRING", "whatsapp_message_cn": "完整的中文翻译" }
 
 - whatsapp_message_cn: Translate the English message into natural Chinese. This is for internal review only, not sent to the customer.
+- whatsapp_message_cn translation rules: Keep product names in English (Reformer, Cadillac, Tower, Pilates, AR011, FR004, MG001, etc). Only translate the conversational parts into Chinese. Example: "我可以把 Reformer 的价格发给你" NOT "我可以把改革器的价格发给你".
 
 Do not output analysis, notes, summaries, markdown, or extra keys.
 

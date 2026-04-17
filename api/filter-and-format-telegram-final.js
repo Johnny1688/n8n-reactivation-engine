@@ -484,6 +484,7 @@ function filterAndFormatTelegramFinalItems(items) {
     const telegramMessages = !shouldBlock
       ? [
           `${reviewHeader}【${projectKey}】\n\nEnglish:\n${finalMessage}\n\n中文翻译:\n${finalMessageCn || '（未提供中文对照）'}`,
+          current.project_key || '',
           finalMessage
         ]
       : [];
