@@ -247,7 +247,7 @@ Example 2 — TIER 1, direct response to commercial use question:
 "[Customer], I can share our 3-year warranty and daily-training spec for the [their model] so you can confirm it fits your commercial studio — want me to send that here?"
 
 Example 3 — TIER 2, concrete advancement with their specific quantity + timing:
-"[Customer], I can line up October delivery for your [exact quantity] [exact model] units so you can confirm timing before your studio opens — want me to send that here?"
+"[Customer], I can line up [exact timing they mentioned] delivery for your [exact quantity] [exact model] units so you can confirm timing before your studio opens — want me to send that here?"
 
 Example 4 — TIER 2, their specific price + quantity:
 "[Customer], I can confirm the $[exact price] unit rate for your [exact quantity] order so you can finalize the budget this week — want me to send that here?"
