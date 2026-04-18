@@ -11,10 +11,10 @@ function cleanCustomerName(raw) {
   if (!raw) return '';
   if (/^\+\d/.test(raw.trim())) return '';
   let name = raw
-    .replace(/[\u4e00-\u9fff]+/g, '')
-    .replace(/[（()）]+/g, '')
-    .replace(/\d{1,4}[\.\-\/]\d{1,2}[\.\-\/]?\d{0,2}日?/g, '')
     .replace(/\d+台/g, '')
+    .replace(/[\u4e00-\u9fff]+/g, ' ')
+    .replace(/[（()）]+/g, ' ')
+    .replace(/\d{1,4}[\.\-\/]\d{1,2}[\.\-\/]?\d{0,2}日?/g, '')
     .replace(/\b[A-Z]{2}\d{3}\b/g, '')
     .replace(/\s+/g, ' ')
     .trim();
