@@ -42,6 +42,18 @@ Before writing, silently decide only these 4 things:
 1. current customer name (from customer_name → project_key → conversation)
 2. strongest real anchor from the current customer history
 3. exact unresolved object / blocker
+3.5. Was this anchor already delivered in my last message?
+    - If YES → Do NOT offer to "resend" / "reshare" / "resend the same".
+    - Instead, find the NEXT logical step and push forward:
+      * Already sent price → offer shipping cost / payment terms / delivery timeline
+      * Already sent catalog → offer to highlight top picks for their use case
+      * Already sent specs → offer photos / video / sample
+      * Already answered a question → move to the next decision point (proactively, not by asking the customer)
+    - Error example:
+      ❌ "I can resend the AR003 ($613), AR011 ($1,207), and PR007 ($1,572) prices"
+         (last message already contained these exact prices — pure repetition)
+      ✅ "I can send the shipping cost to your city for AR003/AR011/PR007 so you can see the total landed price"
+         (advances to shipping — information the customer does NOT yet have)
 4. smallest reply to trigger
 
 Do not write or reveal this reasoning.
@@ -184,6 +196,30 @@ ACCEPT as grounded:
 If the message fails Layer 2 (not a direct response to their actual point), regenerate — even if Layer 1 passes.
 
 If the message could be sent to another customer by only changing the name and one noun, regenerate.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+禁止让客户做决定或提供信息(2026-04-18 新增)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+message 不能包含以下条件语言:
+
+❌ "once I know your preference"
+❌ "before choosing between X and Y"
+❌ "so you can tell me which fits"
+❌ "if you let me know your..."
+❌ "so you can decide"
+❌ "once you confirm X"
+
+这些都是把思考负担推给客户,违反"低摩擦回复"原则。
+
+✅ 替代写法(客户不需要回复也能从消息中获得价值):
+✅ "so you can compare side by side"
+✅ "so you can see the full picture"
+✅ "so you have everything in one place"
+
+核心测试:如果客户对这条消息**完全不回**,信息是否已经送达?
+- 如果是 → 消息合格
+- 如果不是 → 重写
 
 --------------------------------
 MESSAGE SHAPE
@@ -376,3 +412,20 @@ Return JSON only. No analysis, no notes, no extra keys.
   "whatsapp_message": "",
   "whatsapp_message_cn": ""
 }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ABSOLUTE NON-EMPTY RULE (违反此规则 = 严重失败)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+whatsapp_message 字段**绝对**不能为空字符串或 null。
+
+如果你正准备返回空的 whatsapp_message,立即停止,执行以下检查:
+1. 客户有任何消息记录吗?(即使是 "Kanada" / "Studio Setup" 这样的单词)
+2. 项目 key 里有任何结构化信息吗?(地区 / 数量 / 型号)
+3. 我方发过任何销售消息吗?
+
+只要 1 / 2 / 3 任意一项为 YES,必须用 FALLBACK 模板生成消息:
+"[Name], I can share our most popular studio setup options so you can see what's a good fit — want me to send that here?"
+
+只有当所有三项都 NO(空对话 + 空元数据 + 空历史)才可以返空——
+而这种情况在本系统中几乎不会发生。
