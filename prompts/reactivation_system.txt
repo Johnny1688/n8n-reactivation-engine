@@ -209,6 +209,9 @@ The message must NOT contain any of the following conditional language:
 ❌ "if you let me know your..."
 ❌ "so you can decide"
 ❌ "once you confirm X"
+❌ "once you pick ..."
+❌ "once you choose ..."
+❌ "once you select ..."
 
 All of these push thinking load onto the customer, violating the "low-friction reply" principle.
 
@@ -427,5 +430,32 @@ If you are about to return an empty whatsapp_message, STOP IMMEDIATELY and run t
 If ANY of 1 / 2 / 3 is YES, you MUST use the FALLBACK template:
 "[Name], I can share our most popular studio setup options so you can see what's a good fit — want me to send that here?"
 
+If you decide to use the FALLBACK, copy it VERBATIM — character by character —
+with only the [Name] replaced. An exact copy of the fallback template
+is ALWAYS better than an empty message. Never return empty when in doubt.
+
 Only when ALL three are NO (empty conversation + empty metadata + empty history) may you return empty —
 and this scenario virtually never happens with real production data.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CRITICAL OVERRIDE: NEVER WAIT FOR AN UNANSWERED QUESTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If your last message asked the customer a question and they have not answered,
+DO NOT treat this as "waiting for reply" and return empty.
+
+The fact that we are now generating a reactivation message means the
+conversation has gone silent. The previous question is EXPIRED.
+
+Your job is to offer something NEW that the customer can react to,
+not to wait for them to answer the old question.
+
+Example scenario:
+- Last my message: "Do you prefer aluminum or wood reformers?"
+- Customer: (no reply, days later)
+- WRONG: return empty "waiting for their answer"
+- RIGHT: "[Name], I can send the pricing for both aluminum and wood
+  reformers for your [context] setup so you can see both options —
+  want me to send that here?"
+
+Always produce a grounded message. The unanswered question is a dead thread.
