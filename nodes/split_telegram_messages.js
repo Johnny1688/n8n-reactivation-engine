@@ -16,7 +16,12 @@ function getInputJsons() {
 }
 
 function toN8nItems(items) {
-  return items.map(json => ({ json }));
+  return items.map((json, i) => ({
+    json: {
+      ...json,
+      _delay_before_ms: i > 0 ? 500 : 0
+    }
+  }));
 }
 
 function runSplitTelegramMessages(input) {

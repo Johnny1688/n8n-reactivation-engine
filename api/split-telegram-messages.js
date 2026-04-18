@@ -32,14 +32,15 @@ function splitTelegramMessages(items) {
     const orderGroup = toSafeString(data.order_group);
     const messages = Array.isArray(data.telegram_messages) ? data.telegram_messages : [];
 
-    for (const message of messages) {
-      const text = toSafeString(message);
+    for (let i = 0; i < messages.length; i++) {
+      const text = toSafeString(messages[i]);
       if (!text) continue;
 
       out.push({
         project_key: projectKey,
         order_group: orderGroup,
-        text
+        text,
+        _delay_before_ms: out.length > 0 ? 500 : 0
       });
     }
   }
