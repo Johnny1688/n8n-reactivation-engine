@@ -26,7 +26,10 @@ Return ONLY:
 }
 
 - whatsapp_message_cn: Translate the English message into natural Chinese. This is for internal review only, not sent to the customer.
-- whatsapp_message_cn translation rules: Keep product names in English (Reformer, Cadillac, Tower, Pilates, AR011, FR004, MG001, etc). Only translate the conversational parts into Chinese. Example: "我可以把 Reformer 的价格发给你" NOT "我可以把改革器的价格发给你".
+- whatsapp_message_cn translation rules: Keep product names in English (Reformer, Cadillac, Tower, Pilates, AR011, FR004, MG001, etc). Only translate the conversational parts into Chinese.
+- whatsapp_message_cn MUST be a FULL translation of the English message, NOT a generic template. Translate ALL specific details (prices, quantities, locations, names) into the Chinese version.
+- DO NOT use generic templates like "我可以把相关选项整理成一条简单信息". The Chinese version must convey the same specific information as the English version.
+- Example: EN: "Marci, I can send you the shipping cost to Beaumont" → CN: "Marci，我可以把发货到 Beaumont 的运费发给你" (✅ GOOD) NOT "我可以把相关选项整理成一条简单信息" (❌ BAD)
 
 Do not output analysis, notes, summaries, markdown, or extra keys.
 
@@ -95,6 +98,27 @@ NEVER use any of these as greeting names:
 - Raw phone numbers (+16304659913)
 - Full project keys with Chinese characters (Ceci美国)
 - Business entity descriptors (HC菲律宾计划开工作室)
+
+CRITICAL NAME RULE:
+- ALWAYS use the customer_name_clean field provided in input (NEVER use project_key or raw customer_name)
+- If customer_name_clean is empty or starts with "Hi there", start the message with exactly "Hi there,"
+- NEVER include any of these in the customer name part of your message:
+  * Chinese characters (中文)
+  * Phone numbers (+1234567890)
+  * Dates (26.3.15日, 25.12.2日)
+  * Quantity (10台, 2台)
+  * Model codes (AR011, FR004)
+  * Brackets (parentheses)
+- If you see ANY of the above appearing in your draft message's name position, you MUST rewrite it.
+
+VALID examples:
+✅ "Marea, I can..."
+✅ "Hi there, I can..."
+
+INVALID examples (REWRITE if you produce these):
+❌ "Marea澳大利亚（26.4.6日）, I can..."
+❌ "+18622675255, I can..."
+❌ "MCD菲律宾（25.12.2日）, I can..."
 
 --------------------------------
 GROUNDING RULE
@@ -292,6 +316,35 @@ If the customer has mentioned NONE of the above (conversation is too short, just
 → GO DIRECTLY to the FALLBACK template below.
 
 Fake-grounded messages are worse than a clean fallback. A clean fallback gives the reviewer something usable; a fake-grounded message wastes everyone's time and risks embarrassment if sent to the customer.
+
+PRODUCT MODEL RULE:
+- ONLY use product model codes that the customer explicitly mentioned in the conversation
+- DO NOT invent product codes (e.g. AR004, AR012) that don't appear in the customer's messages
+- If you want to mention a model not in conversation, use generic terms instead ("our standard reformer", "the wood model")
+
+Valid product codes (the only ones we sell): AR001, AR003, AR010, AR011, AR012, FR001, FR004, MR001-005, OR001, BR001, PR007, PC006, BS001, MG001-006
+- ANY other code is fabrication - never use it
+
+ANCHOR SPECIFICITY RULE:
+The anchor (the "thing" you're offering to send) must be specific, not generic.
+
+❌ BAD anchors (too vague, FORBIDDEN):
+- "shipping delivery summary"
+- "catalog" (alone, without specifying what's in it)
+- "options" (alone)
+- "details" (alone)
+- "information"
+- "new model options" (without specifying which models)
+
+✅ GOOD anchors (specific from conversation):
+- "the $469 unit price" (specific number from conversation)
+- "AR011 photos and video" (specific model from conversation)
+- "the difference between aluminum and wood reformer" (specific comparison from conversation)
+- "DDP shipping cost to Vancouver" (specific destination from conversation)
+- "the 10-unit total cost breakdown" (specific quantity from conversation)
+
+If you cannot find a specific anchor in the conversation, default to FALLBACK:
+"[Name], I can share our most popular studio setup options so you can see what's a good fit — want me to send that here?"
 
 --------------------------------
 FALLBACK

@@ -5,7 +5,7 @@ Project:
 {{$json.project_key || ''}}
 
 Customer name:
-{{$json.customer_name || ''}}
+{{$json.customer_name_clean || $json.customer_name || ''}}
 
 --------------------------------
 SEND STATE

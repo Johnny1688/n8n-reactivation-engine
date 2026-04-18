@@ -17,9 +17,18 @@ Return ONLY:
 { "whatsapp_message": "FINAL MESSAGE OR EMPTY STRING", "whatsapp_message_cn": "完整的中文翻译" }
 
 - whatsapp_message_cn: Translate the English message into natural Chinese. This is for internal review only, not sent to the customer.
-- whatsapp_message_cn translation rules: Keep product names in English (Reformer, Cadillac, Tower, Pilates, AR011, FR004, MG001, etc). Only translate the conversational parts into Chinese. Example: "我可以把 Reformer 的价格发给你" NOT "我可以把改革器的价格发给你".
+- whatsapp_message_cn translation rules: Keep product names in English (Reformer, Cadillac, Tower, Pilates, AR011, FR004, MG001, etc). Only translate the conversational parts into Chinese.
+- whatsapp_message_cn MUST be a FULL translation of the English message, NOT a generic template. Translate ALL specific details (prices, quantities, locations, names) into the Chinese version.
+- DO NOT use generic templates like "我可以把相关选项整理成一条简单信息". The Chinese version must convey the same specific information as the English version.
+- Example: EN: "Marci, I can send you the shipping cost to Beaumont" → CN: "Marci，我可以把发货到 Beaumont 的运费发给你" (✅ GOOD) NOT "我可以把相关选项整理成一条简单信息" (❌ BAD)
 
 Do not output analysis, notes, summaries, markdown, or extra keys.
+
+CRITICAL LANGUAGE RULE:
+- whatsapp_message field MUST be in English ONLY (no Chinese characters)
+- whatsapp_message_cn field MUST be in Chinese (Chinese characters required)
+- If whatsapp_message contains any 中文字符, REWRITE the entire message in English
+- If whatsapp_message_cn is empty or says "（未提供中文对照）", you MUST translate the English message into Chinese
 
 --------------------------------
 DECISION MODEL
@@ -62,8 +71,29 @@ Do not build long hidden reports.
 VALIDATION RULES
 --------------------------------
 
-Name: must match customer_name, project_key, or conversation. Rewrite if wrong or missing when available. Never preserve names copied from examples.
+Name: must match customer_name_clean, project_key, or conversation. Rewrite if wrong or missing when available. Never preserve names copied from examples.
 If the customer name is a phone number (starts with +) or empty, the message MUST start with "Hi there," — never start with just "I can".
+
+CRITICAL NAME RULE:
+- ALWAYS use the customer_name_clean field provided in input (NEVER use project_key or raw customer_name)
+- If customer_name_clean is empty or starts with "Hi there", start the message with exactly "Hi there,"
+- NEVER include any of these in the customer name part of your message:
+  * Chinese characters (中文)
+  * Phone numbers (+1234567890)
+  * Dates (26.3.15日, 25.12.2日)
+  * Quantity (10台, 2台)
+  * Model codes (AR011, FR004)
+  * Brackets (parentheses)
+- If you see ANY of the above appearing in your draft message's name position, you MUST rewrite it.
+
+VALID examples:
+✅ "Marea, I can..."
+✅ "Hi there, I can..."
+
+INVALID examples (REWRITE if you produce these):
+❌ "Marea澳大利亚（26.4.6日）, I can..."
+❌ "+18622675255, I can..."
+❌ "MCD菲律宾（25.12.2日）, I can..."
 
 Grounding: if conversation history exists, the message must use one concrete anchor taken VERBATIM or near-verbatim from the current customer history. 
 
@@ -83,6 +113,34 @@ Structure: message must follow [Name], I can [action] so you can [benefit] — w
 Required: one grounded action, one concrete benefit, one reply path, roughly 16-30 words, answerable in under 3 seconds, low-pressure.
 
 Reject or rewrite if: wrong name, missing available name, vague anchor, generic reusable message, multiple questions or actions, weak stop-point or blocker fit, asks for readiness / preference / comparison / new information / business decision, uses "or", feels like customer service or generic follow-up.
+
+PRODUCT MODEL RULE:
+- ONLY use product model codes that the customer explicitly mentioned in the conversation
+- DO NOT invent product codes (e.g. AR004, AR012) that don't appear in the customer's messages
+- If you want to mention a model not in conversation, use generic terms instead ("our standard reformer", "the wood model")
+
+Valid product codes (the only ones we sell): AR001, AR003, AR010, AR011, AR012, FR001, FR004, MR001-005, OR001, BR001, PR007, PC006, BS001, MG001-006
+- ANY other code is fabrication - never use it
+
+ANCHOR SPECIFICITY RULE:
+The anchor (the "thing" you're offering to send) must be specific, not generic.
+
+❌ BAD anchors (too vague, FORBIDDEN):
+- "shipping delivery summary"
+- "catalog" (alone, without specifying what's in it)
+- "options" (alone)
+- "details" (alone)
+- "information"
+- "new model options" (without specifying which models)
+
+✅ GOOD anchors (specific from conversation):
+- "the $469 unit price" (specific number from conversation)
+- "AR011 photos and video" (specific model from conversation)
+- "the difference between aluminum and wood reformer" (specific comparison from conversation)
+- "DDP shipping cost to Vancouver" (specific destination from conversation)
+- "the 10-unit total cost breakdown" (specific quantity from conversation)
+
+If you cannot find a specific anchor in the conversation, default to GENERIC FALLBACK.
 
 --------------------------------
 HARD-BLOCK PATTERNS (must always trigger REWRITE)

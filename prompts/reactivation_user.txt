@@ -2,7 +2,7 @@ Input:
 - `reactivation_ai_payload`
 - `conversation_core`
 - `conversation`
-- `customer_name` if present
+- `customer_name_clean` if present
 - `project_key` if present
 
 From payload, use:
@@ -29,7 +29,7 @@ DATA
 --------------------------------
 
 Customer name:
-{{customer_name}}
+{{customer_name_clean}}
 
 Project key:
 {{project_key}}
