@@ -1,0 +1,318 @@
+{
+  "project_key": "Yosef美国 J3 Baranes",
+  "messages": [],
+  "customer_name": "Yosef美国 J3 Baranes",
+  "message_count": 0,
+  "has_messages": false,
+  "last_customer_message": "",
+  "last_customer_message_time_normalized": null,
+  "last_my_message": "",
+  "last_my_message_time_normalized": null,
+  "recent_messages": [],
+  "cleaned_full_conversation": "",
+  "_debug_source": "normalize_customer_data",
+  "original_message_count": 0,
+  "deduplicated_message_count": 0,
+  "_context_builder_version": "build_ai_context_v5.1_PRODUCTION_READY",
+  "core_messages": [],
+  "conversation": "",
+  "conversation_core": "",
+  "customer_only_text": "",
+  "customer_recent_only_text": "",
+  "seller_only_text": "",
+  "project_and_structured_text": "Yosef美国 J3 Baranes\nYosef美国 J3 Baranes\n\n\n\n\n\n\n",
+  "customer_priority_analysis_text": "\n\nYosef美国 J3 Baranes\nYosef美国 J3 Baranes\n\n\n\n\n\n\n",
+  "now_time": "2026-04-16T10:17:32.700Z",
+  "now_time_display": "2026-04-16 10:17",
+  "first_message": "",
+  "first_message_time": "",
+  "first_message_time_display": "unknown",
+  "last_customer_message_time": "",
+  "last_customer_message_time_display": "unknown",
+  "last_my_message_time": "",
+  "last_my_message_time_display": "unknown",
+  "last_message_time": "",
+  "last_message_time_display": "unknown",
+  "last_message_role": "",
+  "timeline": {
+    "now_time": "2026-04-16T10:17:32.700Z",
+    "now_time_display": "2026-04-16 10:17",
+    "first_message_time": "",
+    "first_message_time_display": "unknown",
+    "last_customer_message_time": "",
+    "last_customer_message_time_display": "unknown",
+    "last_my_message_time": "",
+    "last_my_message_time_display": "unknown",
+    "last_message_time": "",
+    "last_message_time_display": "unknown",
+    "last_message_role": "unknown",
+    "who_stopped": "unknown",
+    "who_should_reply_next": "unknown",
+    "sequence": "无对话记录",
+    "conversation_status": "open_no_messages",
+    "gap_days_customer_vs_me": "unknown",
+    "gap_hours_customer_vs_me": "unknown",
+    "gap_minutes_customer_vs_me": "unknown",
+    "hours_since_last_customer_message": "unknown",
+    "hours_since_last_my_message": "unknown",
+    "days_since_last_customer_message": "unknown",
+    "days_since_last_my_message": "unknown",
+    "gap_hint": "",
+    "summary": "暂无对话记录",
+    "events": []
+  },
+  "timeline_summary": "暂无对话记录",
+  "dated_history_summary": "无可用沟通记录",
+  "timeline_events": [],
+  "who_stopped": "unknown",
+  "who_should_reply_next": "unknown",
+  "conversation_sequence": "无对话记录",
+  "timeline_conversation_status": "open_no_messages",
+  "gap_days_customer_vs_me": "unknown",
+  "gap_hours_customer_vs_me": "unknown",
+  "gap_minutes_customer_vs_me": "unknown",
+  "hours_since_last_customer_message": "unknown",
+  "hours_since_last_my_message": "unknown",
+  "days_since_last_customer_message": "unknown",
+  "days_since_last_my_message": "unknown",
+  "cleaned_message_count": 0,
+  "recent_message_count": 0,
+  "core_message_count": 0,
+  "full_conversation_length": 0,
+  "customer_message_count": 0,
+  "my_message_count": 0,
+  "has_customer_reply": false,
+  "has_price_signal": false,
+  "has_timing_signal": false,
+  "has_not_now_signal": false,
+  "last_customer_gap_hint": "",
+  "is_my_turn_to_reply": null,
+  "should_reactivate_now": false,
+  "customer_replied_after_my_last_message": false,
+  "is_customer_silent_after_my_message": null,
+  "customer_last_message_type": "unknown",
+  "last_exchange": {
+    "last_customer_message": "",
+    "last_customer_message_time": "",
+    "last_customer_message_time_display": "unknown",
+    "last_my_message": "",
+    "last_my_message_time": "",
+    "last_my_message_time_display": "unknown",
+    "last_message_role": "unknown",
+    "sequence": "无对话记录",
+    "who_stopped": "unknown",
+    "who_should_reply_next": "unknown"
+  },
+  "stage": "outreach",
+  "follow_up_priority": "low",
+  "status": "open",
+  "customer_type": "unknown",
+  "intent_level": "unknown",
+  "purchase_stage": "information_gathering",
+  "product_interest": "unknown",
+  "quantity_signal": "unknown",
+  "concerns": "unknown",
+  "key_signals": "暂无有效互动记录",
+  "current_blocker": "缺少明确下一步动作",
+  "strategy_direction": "轻重新开启",
+  "reply_angle": "轻提醒并降低回复压力",
+  "follow_up_focus": "轻量重启对话",
+  "primary_reply_anchor": "last_interaction_summary",
+  "secondary_context": "",
+  "reply_risk": "normal",
+  "reactivation_ai_payload": {
+    "timeline": {
+      "last_customer_message_time": "unknown",
+      "last_my_message_time": "unknown",
+      "gap_days": 0
+    },
+    "last_signal": {
+      "type": "unknown",
+      "summary": "no clear signal",
+      "confidence": "medium",
+      "anchor_object": "last_interaction_summary"
+    },
+    "stop_point": {
+      "where_it_stopped": "after last interaction",
+      "why_it_stopped": "no clear next step",
+      "smallest_reply_to_trigger": "simplify_last_point_here",
+      "anchor_object": "last_interaction_summary",
+      "allowed_micro_triggers": [
+        "simplify_last_point_here"
+      ],
+      "send_state": "rewrite_needed",
+      "hard_no_send": false
+    },
+    "constraints": {
+      "must_avoid": [
+        "multi-question message",
+        "pushing decision"
+      ],
+      "must_follow": [
+        "single trigger",
+        "low friction reply",
+        "single micro-trigger",
+        "concrete conversation anchor"
+      ],
+      "do_not_repeat": [],
+      "allowed_micro_triggers": [
+        "simplify_last_point_here"
+      ]
+    },
+    "decision": {
+      "should_follow_up_now": true,
+      "best_trigger_type": "simplify_last_point_here",
+      "best_trigger_reason": "fallback_to_last_interaction_context",
+      "smallest_reply_goal": "simplify_last_point_here",
+      "primary_anchor": "last_interaction_summary",
+      "anchor_object": "last_interaction_summary",
+      "allowed_micro_triggers": [
+        "simplify_last_point_here"
+      ],
+      "send_state": "rewrite_needed",
+      "hard_no_send": false
+    }
+  },
+  "_project_signals": {
+    "project_has_stage_hint": false,
+    "project_has_qty_hint": false,
+    "project_has_model_hint": false
+  },
+  "stop_point_analysis": {
+    "where_it_stopped": "",
+    "why_it_stopped_there": "",
+    "what_my_last_push_was": "",
+    "what_customer_did_not_answer": "",
+    "did_my_last_push_fail": false,
+    "smallest_reply_to_trigger": "simplify_last_point_here",
+    "anchor_object": "last_interaction_summary",
+    "allowed_micro_triggers": [
+      "simplify_last_point_here"
+    ],
+    "send_state": "rewrite_needed",
+    "hard_no_send": false
+  },
+  "forbidden_repeat_zone": {
+    "already_asked_questions": [],
+    "already_sent_topics": [],
+    "already_used_angles": [],
+    "do_not_repeat": [],
+    "allowed_micro_triggers": [
+      "simplify_last_point_here"
+    ]
+  },
+  "reactivation_decision_basis": {
+    "should_follow_up_now": true,
+    "best_trigger_type": "simplify_last_point_here",
+    "best_trigger_reason": "fallback_to_last_interaction_context",
+    "must_avoid": [],
+    "smallest_reply_goal": "simplify_last_point_here",
+    "primary_anchor": "last_interaction_summary",
+    "anchor_object": "last_interaction_summary",
+    "allowed_micro_triggers": [
+      "simplify_last_point_here"
+    ],
+    "send_state": "rewrite_needed",
+    "hard_no_send": false
+  },
+  "reactivation_v6_core": {
+    "timeline_facts": {
+      "last_customer_message_time": "",
+      "last_my_message_time": "",
+      "who_should_reply_next": "unknown",
+      "days_since_last_customer_message": "unknown",
+      "days_since_last_my_message": "unknown",
+      "conversation_status": "open_no_messages"
+    },
+    "last_customer_signal": {
+      "last_customer_message": "",
+      "last_customer_message_type": "unknown"
+    },
+    "stop_point_analysis": {
+      "where_it_stopped": "",
+      "why_it_stopped_there": "",
+      "what_my_last_push_was": "",
+      "what_customer_did_not_answer": "",
+      "did_my_last_push_fail": false,
+      "smallest_reply_to_trigger": "simplify_last_point_here",
+      "anchor_object": "last_interaction_summary",
+      "allowed_micro_triggers": [
+        "simplify_last_point_here"
+      ],
+      "send_state": "rewrite_needed",
+      "hard_no_send": false
+    },
+    "forbidden_repeat_zone": {
+      "already_asked_questions": [],
+      "already_sent_topics": [],
+      "already_used_angles": [],
+      "do_not_repeat": [],
+      "allowed_micro_triggers": [
+        "simplify_last_point_here"
+      ]
+    },
+    "reactivation_decision_basis": {
+      "should_follow_up_now": true,
+      "best_trigger_type": "simplify_last_point_here",
+      "best_trigger_reason": "fallback_to_last_interaction_context",
+      "must_avoid": [],
+      "smallest_reply_goal": "simplify_last_point_here",
+      "primary_anchor": "last_interaction_summary",
+      "anchor_object": "last_interaction_summary",
+      "allowed_micro_triggers": [
+        "simplify_last_point_here"
+      ],
+      "send_state": "rewrite_needed",
+      "hard_no_send": false
+    },
+    "anchor_object": "last_interaction_summary",
+    "allowed_micro_triggers": [
+      "simplify_last_point_here"
+    ],
+    "send_state": "rewrite_needed",
+    "hard_no_send": false
+  },
+  "anchor_object": "last_interaction_summary",
+  "allowed_micro_triggers": [
+    "simplify_last_point_here"
+  ],
+  "send_state": "rewrite_needed",
+  "hard_no_send": false,
+  "output": [
+    {
+      "id": "msg_0770dcc489c168980069e0b74c3bf081a2abbecb88a4da7885",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "{\n  \"whatsapp_message\": \"Yosef, I can simplify our last point so you can quickly see what we discussed — want me to send that here?\"\n}"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "ai_parsed": {
+    "whatsapp_message": "Yosef, I can simplify our last point so you can quickly see what we discussed — want me to send that here?"
+  },
+  "order_group": "Yosef美国 J3 Baranes",
+  "_en": "Yosef, I can simplify our last point so you can quickly see what we discussed — want me to send that here?",
+  "_cn": "我可以整理成一条简单信息发给你，要我发这里吗？",
+  "weak_candidate_message": "",
+  "needs_enforce_rewrite": false,
+  "telegram_messages": [
+    "【Yosef美国 J3 Baranes】\n\nEnglish:\nYosef, I can simplify our last point so you can quickly see what we discussed — want me to send that here?\n\n中文翻译:\n我可以整理成一条简单信息发给你，要我发这里吗？",
+    "Yosef, I can simplify our last point so you can quickly see what we discussed — want me to send that here?"
+  ],
+  "enforce_parsed": {
+    "whatsapp_message": "Yosef, I can simplify our last point so you can quickly see what we discussed — want me to send that here?"
+  },
+  "analysis_text": "客户名称：Yosef美国 J3 Baranes\n\n阶段：初步触达 ｜ 优先级：低 ｜ 状态：进行中\n\n客户分析：\n客户类型：未知\n意向等级：未知\n采购阶段：信息收集\n关注产品：unknown\n数量信号：unknown\n关注点：unknown\n关键信号：暂无有效互动记录\n\n历史沟通回顾：\n无可用沟通记录\n\n关键时间节点：\n客户最后回复：unknown\n我方最后发送：unknown\n\n时间间隔：\n—\n\n当前判断：\n客户信号：暂无有效互动记录\n当前状态：open_no_messages\n\n当前阻碍：缺少明确下一步动作\n策略方向：轻重新开启\n回复角度：轻提醒并降低回复压力\n跟进焦点：轻量重启对话\n\n分析信心：\n中\n\nAI分析摘要：\n未输出\n\n推理摘要：\n轻提醒并降低回复压力\n\nEnforce执行检查：\nEnforce状态：pass\n目标回复：未输出\n多路径风险：低\n思考负担风险：低\n高风险词拦截：否\n泛化表达拦截：否\n弱锚点拦截：是\n\n建议跟进话术（最终英文）：\n✅ Yosef, I can simplify our last point so you can quickly see what we discussed — want me to send that here?\n\n建议跟进话术（中文对照）：\n✅ 我可以整理成一条简单信息发给你，要我发这里吗？",
+  "whatsapp_text": "Yosef, I can simplify our last point so you can quickly see what we discussed — want me to send that here?",
+  "whatsapp_message": "Yosef, I can simplify our last point so you can quickly see what we discussed — want me to send that here?",
+  "whatsapp_message_cn": "我可以整理成一条简单信息发给你，要我发这里吗？",
+  "enforce_status": "pass",
+  "auto_send_pass": true
+}

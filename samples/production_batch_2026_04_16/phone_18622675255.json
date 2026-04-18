@@ -1,0 +1,371 @@
+{
+  "project_key": "+18622675255",
+  "messages": [
+    {
+      "project_key": "+18622675255",
+      "role": "me",
+      "message": "Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. \n\nTo make sure I point you in the right direction, could you help me confirm two things first:\n\n Material preference:\n\n明白了，谢谢提供详细信息——工作室用途，大约 10 台，运往美国 \n\n为了确保我为您提供正确的方向，您能先帮我确认两件事吗：\n\n 材质偏好：\nAluminum\n铝\nWood\n木\nStainless steel\n不锈钢\n\n Reformer style:\n\n 改造风格:\nStandard / core reformer\n标准/核心改造器\nFoldable reformer  \nHalf-height\n半高\n3-in-1 system\n三合一系统\nCadillac\n凯迪拉克\nOr megaformer-style machine\n或超大型变形机\n\nOnce I have this, I’ll narrow it down to the most suitable options for a studio setup and we can move from there.\n\n一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。",
+      "message_time": "2026-02-06T22:40:00+00:00"
+    }
+  ],
+  "customer_name": "+18622675255",
+  "message_count": 1,
+  "has_messages": true,
+  "last_customer_message": "",
+  "last_customer_message_time_normalized": null,
+  "last_my_message": "Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. \n\nTo make sure I point you in the right direction, could you help me confirm two things first:\n\n Material preference:\n\n明白了，谢谢提供详细信息——工作室用途，大约 10 台，运往美国 \n\n为了确保我为您提供正确的方向，您能先帮我确认两件事吗：\n\n 材质偏好：\nAluminum\n铝\nWood\n木\nStainless steel\n不锈钢\n\n Reformer style:\n\n 改造风格:\nStandard / core reformer\n标准/核心改造器\nFoldable reformer  \nHalf-height\n半高\n3-in-1 system\n三合一系统\nCadillac\n凯迪拉克\nOr megaformer-style machine\n或超大型变形机\n\nOnce I have this, I’ll narrow it down to the most suitable options for a studio setup and we can move from there.\n\n一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。",
+  "last_my_message_time_normalized": "2026-02-06T22:40:00+00:00",
+  "recent_messages": [
+    {
+      "project_key": "+18622675255",
+      "role": "me",
+      "message": "Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. \n\nTo make sure I point you in the right direction, could you help me confirm two things first:\n\n Material preference:\n\n明白了，谢谢提供详细信息——工作室用途，大约 10 台，运往美国 \n\n为了确保我为您提供正确的方向，您能先帮我确认两件事吗：\n\n 材质偏好：\nAluminum\n铝\nWood\n木\nStainless steel\n不锈钢\n\n Reformer style:\n\n 改造风格:\nStandard / core reformer\n标准/核心改造器\nFoldable reformer  \nHalf-height\n半高\n3-in-1 system\n三合一系统\nCadillac\n凯迪拉克\nOr megaformer-style machine\n或超大型变形机\n\nOnce I have this, I’ll narrow it down to the most suitable options for a studio setup and we can move from there.\n\n一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。",
+      "message_time": "2026-02-06T22:40:00+00:00"
+    }
+  ],
+  "cleaned_full_conversation": "me: Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. \n\nTo make sure I point you in the right direction, could you help me confirm two things first:\n\n Material preference:\n\n明白了，谢谢提供详细信息——工作室用途，大约 10 台，运往美国 \n\n为了确保我为您提供正确的方向，您能先帮我确认两件事吗：\n\n 材质偏好：\nAluminum\n铝\nWood\n木\nStainless steel\n不锈钢\n\n Reformer style:\n\n 改造风格:\nStandard / core reformer\n标准/核心改造器\nFoldable reformer  \nHalf-height\n半高\n3-in-1 system\n三合一系统\nCadillac\n凯迪拉克\nOr megaformer-style machine\n或超大型变形机\n\nOnce I have this, I’ll narrow it down to the most suitable options for a studio setup and we can move from there.\n\n一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。",
+  "_debug_source": "normalize_customer_data",
+  "original_message_count": 1,
+  "deduplicated_message_count": 1,
+  "_context_builder_version": "build_ai_context_v5.1_PRODUCTION_READY",
+  "core_messages": [
+    {
+      "project_key": "+18622675255",
+      "role": "me",
+      "message": "Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. \n\nTo make sure I point you in the right direction, could you help me confirm two things first:\n\n Material preference:\n\n明白了，谢谢提供详细信息——工作室用途，大约 10 台，运往美国 \n\n为了确保我为您提供正确的方向，您能先帮我确认两件事吗：\n\n 材质偏好：\nAluminum\n铝\nWood\n木\nStainless steel\n不锈钢\n\n Reformer style:\n\n 改造风格:\nStandard / core reformer\n标准/核心改造器\nFoldable reformer  \nHalf-height\n半高\n3-in-1 system\n三合一系统\nCadillac\n凯迪拉克\nOr megaformer-style machine\n或超大型变形机\n\nOnce I have this, I’ll narrow it down to the most suitable options for a studio setup and we can move from there.\n\n一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。",
+      "message_time": "2026-02-06T22:40:00+00:00"
+    }
+  ],
+  "conversation": "me: Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. \n\nTo make sure I point you in the right direction, could you help me confirm two things first:\n\n Material preference:\n\n明白了，谢谢提供详细信息——工作室用途，大约 10 台，运往美国 \n\n为了确保我为您提供正确的方向，您能先帮我确认两件事吗：\n\n 材质偏好：\nAluminum\n铝\nWood\n木\nStainless steel\n不锈钢\n\n Reformer style:\n\n 改造风格:\nStandard / core reformer\n标准/核心改造器\nFoldable reformer  \nHalf-height\n半高\n3-in-1 system\n三合一系统\nCadillac\n凯迪拉克\nOr megaformer-style machine\n或超大型变形机\n\nOnce I have this, I’ll narrow it down to the most suitable options for a studio setup and we can move from there.\n\n一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。",
+  "conversation_core": "me: Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. \n\nTo make sure I point you in the right direction, could you help me confirm two things first:\n\n Material preference:\n\n明白了，谢谢提供详细信息——工作室用途，大约 10 台，运往美国 \n\n为了确保我为您提供正确的方向，您能先帮我确认两件事吗：\n\n 材质偏好：\nAluminum\n铝\nWood\n木\nStainless steel\n不锈钢\n\n Reformer style:\n\n 改造风格:\nStandard / core reformer\n标准/核心改造器\nFoldable reformer  \nHalf-height\n半高\n3-in-1 system\n三合一系统\nCadillac\n凯迪拉克\nOr megaformer-style machine\n或超大型变形机\n\nOnce I have this, I’ll narrow it down to the most suitable options for a studio setup and we can move from there.\n\n一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。",
+  "customer_only_text": "",
+  "customer_recent_only_text": "",
+  "seller_only_text": "Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. \n\nTo make sure I point you in the right direction, could you help me confirm two things first:\n\n Material preference:\n\n明白了，谢谢提供详细信息——工作室用途，大约 10 台，运往美国 \n\n为了确保我为您提供正确的方向，您能先帮我确认两件事吗：\n\n 材质偏好：\nAluminum\n铝\nWood\n木\nStainless steel\n不锈钢\n\n Reformer style:\n\n 改造风格:\nStandard / core reformer\n标准/核心改造器\nFoldable reformer  \nHalf-height\n半高\n3-in-1 system\n三合一系统\nCadillac\n凯迪拉克\nOr megaformer-style machine\n或超大型变形机\n\nOnce I have this, I’ll narrow it down to the most suitable options for a studio setup and we can move from there.\n\n一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。",
+  "project_and_structured_text": "+18622675255\n+18622675255\n\n\n\n\n\n\n",
+  "customer_priority_analysis_text": "\n\n+18622675255\n+18622675255\n\n\n\n\n\n\n",
+  "now_time": "2026-04-16T10:17:32.661Z",
+  "now_time_display": "2026-04-16 10:17",
+  "first_message": "Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. \n\nTo make sure I point you in the right direction, could you help me confirm two things first:\n\n Material preference:\n\n明白了，谢谢提供详细信息——工作室用途，大约 10 台，运往美国 \n\n为了确保我为您提供正确的方向，您能先帮我确认两件事吗：\n\n 材质偏好：\nAluminum\n铝\nWood\n木\nStainless steel\n不锈钢\n\n Reformer style:\n\n 改造风格:\nStandard / core reformer\n标准/核心改造器\nFoldable reformer  \nHalf-height\n半高\n3-in-1 system\n三合一系统\nCadillac\n凯迪拉克\nOr megaformer-style machine\n或超大型变形机\n\nOnce I have this, I’ll narrow it down to the most suitable options for a studio setup and we can move from there.\n\n一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。",
+  "first_message_time": "2026-02-06T22:40:00+00:00",
+  "first_message_time_display": "2026-02-06 22:40",
+  "last_customer_message_time": "",
+  "last_customer_message_time_display": "unknown",
+  "last_my_message_time": "2026-02-06T22:40:00+00:00",
+  "last_my_message_time_display": "2026-02-06 22:40",
+  "last_message_time": "2026-02-06T22:40:00+00:00",
+  "last_message_time_display": "2026-02-06 22:40",
+  "last_message_role": "me",
+  "timeline": {
+    "now_time": "2026-04-16T10:17:32.661Z",
+    "now_time_display": "2026-04-16 10:17",
+    "first_message_time": "2026-02-06T22:40:00+00:00",
+    "first_message_time_display": "2026-02-06 22:40",
+    "last_customer_message_time": "",
+    "last_customer_message_time_display": "unknown",
+    "last_my_message_time": "2026-02-06T22:40:00+00:00",
+    "last_my_message_time_display": "2026-02-06 22:40",
+    "last_message_time": "2026-02-06T22:40:00+00:00",
+    "last_message_time_display": "2026-02-06 22:40",
+    "last_message_role": "me",
+    "who_stopped": "customer",
+    "who_should_reply_next": "customer",
+    "sequence": "我方最后发言，等待客户回复",
+    "conversation_status": "waiting_customer",
+    "gap_days_customer_vs_me": "unknown",
+    "gap_hours_customer_vs_me": "unknown",
+    "gap_minutes_customer_vs_me": "unknown",
+    "hours_since_last_customer_message": "unknown",
+    "hours_since_last_my_message": "1643",
+    "days_since_last_customer_message": "unknown",
+    "days_since_last_my_message": "68",
+    "gap_hint": "",
+    "summary": "首次记录：2026-02-06 22:40；我方最后发送：2026-02-06 22:40；当前序列：我方最后发言，等待客户回复",
+    "events": [
+      {
+        "role": "me",
+        "message_time": "2026-02-06T22:40:00+00:00",
+        "message_time_display": "2026-02-06 22:40",
+        "message": "Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. \n\nTo make sure I point you in the right direction, could you help me confirm two things first:\n\n Material preference:\n\n明白了，谢谢提供详细信息——工作室用途，大约 10 台，运往美国 \n\n为了确保我为您提供正确的方向，您能先帮我确认两件事吗：\n\n 材质偏好：\nAluminum\n铝\nWood\n木\nStainless steel\n不锈钢\n\n Reformer style:\n\n 改造风格:\nStandard / core reformer\n标准/核心改造器\nFoldable reformer  \nHalf-height\n半高\n3-in-1 system\n三合一系统\nCadillac\n凯迪拉克\nOr megaformer-style machine\n或超大型变形机\n\nOnce I have this, I’ll narrow it down to the most suitable options for a studio setup and we can move from there.\n\n一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。"
+      }
+    ]
+  },
+  "timeline_summary": "首次记录：2026-02-06 22:40；我方最后发送：2026-02-06 22:40；当前序列：我方最后发言，等待客户回复",
+  "dated_history_summary": "2026-02-06 22:40｜我方：Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. \n\nTo make sure I point you in the right direction, could you help me confirm two things first:\n\n Material preference:\n\n明白了，谢谢提供详细信息——工作室用途，大约 10 台，运往美国 \n\n为了确保我为您提供正确的方向，您能先帮我确认两件事吗：\n\n 材质偏好：\nAluminum\n铝\nWood\n木\nStainless steel\n不锈钢\n\n Reformer style:\n\n 改造风格:\nStandard / core reformer\n标准/核心改造器\nFoldable reformer  \nHalf-height\n半高\n3-in-1 system\n三合一系统\nCadillac\n凯迪拉克\nOr megaformer-style machine\n或超大型变形机\n\nOnce I have this, I’ll narrow it down to the most suitable options for a studio setup and we can move from there.\n\n一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。",
+  "timeline_events": [
+    {
+      "role": "me",
+      "message_time": "2026-02-06T22:40:00+00:00",
+      "message_time_display": "2026-02-06 22:40",
+      "message": "Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. \n\nTo make sure I point you in the right direction, could you help me confirm two things first:\n\n Material preference:\n\n明白了，谢谢提供详细信息——工作室用途，大约 10 台，运往美国 \n\n为了确保我为您提供正确的方向，您能先帮我确认两件事吗：\n\n 材质偏好：\nAluminum\n铝\nWood\n木\nStainless steel\n不锈钢\n\n Reformer style:\n\n 改造风格:\nStandard / core reformer\n标准/核心改造器\nFoldable reformer  \nHalf-height\n半高\n3-in-1 system\n三合一系统\nCadillac\n凯迪拉克\nOr megaformer-style machine\n或超大型变形机\n\nOnce I have this, I’ll narrow it down to the most suitable options for a studio setup and we can move from there.\n\n一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。"
+    }
+  ],
+  "who_stopped": "customer",
+  "who_should_reply_next": "customer",
+  "conversation_sequence": "我方最后发言，等待客户回复",
+  "timeline_conversation_status": "waiting_customer",
+  "gap_days_customer_vs_me": "unknown",
+  "gap_hours_customer_vs_me": "unknown",
+  "gap_minutes_customer_vs_me": "unknown",
+  "hours_since_last_customer_message": "unknown",
+  "hours_since_last_my_message": "1643",
+  "days_since_last_customer_message": "unknown",
+  "days_since_last_my_message": "68",
+  "cleaned_message_count": 1,
+  "recent_message_count": 1,
+  "core_message_count": 1,
+  "full_conversation_length": 640,
+  "customer_message_count": 0,
+  "my_message_count": 1,
+  "has_customer_reply": false,
+  "has_price_signal": false,
+  "has_timing_signal": false,
+  "has_not_now_signal": false,
+  "last_customer_gap_hint": "",
+  "is_my_turn_to_reply": false,
+  "should_reactivate_now": true,
+  "customer_replied_after_my_last_message": false,
+  "is_customer_silent_after_my_message": true,
+  "customer_last_message_type": "unknown",
+  "last_exchange": {
+    "last_customer_message": "",
+    "last_customer_message_time": "",
+    "last_customer_message_time_display": "unknown",
+    "last_my_message": "Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. \n\nTo make sure I point you in the right direction, could you help me confirm two things first:\n\n Material preference:\n\n明白了，谢谢提供详细信息——工作室用途，大约 10 台，运往美国 \n\n为了确保我为您提供正确的方向，您能先帮我确认两件事吗：\n\n 材质偏好：\nAluminum\n铝\nWood\n木\nStainless steel\n不锈钢\n\n Reformer style:\n\n 改造风格:\nStandard / core reformer\n标准/核心改造器\nFoldable reformer  \nHalf-height\n半高\n3-in-1 system\n三合一系统\nCadillac\n凯迪拉克\nOr megaformer-style machine\n或超大型变形机\n\nOnce I have this, I’ll narrow it down to the most suitable options for a studio setup and we can move from there.\n\n一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。",
+    "last_my_message_time": "2026-02-06T22:40:00+00:00",
+    "last_my_message_time_display": "2026-02-06 22:40",
+    "last_message_role": "me",
+    "sequence": "我方最后发言，等待客户回复",
+    "who_stopped": "customer",
+    "who_should_reply_next": "customer"
+  },
+  "stage": "engaged",
+  "follow_up_priority": "low",
+  "status": "waiting_for_customer",
+  "customer_type": "unknown",
+  "intent_level": "unknown",
+  "purchase_stage": "information_gathering",
+  "product_interest": "Reformer",
+  "quantity_signal": "unknown",
+  "concerns": "unknown",
+  "key_signals": "仅有我方触达记录；等待客户回应",
+  "current_blocker": "客户尚未回复我方最近消息",
+  "strategy_direction": "首次重新激活",
+  "reply_angle": "低压力重新开启对话",
+  "follow_up_focus": "提及Reformer",
+  "primary_reply_anchor": "shipping_delivery_summary",
+  "secondary_context": "Reformer",
+  "reply_risk": "normal",
+  "reactivation_ai_payload": {
+    "timeline": {
+      "last_customer_message_time": "unknown",
+      "last_my_message_time": "2026-02-06T22:40:00+00:00",
+      "gap_days": 0
+    },
+    "last_signal": {
+      "type": "unknown",
+      "summary": "no clear signal",
+      "confidence": "medium",
+      "anchor_object": "shipping_delivery_summary"
+    },
+    "stop_point": {
+      "where_it_stopped": "my_last_message",
+      "why_it_stopped": "my_last_message_unanswered",
+      "smallest_reply_to_trigger": "resend_shipping_summary_here",
+      "anchor_object": "shipping_delivery_summary",
+      "allowed_micro_triggers": [
+        "resend_shipping_summary_here"
+      ],
+      "send_state": "sendable",
+      "hard_no_send": false
+    },
+    "constraints": {
+      "must_avoid": [
+        "multi-question message",
+        "pushing decision"
+      ],
+      "must_follow": [
+        "single trigger",
+        "low friction reply",
+        "single micro-trigger",
+        "concrete conversation anchor"
+      ],
+      "do_not_repeat": [
+        "repeat_selection_help"
+      ],
+      "allowed_micro_triggers": [
+        "resend_shipping_summary_here"
+      ]
+    },
+    "decision": {
+      "should_follow_up_now": true,
+      "best_trigger_type": "resend_shipping_summary_here",
+      "best_trigger_reason": "shipping_or_delivery_context_detected",
+      "smallest_reply_goal": "resend_shipping_summary_here",
+      "primary_anchor": "shipping_delivery_summary",
+      "anchor_object": "shipping_delivery_summary",
+      "allowed_micro_triggers": [
+        "resend_shipping_summary_here"
+      ],
+      "send_state": "sendable",
+      "hard_no_send": false
+    }
+  },
+  "_project_signals": {
+    "project_has_stage_hint": false,
+    "project_has_qty_hint": false,
+    "project_has_model_hint": false
+  },
+  "stop_point_analysis": {
+    "where_it_stopped": "my_last_message",
+    "why_it_stopped_there": "my_last_message_unanswered",
+    "what_my_last_push_was": "Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. \n\nTo make sure I point you in the right direction, could you help me confirm two things first:\n\n Material preference:\n\n明白了，谢谢提供详细信息——工作室用途，大约 10 台，运往美国 \n\n为了确保我为您提供正确的方向，您能先帮我确认两件事吗：\n\n 材质偏好：\nAluminum\n铝\nWood\n木\nStainless steel\n不锈钢\n\n Reformer style:\n\n 改造风格:\nStandard / core reformer\n标准/核心改造器\nFoldable reformer  \nHalf-height\n半高\n3-in-1 system\n三合一系统\nCadillac\n凯迪拉克\nOr megaformer-style machine\n或超大型变形机\n\nOnce I have this, I’ll narrow it down to the most suitable options for a studio setup and we can move from there.\n\n一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。",
+    "what_customer_did_not_answer": "",
+    "did_my_last_push_fail": false,
+    "smallest_reply_to_trigger": "resend_shipping_summary_here",
+    "anchor_object": "shipping_delivery_summary",
+    "allowed_micro_triggers": [
+      "resend_shipping_summary_here"
+    ],
+    "send_state": "sendable",
+    "hard_no_send": false
+  },
+  "forbidden_repeat_zone": {
+    "already_asked_questions": [],
+    "already_sent_topics": [
+      "delivery time"
+    ],
+    "already_used_angles": [
+      "selection help"
+    ],
+    "do_not_repeat": [
+      "repeat_selection_help"
+    ],
+    "allowed_micro_triggers": [
+      "resend_shipping_summary_here"
+    ]
+  },
+  "reactivation_decision_basis": {
+    "should_follow_up_now": true,
+    "best_trigger_type": "resend_shipping_summary_here",
+    "best_trigger_reason": "shipping_or_delivery_context_detected",
+    "must_avoid": [
+      "repeat_selection_help"
+    ],
+    "smallest_reply_goal": "resend_shipping_summary_here",
+    "primary_anchor": "shipping_delivery_summary",
+    "anchor_object": "shipping_delivery_summary",
+    "allowed_micro_triggers": [
+      "resend_shipping_summary_here"
+    ],
+    "send_state": "sendable",
+    "hard_no_send": false
+  },
+  "reactivation_v6_core": {
+    "timeline_facts": {
+      "last_customer_message_time": "",
+      "last_my_message_time": "2026-02-06T22:40:00+00:00",
+      "who_should_reply_next": "customer",
+      "days_since_last_customer_message": "unknown",
+      "days_since_last_my_message": "68",
+      "conversation_status": "waiting_customer"
+    },
+    "last_customer_signal": {
+      "last_customer_message": "",
+      "last_customer_message_type": "unknown"
+    },
+    "stop_point_analysis": {
+      "where_it_stopped": "my_last_message",
+      "why_it_stopped_there": "my_last_message_unanswered",
+      "what_my_last_push_was": "Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. \n\nTo make sure I point you in the right direction, could you help me confirm two things first:\n\n Material preference:\n\n明白了，谢谢提供详细信息——工作室用途，大约 10 台，运往美国 \n\n为了确保我为您提供正确的方向，您能先帮我确认两件事吗：\n\n 材质偏好：\nAluminum\n铝\nWood\n木\nStainless steel\n不锈钢\n\n Reformer style:\n\n 改造风格:\nStandard / core reformer\n标准/核心改造器\nFoldable reformer  \nHalf-height\n半高\n3-in-1 system\n三合一系统\nCadillac\n凯迪拉克\nOr megaformer-style machine\n或超大型变形机\n\nOnce I have this, I’ll narrow it down to the most suitable options for a studio setup and we can move from there.\n\n一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。",
+      "what_customer_did_not_answer": "",
+      "did_my_last_push_fail": false,
+      "smallest_reply_to_trigger": "resend_shipping_summary_here",
+      "anchor_object": "shipping_delivery_summary",
+      "allowed_micro_triggers": [
+        "resend_shipping_summary_here"
+      ],
+      "send_state": "sendable",
+      "hard_no_send": false
+    },
+    "forbidden_repeat_zone": {
+      "already_asked_questions": [],
+      "already_sent_topics": [
+        "delivery time"
+      ],
+      "already_used_angles": [
+        "selection help"
+      ],
+      "do_not_repeat": [
+        "repeat_selection_help"
+      ],
+      "allowed_micro_triggers": [
+        "resend_shipping_summary_here"
+      ]
+    },
+    "reactivation_decision_basis": {
+      "should_follow_up_now": true,
+      "best_trigger_type": "resend_shipping_summary_here",
+      "best_trigger_reason": "shipping_or_delivery_context_detected",
+      "must_avoid": [
+        "repeat_selection_help"
+      ],
+      "smallest_reply_goal": "resend_shipping_summary_here",
+      "primary_anchor": "shipping_delivery_summary",
+      "anchor_object": "shipping_delivery_summary",
+      "allowed_micro_triggers": [
+        "resend_shipping_summary_here"
+      ],
+      "send_state": "sendable",
+      "hard_no_send": false
+    },
+    "anchor_object": "shipping_delivery_summary",
+    "allowed_micro_triggers": [
+      "resend_shipping_summary_here"
+    ],
+    "send_state": "sendable",
+    "hard_no_send": false
+  },
+  "anchor_object": "shipping_delivery_summary",
+  "allowed_micro_triggers": [
+    "resend_shipping_summary_here"
+  ],
+  "send_state": "sendable",
+  "hard_no_send": false,
+  "output": [
+    {
+      "id": "msg_0b88b8580d1275270069e0b74d85f081939af847e325c4b56f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "{\n  \"whatsapp_message\": \"+18622675255, I can resend the shipping delivery summary here so you can see the details clearly — want me to send that now?\"\n}"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "ai_parsed": {
+    "whatsapp_message": "+18622675255, I can resend the shipping delivery summary here so you can see the details clearly — want me to send that now?"
+  },
+  "order_group": "+18622675255",
+  "_en": "+18622675255, I can resend the shipping delivery summary here so you can see the details clearly — want me to send that now?",
+  "_cn": "我可以把运输信息整理成一条清楚的信息，要我发这里吗？",
+  "weak_candidate_message": "",
+  "needs_enforce_rewrite": false,
+  "telegram_messages": [
+    "【+18622675255】\n\nEnglish:\n+18622675255, I can resend the shipping delivery summary here so you can see the details clearly — want me to send that now?\n\n中文翻译:\n我可以把运输信息整理成一条清楚的信息，要我发这里吗？",
+    "+18622675255, I can resend the shipping delivery summary here so you can see the details clearly — want me to send that now?"
+  ],
+  "enforce_parsed": {
+    "whatsapp_message": "+18622675255, I can resend the shipping delivery summary here so you can see the details clearly — want me to send that now?"
+  },
+  "analysis_text": "客户名称：+18622675255\n\n阶段：已互动 ｜ 优先级：低 ｜ 状态：等待客户回复\n\n客户分析：\n客户类型：未知\n意向等级：未知\n采购阶段：信息收集\n关注产品：Reformer\n数量信号：unknown\n关注点：unknown\n关键信号：仅有我方触达记录；等待客户回应\n\n历史沟通回顾：\n2026-02-06 22:40｜我方：Got it, thanks for the details — studio use, around 10 units, delivered to the U.S. To make sure I point you in the right direction, could you help me confirm two things first: Material preference: 明白 ...  to the most suitable options for a studio setup and we can move from there. 一旦我有了这些信息，我将缩小范围，选出最适合工作室设置的选择，然后我们可以从这里开始。\n\n关键时间节点：\n客户最后回复：unknown\n我方最后发送：2026-02-06T22:40:00+00:00\n\n时间间隔：\n—\n\n当前判断：\n客户信号：仅有我方触达记录；等待客户回应\n当前状态：waiting_customer\n\n当前阻碍：客户尚未回复我方最近消息\n策略方向：首次重新激活\n回复角度：低压力重新开启对话\n跟进焦点：提及Reformer\n\n分析信心：\n中\n\nAI分析摘要：\n未输出\n\n推理摘要：\n低压力重新开启对话\n\nEnforce执行检查：\nEnforce状态：pass\n目标回复：未输出\n多路径风险：低\n思考负担风险：低\n高风险词拦截：否\n泛化表达拦截：否\n弱锚点拦截：否\n\n建议跟进话术（最终英文）：\n✅ +18622675255, I can resend the shipping delivery summary here so you can see the details clearly — want me to send that now?\n\n建议跟进话术（中文对照）：\n✅ 我可以把运输信息整理成一条清楚的信息，要我发这里吗？",
+  "whatsapp_text": "+18622675255, I can resend the shipping delivery summary here so you can see the details clearly — want me to send that now?",
+  "whatsapp_message": "+18622675255, I can resend the shipping delivery summary here so you can see the details clearly — want me to send that now?",
+  "whatsapp_message_cn": "我可以把运输信息整理成一条清楚的信息，要我发这里吗？",
+  "enforce_status": "pass",
+  "auto_send_pass": true
+}

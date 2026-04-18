@@ -1,0 +1,169 @@
+# Prompt v2 Comparison — 15 Selected Customers
+
+Old batch: production_batch_raw.json (prompt v1, 2026-04-16)
+New batch: production_batch_new_raw.json (prompt v2, post 5741d90)
+
+---
+
+## #1 Ceci
+
+- project_key: Ceci美国（26.4.5日）
+- state: is_my_turn=true, has_not_now=false, hard_no_send=false
+
+**OLD:** Ceci, I can clarify what makes our options different from the cheaper ones you found so you can make an informed choice — want me to send that here?
+
+**NEW:** Ceci, I can clarify why our models might cost more than the cheaper options you found so you can see the value in our quality — want me to send that here?
+
+---
+
+## #2 Marea
+
+- project_key: Marea澳大利亚（26.4.6日） Didoe
+- state: is_my_turn=true, has_not_now=false, hard_no_send=false
+
+**OLD:** Marea, I can resend the price range for one unit so you can see the exact cost clearly — want me to send that here?
+
+**NEW:** Marea, I can resend the price range for the standard reformer so you can see the options for your needs — want me to send that here?
+
+---
+
+## #3 Peter加拿大
+
+- project_key: Peter加拿大10台FR004（25.9.16日） Harris
+- state: is_my_turn=true, has_not_now=false, hard_no_send=false
+
+**OLD:** Peter, I can resend the unit price of USD 469 per unit so you can confirm the total cost easily — want me to send that here?
+
+**NEW:** Peter, I can resend the total landed cost of USD 7,330 for your 10 units so you can confirm everything is in order — want me to send that here?
+
+---
+
+## #4 Rocio
+
+- project_key: Rocio美国10台AR011（26.3.16日）10月份左右开业
+- state: is_my_turn=false, has_not_now=false, hard_no_send=false
+
+**OLD:** Rocio, I can send the AR011 photos here so you can see them before your studio opens in October — want me to send that now?
+
+**NEW:** Rocio, I can send you the AR011 photos and videos so you can visualize them for your studio setup in October — want me to send that here?
+
+---
+
+## #5 Krim
+
+- project_key: Krim加拿大6台（26.2.23日）
+- state: is_my_turn=false, has_not_now=false, hard_no_send=false
+
+**OLD:** Krim, I can send the PR007 photos and videos here so you can check them out easily — want me to send that now?
+
+**NEW:** Krim, I can send you the PR007 photos and videos here so you can see the details clearly — want me to send that now?
+
+---
+
+## #6 Sarang
+
+- project_key: Sarang美国（26.2.26日） Park
+- state: is_my_turn=false, has_not_now=false, hard_no_send=false
+
+**OLD:** Sarang, I can clarify why the Aluminum Reformer (AR011) is often preferred over the Wooden Reformer (MR001) so you can make a better choice — want me to send that here?
+
+**NEW:** Sarang, I can clarify why our aluminum model is priced higher than some alternatives so you can see the value it brings for your studio setup — want me to send that here?
+
+---
+
+## #7 Gladys-Skinline
+
+- project_key: Gladys-Skinline菲律宾
+- state: is_my_turn=false, has_not_now=false, hard_no_send=false
+
+**OLD:** Gladys-Skinline菲律宾, I can simplify the last point we discussed so you can quickly see it — want me to send that here?
+
+**NEW:** Gladys, I can simplify my last point for you so you can easily pick up where we left off — want me to send that here?
+
+---
+
+## #8 HC菲律宾计划开工作室
+
+- project_key: HC菲律宾计划开工作室
+- state: is_my_turn=null, has_not_now=false, hard_no_send=false
+
+**OLD:** HC菲律宾计划开工作室, I can simplify the last point we discussed so you can quickly see it — want me to send that here?
+
+**NEW:** HC, I can summarize our last interaction so you can quickly catch up on what we discussed — want me to send that here?
+
+---
+
+## #9 Momz加拿大工作室
+
+- project_key: Momz加拿大工作室
+- state: is_my_turn=false, has_not_now=false, hard_no_send=false
+
+**OLD:** Momz加拿大工作室, I can line up the October arrival timing for your Pilates equipment so you can plan your setup clearly — want me to send that here?
+
+**NEW:** Momz, I can line up October arrival timing for your equipment so you can plan ahead for your studio — want me to send that here?
+
+---
+
+## #10 +16304659913
+
+- project_key: +16304659913
+- state: is_my_turn=false, has_not_now=false, hard_no_send=false
+
+**OLD:** +16304659913, I can line up the new model options for your studio setups so you can explore them easily — want me to send that here?
+
+**NEW:** Hi there, I can line up the new model options we launched so you can explore what's available for your studio this year — want me to send that here?
+
+---
+
+## #11 +18732009910
+
+- project_key: +18732009910
+- state: is_my_turn=false, has_not_now=false, hard_no_send=false
+
+**OLD:** Hi, I can simplify my last message for you so you can quickly see the key point — want me to send that here?
+
+**NEW:** Hi there, I can simplify the key point from my last message so you can quickly see it — want me to send that here?
+
+---
+
+## #12 Julia美国哥伦比亚
+
+- project_key: Julia美国哥伦比亚超模机 Gil
+- state: is_my_turn=false, has_not_now=false, hard_no_send=false
+
+**OLD:** Julia, I can simplify my last point about the 6 MG001 units so you can quickly see what’s next — want me to send that here?
+
+**NEW:** Julia, I can simplify my last message about the 6 MG001 units so you can easily see what’s next — want me to send that here?
+
+---
+
+## #13 Yosef
+
+- project_key: Yosef美国 J3 Baranes
+- state: is_my_turn=null, has_not_now=false, hard_no_send=false
+
+**OLD:** Yosef, I can simplify our last point so you can quickly see what we discussed — want me to send that here?
+
+**NEW:** Yosef, I can simplify our last interaction summary so you can quickly see the key points — want me to send that here?
+
+---
+
+## #14 MCD菲律宾
+
+- project_key: MCD菲律宾（25.12.2日）
+- state: is_my_turn=false, has_not_now=false, hard_no_send=false
+
+**OLD:** MCD菲律宾（25.12.2日），我可以重新发送我们的全目录给您，这样您可以快速选择合适的普拉提设备 — 想让我发过来吗？
+
+**NEW:** MCD, I can resend the catalog you asked about so you can choose the right models for your studio setup — want me to send that here?
+
+---
+
+## #15 Bianca Wallace
+
+- project_key: Bianca Wallace加拿大1台FR001（25.9.17日）
+- state: is_my_turn=false, has_not_now=true, hard_no_send=true
+
+**OLD:** Bianca, I can keep you updated with new models whenever you’re ready again so you can explore options at your convenience — want me to send that here?
+
+**NEW:** Bianca, I can keep the latest equipment options ready for you when you're ready to explore again, so you have them at hand — want me to do that?

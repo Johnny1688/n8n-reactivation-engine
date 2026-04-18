@@ -1,0 +1,898 @@
+{
+  "project_key": "Emma加拿大（26.3.20日） Sabouri",
+  "messages": [
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "customer",
+      "message": "Hi\n嗨",
+      "message_time": "2026-03-20T14:48:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Hi! Thanks for reaching out \nTo make sure I point you to the right Pilates Reformer, could you tell me a bit about your plan?\n Is this for a studio, gym, or resale business?\n Roughly how many units are you considering?\n Which country will the machines be delivered to?",
+      "message_time": "2026-03-20T14:48:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "customer",
+      "message": "What’s MOQ?\n什么是最小起订量？",
+      "message_time": "2026-03-20T14:48:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Hi \n\nOur MOQ is quite flexible — we can start from 1 unit for trial orders.\n\nFor better pricing, most clients usually go with 3–5 units or more.\n\nJust to guide you properly — are you planning for resale, or for your own studio/gym use?",
+      "message_time": "2026-03-20T15:05:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "customer",
+      "message": "Oh great \n\nMy own studio",
+      "message_time": "2026-03-20T15:06:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Nice studio setup is exciting\n很棒 工作室设置令人兴奋",
+      "message_time": "2026-03-20T15:18:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "To suggest the best model for you, could you let me know:",
+      "message_time": "2026-03-20T15:22:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "• aluminum, wood, or stainless steel?\n • standard reformer, foldable, half tower, combo, Cadillac, or megaformer?\n • and roughly how many units you need?",
+      "message_time": "2026-03-20T15:22:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "customer",
+      "message": "Thanks for the guidance",
+      "message_time": "2026-03-20T15:24:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "customer",
+      "message": "Can you please send me pictures with specs as well as pricing",
+      "message_time": "2026-03-20T15:25:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Do you prefer aluminum or wood reformers?\n(Aluminum is more durable for daily classes, wood has a more classic feel)\n\nAlso, roughly how many reformers are you planning for your studio?\n你更喜欢铝制还是木制 reformer？\n（铝制更耐用，适合日常使用；木制更有经典感觉）\n\n另外，你计划为你的工作室购买多少个 reformer？",
+      "message_time": "2026-03-20T15:35:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Before I send pricing, just to make sure I recommend the right one for you:",
+      "message_time": "2026-03-20T15:35:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Since this is for your own studio, I’ll send you a few of our most popular commercial models — with pictures and key specs so you can get a clear idea.",
+      "message_time": "2026-03-20T15:35:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Got it happy to share.",
+      "message_time": "2026-03-20T15:35:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "customer",
+      "message": "I’d like to see both. Thank you",
+      "message_time": "2026-03-20T15:37:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "I’ll send you pictures + key specs first, then pricing right after.\n我会先发给你图片和关键规格，然后马上发送价格。",
+      "message_time": "2026-03-20T15:43:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "From our experience:\nMost studios go with aluminum for durability and lower maintenance,\nwhile wooden reformers are chosen more for aesthetics and a classic feel.\n从我们的经验来看：\n大多数工作室选择铝材是因为其耐用性和低维护成本，\n而木质改革者则更多是为了美观和经典的感觉。",
+      "message_time": "2026-03-20T15:43:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Perfect I’ll show you one aluminum model and one wooden model so you can easily compare.",
+      "message_time": "2026-03-20T15:43:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Let me send them over\n我这就把资料发给他们",
+      "message_time": "2026-03-20T15:44:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "This is one of our most popular commercial aluminum reformers (AR001) — very stable, smooth carriage, and designed for daily studio use.",
+      "message_time": "2026-03-20T15:45:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "And this is our classic wooden reformer (MR001) — more traditional look, slightly softer feel, very popular for boutique-style studios.",
+      "message_time": "2026-03-20T15:46:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Both models come with adjustable resistance springs, smooth rail system, and can handle high-frequency classes.\n\nAluminum is easier to maintain long-term,\nwhile wood focuses more on aesthetics and feel.",
+      "message_time": "2026-03-20T15:47:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "For pricing:\n\nAR001 (aluminum): $498/ unit\nMR001 (wood): $575 / unit\n\nShipping depends on quantity and your location — I can calculate it for you once I know your plan.",
+      "message_time": "2026-03-20T15:47:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Most new studios usually start with 4–8 units depending on space — happy to suggest a layout for you as well.\n大多数新工作室通常从 4-8 个单位开始，具体取决于空间——我很乐意为您建议一个布局方案。",
+      "message_time": "2026-03-20T15:48:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "customer",
+      "message": "Thanks again for sharing — this is really helpful. \n\nI had a few quick questions:\n 1. What is the warranty on both models, and what parts are covered (frame, springs, carriage, upholstery)?\n 2. Are these reformers designed for full commercial studio use (multiple classes per day)?\n 3. Do you have any studios currently using these long-term that you could share as references?\n再次感谢分享——这真的很有帮助。\n\n我有一些快速的问题：\n1. 两款产品的保修期是多久，哪些部件在保修范围内（框架、弹簧、滑车、内饰）？\n2. 这些改革者是为全商业工作室使用设计的吗（每天多个班级）？\n3. 您目前是否有任何工作室正在长期使用这些设备，可以分享作为参考？",
+      "message_time": "2026-03-25T23:42:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Great questions — happy to clarify",
+      "message_time": "2026-03-25T23:53:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "1. Warranty:\nWe provide 5years for the frame, and 1 years for main moving parts like springs, carriage system, and upholstery.\n 2. Commercial use:\nYes — both models are designed for full commercial studio use, including multiple classes per day.\nThe aluminum model is especially preferred for higher frequency because it’s easier to maintain long-term.\n 3. Studio references:\nYes, we do have studios using them long-term.\nFor example, one of our clients in New York recently set up a studio with 14 reformers (still in setup phase), and we also have several smaller studios running daily classes.\n1. 保修：\n我们提供 5 年框架保修，以及 1 年主要运动部件（如弹簧、滑车系统和面料）保修。\n2. 商业用途：\n是——两款产品均设计用于全面的商业工作室使用，包括每天多个课程。\n铝制型号特别适合高频使用，因为它更易于长期维护。\n3. 工作室参考：\n是的，确实有工作室长期使用它们。\n例如，我们纽约的一家客户最近建立了一个配备 14 台 reformers 的工作室（目前仍在设置阶段），我们还有几家小型工作室每天开设课程。",
+      "message_time": "2026-03-25T23:53:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "By the way, how many reformers are you thinking for your studio?\n顺便问一下，您打算为您的工作室配备多少台改革机？",
+      "message_time": "2026-03-25T23:54:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "I can also share some real production and shipment photos if helpful",
+      "message_time": "2026-03-25T23:54:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "customer",
+      "message": "Thank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？",
+      "message_time": "2026-03-25T23:57:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "For studio references:\nDue to client privacy, we usually don’t share direct contact details, but I can also share some real studio setup photos from our clients, so you can see how the machines are actually used in practice",
+      "message_time": "2026-03-26T00:17:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Great questions — you’re looking at all the right things \n非常好的问题——你关注了所有正确的事情",
+      "message_time": "2026-03-26T00:17:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "By the way, are you thinking closer to 4–6 units or a larger setup?",
+      "message_time": "2026-03-26T00:18:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "For Vancouver landed cost:\nBased on recent shipments, the total landed cost is usually around $350–$450per unit (including shipping, duties, and taxes), depending on quantity and model.\nI can calculate an exact DDP cost for you once I know how many units you’re planning.\n对于温哥华到岸成本：\n根据最近的货运情况，每台设备的总落地成本通常在 350 至 450 美元之间（包括运费、关税和税费），具体取决于数量和型号。\n一旦我了解您计划订购的数量，我可以为您计算确切的 DDP 成本。",
+      "message_time": "2026-03-26T00:18:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "For spare parts:\nCommon parts like springs, wheels, and ropes are easy to replace and we keep them available.\nShipping usually takes about 5–10 days by express, and the cost is quite low (typically tens of USD per part).\n用于备件：\n弹簧、轮子和绳索等常见部件容易更换，我们随时备有这些部件。\n通过快递运输通常需要 5-10 天，费用相当低廉（每个部件通常只需几十美元）。",
+      "message_time": "2026-03-26T00:18:00+00:00"
+    }
+  ],
+  "customer_name": "Emma加拿大（26.3.20日） Sabouri",
+  "message_count": 36,
+  "has_messages": true,
+  "last_customer_message": "Thank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？",
+  "last_customer_message_time_normalized": "2026-03-25T23:57:00+00:00",
+  "last_my_message": "For spare parts:\nCommon parts like springs, wheels, and ropes are easy to replace and we keep them available.\nShipping usually takes about 5–10 days by express, and the cost is quite low (typically tens of USD per part).\n用于备件：\n弹簧、轮子和绳索等常见部件容易更换，我们随时备有这些部件。\n通过快递运输通常需要 5-10 天，费用相当低廉（每个部件通常只需几十美元）。",
+  "last_my_message_time_normalized": "2026-03-26T00:18:00+00:00",
+  "recent_messages": [
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Great questions — happy to clarify",
+      "message_time": "2026-03-25T23:53:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "1. Warranty:\nWe provide 5years for the frame, and 1 years for main moving parts like springs, carriage system, and upholstery.\n 2. Commercial use:\nYes — both models are designed for full commercial studio use, including multiple classes per day.\nThe aluminum model is especially preferred for higher frequency because it’s easier to maintain long-term.\n 3. Studio references:\nYes, we do have studios using them long-term.\nFor example, one of our clients in New York recently set up a studio with 14 reformers (still in setup phase), and we also have several smaller studios running daily classes.\n1. 保修：\n我们提供 5 年框架保修，以及 1 年主要运动部件（如弹簧、滑车系统和面料）保修。\n2. 商业用途：\n是——两款产品均设计用于全面的商业工作室使用，包括每天多个课程。\n铝制型号特别适合高频使用，因为它更易于长期维护。\n3. 工作室参考：\n是的，确实有工作室长期使用它们。\n例如，我们纽约的一家客户最近建立了一个配备 14 台 reformers 的工作室（目前仍在设置阶段），我们还有几家小型工作室每天开设课程。",
+      "message_time": "2026-03-25T23:53:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "By the way, how many reformers are you thinking for your studio?\n顺便问一下，您打算为您的工作室配备多少台改革机？",
+      "message_time": "2026-03-25T23:54:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "I can also share some real production and shipment photos if helpful",
+      "message_time": "2026-03-25T23:54:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "customer",
+      "message": "Thank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？",
+      "message_time": "2026-03-25T23:57:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "For studio references:\nDue to client privacy, we usually don’t share direct contact details, but I can also share some real studio setup photos from our clients, so you can see how the machines are actually used in practice",
+      "message_time": "2026-03-26T00:17:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Great questions — you’re looking at all the right things \n非常好的问题——你关注了所有正确的事情",
+      "message_time": "2026-03-26T00:17:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "By the way, are you thinking closer to 4–6 units or a larger setup?",
+      "message_time": "2026-03-26T00:18:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "For Vancouver landed cost:\nBased on recent shipments, the total landed cost is usually around $350–$450per unit (including shipping, duties, and taxes), depending on quantity and model.\nI can calculate an exact DDP cost for you once I know how many units you’re planning.\n对于温哥华到岸成本：\n根据最近的货运情况，每台设备的总落地成本通常在 350 至 450 美元之间（包括运费、关税和税费），具体取决于数量和型号。\n一旦我了解您计划订购的数量，我可以为您计算确切的 DDP 成本。",
+      "message_time": "2026-03-26T00:18:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "For spare parts:\nCommon parts like springs, wheels, and ropes are easy to replace and we keep them available.\nShipping usually takes about 5–10 days by express, and the cost is quite low (typically tens of USD per part).\n用于备件：\n弹簧、轮子和绳索等常见部件容易更换，我们随时备有这些部件。\n通过快递运输通常需要 5-10 天，费用相当低廉（每个部件通常只需几十美元）。",
+      "message_time": "2026-03-26T00:18:00+00:00"
+    }
+  ],
+  "cleaned_full_conversation": "customer: Hi\n嗨\nme: Hi! Thanks for reaching out \nTo make sure I point you to the right Pilates Reformer, could you tell me a bit about your plan?\n Is this for a studio, gym, or resale business?\n Roughly how many units are you considering?\n Which country will the machines be delivered to?\ncustomer: What’s MOQ?\n什么是最小起订量？\nme: Hi \n\nOur MOQ is quite flexible — we can start from 1 unit for trial orders.\n\nFor better pricing, most clients usually go with 3–5 units or more.\n\nJust to guide you properly — are you planning for resale, or for your own studio/gym use?\ncustomer: Oh great \n\nMy own studio\nme: Nice studio setup is exciting\n很棒 工作室设置令人兴奋\nme: To suggest the best model for you, could you let me know:\nme: • aluminum, wood, or stainless steel?\n • standard reformer, foldable, half tower, combo, Cadillac, or megaformer?\n • and roughly how many units you need?\ncustomer: Thanks for the guidance\ncustomer: Can you please send me pictures with specs as well as pricing\nme: Do you prefer aluminum or wood reformers?\n(Aluminum is more durable for daily classes, wood has a more classic feel)\n\nAlso, roughly how many reformers are you planning for your studio?\n你更喜欢铝制还是木制 reformer？\n（铝制更耐用，适合日常使用；木制更有经典感觉）\n\n另外，你计划为你的工作室购买多少个 reformer？\nme: Before I send pricing, just to make sure I recommend the right one for you:\nme: Since this is for your own studio, I’ll send you a few of our most popular commercial models — with pictures and key specs so you can get a clear idea.\nme: Got it happy to share.\ncustomer: I’d like to see both. Thank you\nme: I’ll send you pictures + key specs first, then pricing right after.\n我会先发给你图片和关键规格，然后马上发送价格。\nme: From our experience:\nMost studios go with aluminum for durability and lower maintenance,\nwhile wooden reformers are chosen more for aesthetics and a classic feel.\n从我们的经验来看：\n大多数工作室选择铝材是因为其耐用性和低维护成本，\n而木质改革者则更多是为了美观和经典的感觉。\nme: Perfect I’ll show you one aluminum model and one wooden model so you can easily compare.\nme: Let me send them over\n我这就把资料发给他们\nme: This is one of our most popular commercial aluminum reformers (AR001) — very stable, smooth carriage, and designed for daily studio use.\nme: And this is our classic wooden reformer (MR001) — more traditional look, slightly softer feel, very popular for boutique-style studios.\nme: Both models come with adjustable resistance springs, smooth rail system, and can handle high-frequency classes.\n\nAluminum is easier to maintain long-term,\nwhile wood focuses more on aesthetics and feel.\nme: For pricing:\n\nAR001 (aluminum): $498/ unit\nMR001 (wood): $575 / unit\n\nShipping depends on quantity and your location — I can calculate it for you once I know your plan.\nme: Most new studios usually start with 4–8 units depending on space — happy to suggest a layout for you as well.\n大多数新工作室通常从 4-8 个单位开始，具体取决于空间——我很乐意为您建议一个布局方案。\ncustomer: Thanks again for sharing — this is really helpful. \n\nI had a few quick questions:\n 1. What is the warranty on both models, and what parts are covered (frame, springs, carriage, upholstery)?\n 2. Are these reformers designed for full commercial studio use (multiple classes per day)?\n 3. Do you have any studios currently using these long-term that you could share as references?\n再次感谢分享——这真的很有帮助。\n\n我有一些快速的问题：\n1. 两款产品的保修期是多久，哪些部件在保修范围内（框架、弹簧、滑车、内饰）？\n2. 这些改革者是为全商业工作室使用设计的吗（每天多个班级）？\n3. 您目前是否有任何工作室正在长期使用这些设备，可以分享作为参考？\nme: Great questions — happy to clarify\nme: 1. Warranty:\nWe provide 5years for the frame, and 1 years for main moving parts like springs, carriage system, and upholstery.\n 2. Commercial use:\nYes — both models are designed for full commercial studio use, including multiple classes per day.\nThe aluminum model is especially preferred for higher frequency because it’s easier to maintain long-term.\n 3. Studio references:\nYes, we do have studios using them long-term.\nFor example, one of our clients in New York recently set up a studio with 14 reformers (still in setup phase), and we also have several smaller studios running daily classes.\n1. 保修：\n我们提供 5 年框架保修，以及 1 年主要运动部件（如弹簧、滑车系统和面料）保修。\n2. 商业用途：\n是——两款产品均设计用于全面的商业工作室使用，包括每天多个课程。\n铝制型号特别适合高频使用，因为它更易于长期维护。\n3. 工作室参考：\n是的，确实有工作室长期使用它们。\n例如，我们纽约的一家客户最近建立了一个配备 14 台 reformers 的工作室（目前仍在设置阶段），我们还有几家小型工作室每天开设课程。\nme: By the way, how many reformers are you thinking for your studio?\n顺便问一下，您打算为您的工作室配备多少台改革机？\nme: I can also share some real production and shipment photos if helpful\ncustomer: Thank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？\nme: For studio references:\nDue to client privacy, we usually don’t share direct contact details, but I can also share some real studio setup photos from our clients, so you can see how the machines are actually used in practice\nme: Great questions — you’re looking at all the right things \n非常好的问题——你关注了所有正确的事情\nme: By the way, are you thinking closer to 4–6 units or a larger setup?\nme: For Vancouver landed cost:\nBased on recent shipments, the total landed cost is usually around $350–$450per unit (including shipping, duties, and taxes), depending on quantity and model.\nI can calculate an exact DDP cost for you once I know how many units you’re planning.\n对于温哥华到岸成本：\n根据最近的货运情况，每台设备的总落地成本通常在 350 至 450 美元之间（包括运费、关税和税费），具体取决于数量和型号。\n一旦我了解您计划订购的数量，我可以为您计算确切的 DDP 成本。\nme: For spare parts:\nCommon parts like springs, wheels, and ropes are easy to replace and we keep them available.\nShipping usually takes about 5–10 days by express, and the cost is quite low (typically tens of USD per part).\n用于备件：\n弹簧、轮子和绳索等常见部件容易更换，我们随时备有这些部件。\n通过快递运输通常需要 5-10 天，费用相当低廉（每个部件通常只需几十美元）。",
+  "_debug_source": "normalize_customer_data",
+  "original_message_count": 36,
+  "deduplicated_message_count": 35,
+  "_context_builder_version": "build_ai_context_v5.1_PRODUCTION_READY",
+  "core_messages": [
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "I’ll send you pictures + key specs first, then pricing right after.\n我会先发给你图片和关键规格，然后马上发送价格。",
+      "message_time": "2026-03-20T15:43:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "From our experience:\nMost studios go with aluminum for durability and lower maintenance,\nwhile wooden reformers are chosen more for aesthetics and a classic feel.\n从我们的经验来看：\n大多数工作室选择铝材是因为其耐用性和低维护成本，\n而木质改革者则更多是为了美观和经典的感觉。",
+      "message_time": "2026-03-20T15:43:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Perfect I’ll show you one aluminum model and one wooden model so you can easily compare.",
+      "message_time": "2026-03-20T15:43:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Let me send them over\n我这就把资料发给他们",
+      "message_time": "2026-03-20T15:44:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "This is one of our most popular commercial aluminum reformers (AR001) — very stable, smooth carriage, and designed for daily studio use.",
+      "message_time": "2026-03-20T15:45:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "And this is our classic wooden reformer (MR001) — more traditional look, slightly softer feel, very popular for boutique-style studios.",
+      "message_time": "2026-03-20T15:46:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Both models come with adjustable resistance springs, smooth rail system, and can handle high-frequency classes.\n\nAluminum is easier to maintain long-term,\nwhile wood focuses more on aesthetics and feel.",
+      "message_time": "2026-03-20T15:47:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "For pricing:\n\nAR001 (aluminum): $498/ unit\nMR001 (wood): $575 / unit\n\nShipping depends on quantity and your location — I can calculate it for you once I know your plan.",
+      "message_time": "2026-03-20T15:47:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Most new studios usually start with 4–8 units depending on space — happy to suggest a layout for you as well.\n大多数新工作室通常从 4-8 个单位开始，具体取决于空间——我很乐意为您建议一个布局方案。",
+      "message_time": "2026-03-20T15:48:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "customer",
+      "message": "Thanks again for sharing — this is really helpful. \n\nI had a few quick questions:\n 1. What is the warranty on both models, and what parts are covered (frame, springs, carriage, upholstery)?\n 2. Are these reformers designed for full commercial studio use (multiple classes per day)?\n 3. Do you have any studios currently using these long-term that you could share as references?\n再次感谢分享——这真的很有帮助。\n\n我有一些快速的问题：\n1. 两款产品的保修期是多久，哪些部件在保修范围内（框架、弹簧、滑车、内饰）？\n2. 这些改革者是为全商业工作室使用设计的吗（每天多个班级）？\n3. 您目前是否有任何工作室正在长期使用这些设备，可以分享作为参考？",
+      "message_time": "2026-03-25T23:42:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Great questions — happy to clarify",
+      "message_time": "2026-03-25T23:53:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "1. Warranty:\nWe provide 5years for the frame, and 1 years for main moving parts like springs, carriage system, and upholstery.\n 2. Commercial use:\nYes — both models are designed for full commercial studio use, including multiple classes per day.\nThe aluminum model is especially preferred for higher frequency because it’s easier to maintain long-term.\n 3. Studio references:\nYes, we do have studios using them long-term.\nFor example, one of our clients in New York recently set up a studio with 14 reformers (still in setup phase), and we also have several smaller studios running daily classes.\n1. 保修：\n我们提供 5 年框架保修，以及 1 年主要运动部件（如弹簧、滑车系统和面料）保修。\n2. 商业用途：\n是——两款产品均设计用于全面的商业工作室使用，包括每天多个课程。\n铝制型号特别适合高频使用，因为它更易于长期维护。\n3. 工作室参考：\n是的，确实有工作室长期使用它们。\n例如，我们纽约的一家客户最近建立了一个配备 14 台 reformers 的工作室（目前仍在设置阶段），我们还有几家小型工作室每天开设课程。",
+      "message_time": "2026-03-25T23:53:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "By the way, how many reformers are you thinking for your studio?\n顺便问一下，您打算为您的工作室配备多少台改革机？",
+      "message_time": "2026-03-25T23:54:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "I can also share some real production and shipment photos if helpful",
+      "message_time": "2026-03-25T23:54:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "customer",
+      "message": "Thank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？",
+      "message_time": "2026-03-25T23:57:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "For studio references:\nDue to client privacy, we usually don’t share direct contact details, but I can also share some real studio setup photos from our clients, so you can see how the machines are actually used in practice",
+      "message_time": "2026-03-26T00:17:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "Great questions — you’re looking at all the right things \n非常好的问题——你关注了所有正确的事情",
+      "message_time": "2026-03-26T00:17:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "By the way, are you thinking closer to 4–6 units or a larger setup?",
+      "message_time": "2026-03-26T00:18:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "For Vancouver landed cost:\nBased on recent shipments, the total landed cost is usually around $350–$450per unit (including shipping, duties, and taxes), depending on quantity and model.\nI can calculate an exact DDP cost for you once I know how many units you’re planning.\n对于温哥华到岸成本：\n根据最近的货运情况，每台设备的总落地成本通常在 350 至 450 美元之间（包括运费、关税和税费），具体取决于数量和型号。\n一旦我了解您计划订购的数量，我可以为您计算确切的 DDP 成本。",
+      "message_time": "2026-03-26T00:18:00+00:00"
+    },
+    {
+      "project_key": "Emma加拿大（26.3.20日） Sabouri",
+      "role": "me",
+      "message": "For spare parts:\nCommon parts like springs, wheels, and ropes are easy to replace and we keep them available.\nShipping usually takes about 5–10 days by express, and the cost is quite low (typically tens of USD per part).\n用于备件：\n弹簧、轮子和绳索等常见部件容易更换，我们随时备有这些部件。\n通过快递运输通常需要 5-10 天，费用相当低廉（每个部件通常只需几十美元）。",
+      "message_time": "2026-03-26T00:18:00+00:00"
+    }
+  ],
+  "conversation": "me: Great questions — happy to clarify\nme: 1. Warranty:\nWe provide 5years for the frame, and 1 years for main moving parts like springs, carriage system, and upholstery.\n 2. Commercial use:\nYes — both models are designed for full commercial studio use, including multiple classes per day.\nThe aluminum model is especially preferred for higher frequency because it’s easier to maintain long-term.\n 3. Studio references:\nYes, we do have studios using them long-term.\nFor example, one of our clients in New York recently set up a studio with 14 reformers (still in setup phase), and we also have several smaller studios running daily classes.\n1. 保修：\n我们提供 5 年框架保修，以及 1 年主要运动部件（如弹簧、滑车系统和面料）保修。\n2. 商业用途：\n是——两款产品均设计用于全面的商业工作室使用，包括每天多个课程。\n铝制型号特别适合高频使用，因为它更易于长期维护。\n3. 工作室参考：\n是的，确实有工作室长期使用它们。\n例如，我们纽约的一家客户最近建立了一个配备 14 台 reformers 的工作室（目前仍在设置阶段），我们还有几家小型工作室每天开设课程。\nme: By the way, how many reformers are you thinking for your studio?\n顺便问一下，您打算为您的工作室配备多少台改革机？\nme: I can also share some real production and shipment photos if helpful\ncustomer: Thank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？\nme: For studio references:\nDue to client privacy, we usually don’t share direct contact details, but I can also share some real studio setup photos from our clients, so you can see how the machines are actually used in practice\nme: Great questions — you’re looking at all the right things \n非常好的问题——你关注了所有正确的事情\nme: By the way, are you thinking closer to 4–6 units or a larger setup?\nme: For Vancouver landed cost:\nBased on recent shipments, the total landed cost is usually around $350–$450per unit (including shipping, duties, and taxes), depending on quantity and model.\nI can calculate an exact DDP cost for you once I know how many units you’re planning.\n对于温哥华到岸成本：\n根据最近的货运情况，每台设备的总落地成本通常在 350 至 450 美元之间（包括运费、关税和税费），具体取决于数量和型号。\n一旦我了解您计划订购的数量，我可以为您计算确切的 DDP 成本。\nme: For spare parts:\nCommon parts like springs, wheels, and ropes are easy to replace and we keep them available.\nShipping usually takes about 5–10 days by express, and the cost is quite low (typically tens of USD per part).\n用于备件：\n弹簧、轮子和绳索等常见部件容易更换，我们随时备有这些部件。\n通过快递运输通常需要 5-10 天，费用相当低廉（每个部件通常只需几十美元）。",
+  "conversation_core": "me: I’ll send you pictures + key specs first, then pricing right after.\n我会先发给你图片和关键规格，然后马上发送价格。\nme: From our experience:\nMost studios go with aluminum for durability and lower maintenance,\nwhile wooden reformers are chosen more for aesthetics and a classic feel.\n从我们的经验来看：\n大多数工作室选择铝材是因为其耐用性和低维护成本，\n而木质改革者则更多是为了美观和经典的感觉。\nme: Perfect I’ll show you one aluminum model and one wooden model so you can easily compare.\nme: Let me send them over\n我这就把资料发给他们\nme: This is one of our most popular commercial aluminum reformers (AR001) — very stable, smooth carriage, and designed for daily studio use.\nme: And this is our classic wooden reformer (MR001) — more traditional look, slightly softer feel, very popular for boutique-style studios.\nme: Both models come with adjustable resistance springs, smooth rail system, and can handle high-frequency classes.\n\nAluminum is easier to maintain long-term,\nwhile wood focuses more on aesthetics and feel.\nme: For pricing:\n\nAR001 (aluminum): $498/ unit\nMR001 (wood): $575 / unit\n\nShipping depends on quantity and your location — I can calculate it for you once I know your plan.\nme: Most new studios usually start with 4–8 units depending on space — happy to suggest a layout for you as well.\n大多数新工作室通常从 4-8 个单位开始，具体取决于空间——我很乐意为您建议一个布局方案。\ncustomer: Thanks again for sharing — this is really helpful. \n\nI had a few quick questions:\n 1. What is the warranty on both models, and what parts are covered (frame, springs, carriage, upholstery)?\n 2. Are these reformers designed for full commercial studio use (multiple classes per day)?\n 3. Do you have any studios currently using these long-term that you could share as references?\n再次感谢分享——这真的很有帮助。\n\n我有一些快速的问题：\n1. 两款产品的保修期是多久，哪些部件在保修范围内（框架、弹簧、滑车、内饰）？\n2. 这些改革者是为全商业工作室使用设计的吗（每天多个班级）？\n3. 您目前是否有任何工作室正在长期使用这些设备，可以分享作为参考？\nme: Great questions — happy to clarify\nme: 1. Warranty:\nWe provide 5years for the frame, and 1 years for main moving parts like springs, carriage system, and upholstery.\n 2. Commercial use:\nYes — both models are designed for full commercial studio use, including multiple classes per day.\nThe aluminum model is especially preferred for higher frequency because it’s easier to maintain long-term.\n 3. Studio references:\nYes, we do have studios using them long-term.\nFor example, one of our clients in New York recently set up a studio with 14 reformers (still in setup phase), and we also have several smaller studios running daily classes.\n1. 保修：\n我们提供 5 年框架保修，以及 1 年主要运动部件（如弹簧、滑车系统和面料）保修。\n2. 商业用途：\n是——两款产品均设计用于全面的商业工作室使用，包括每天多个课程。\n铝制型号特别适合高频使用，因为它更易于长期维护。\n3. 工作室参考：\n是的，确实有工作室长期使用它们。\n例如，我们纽约的一家客户最近建立了一个配备 14 台 reformers 的工作室（目前仍在设置阶段），我们还有几家小型工作室每天开设课程。\nme: By the way, how many reformers are you thinking for your studio?\n顺便问一下，您打算为您的工作室配备多少台改革机？\nme: I can also share some real production and shipment photos if helpful\ncustomer: Thank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？\nme: For studio references:\nDue to client privacy, we usually don’t share direct contact details, but I can also share some real studio setup photos from our clients, so you can see how the machines are actually used in practice\nme: Great questions — you’re looking at all the right things \n非常好的问题——你关注了所有正确的事情\nme: By the way, are you thinking closer to 4–6 units or a larger setup?\nme: For Vancouver landed cost:\nBased on recent shipments, the total landed cost is usually around $350–$450per unit (including shipping, duties, and taxes), depending on quantity and model.\nI can calculate an exact DDP cost for you once I know how many units you’re planning.\n对于温哥华到岸成本：\n根据最近的货运情况，每台设备的总落地成本通常在 350 至 450 美元之间（包括运费、关税和税费），具体取决于数量和型号。\n一旦我了解您计划订购的数量，我可以为您计算确切的 DDP 成本。\nme: For spare parts:\nCommon parts like springs, wheels, and ropes are easy to replace and we keep them available.\nShipping usually takes about 5–10 days by express, and the cost is quite low (typically tens of USD per part).\n用于备件：\n弹簧、轮子和绳索等常见部件容易更换，我们随时备有这些部件。\n通过快递运输通常需要 5-10 天，费用相当低廉（每个部件通常只需几十美元）。",
+  "customer_only_text": "Hi\n嗨\nWhat’s MOQ?\n什么是最小起订量？\nOh great \n\nMy own studio\nThanks for the guidance\nCan you please send me pictures with specs as well as pricing\nI’d like to see both. Thank you\nThanks again for sharing — this is really helpful. \n\nI had a few quick questions:\n 1. What is the warranty on both models, and what parts are covered (frame, springs, carriage, upholstery)?\n 2. Are these reformers designed for full commercial studio use (multiple classes per day)?\n 3. Do you have any studios currently using these long-term that you could share as references?\n再次感谢分享——这真的很有帮助。\n\n我有一些快速的问题：\n1. 两款产品的保修期是多久，哪些部件在保修范围内（框架、弹簧、滑车、内饰）？\n2. 这些改革者是为全商业工作室使用设计的吗（每天多个班级）？\n3. 您目前是否有任何工作室正在长期使用这些设备，可以分享作为参考？\nThank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？",
+  "customer_recent_only_text": "Hi\n嗨\nWhat’s MOQ?\n什么是最小起订量？\nOh great \n\nMy own studio\nThanks for the guidance\nCan you please send me pictures with specs as well as pricing\nI’d like to see both. Thank you\nThanks again for sharing — this is really helpful. \n\nI had a few quick questions:\n 1. What is the warranty on both models, and what parts are covered (frame, springs, carriage, upholstery)?\n 2. Are these reformers designed for full commercial studio use (multiple classes per day)?\n 3. Do you have any studios currently using these long-term that you could share as references?\n再次感谢分享——这真的很有帮助。\n\n我有一些快速的问题：\n1. 两款产品的保修期是多久，哪些部件在保修范围内（框架、弹簧、滑车、内饰）？\n2. 这些改革者是为全商业工作室使用设计的吗（每天多个班级）？\n3. 您目前是否有任何工作室正在长期使用这些设备，可以分享作为参考？\nThank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？",
+  "seller_only_text": "Hi! Thanks for reaching out \nTo make sure I point you to the right Pilates Reformer, could you tell me a bit about your plan?\n Is this for a studio, gym, or resale business?\n Roughly how many units are you considering?\n Which country will the machines be delivered to?\nHi \n\nOur MOQ is quite flexible — we can start from 1 unit for trial orders.\n\nFor better pricing, most clients usually go with 3–5 units or more.\n\nJust to guide you properly — are you planning for resale, or for your own studio/gym use?\nNice studio setup is exciting\n很棒 工作室设置令人兴奋\nTo suggest the best model for you, could you let me know:\n• aluminum, wood, or stainless steel?\n • standard reformer, foldable, half tower, combo, Cadillac, or megaformer?\n • and roughly how many units you need?\nDo you prefer aluminum or wood reformers?\n(Aluminum is more durable for daily classes, wood has a more classic feel)\n\nAlso, roughly how many reformers are you planning for your studio?\n你更喜欢铝制还是木制 reformer？\n（铝制更耐用，适合日常使用；木制更有经典感觉）\n\n另外，你计划为你的工作室购买多少个 reformer？\nBefore I send pricing, just to make sure I recommend the right one for you:\nSince this is for your own studio, I’ll send you a few of our most popular commercial models — with pictures and key specs so you can get a clear idea.\nGot it happy to share.\nI’ll send you pictures + key specs first, then pricing right after.\n我会先发给你图片和关键规格，然后马上发送价格。\nFrom our experience:\nMost studios go with aluminum for durability and lower maintenance,\nwhile wooden reformers are chosen more for aesthetics and a classic feel.\n从我们的经验来看：\n大多数工作室选择铝材是因为其耐用性和低维护成本，\n而木质改革者则更多是为了美观和经典的感觉。\nPerfect I’ll show you one aluminum model and one wooden model so you can easily compare.\nLet me send them over\n我这就把资料发给他们\nThis is one of our most popular commercial aluminum reformers (AR001) — very stable, smooth carriage, and designed for daily studio use.\nAnd this is our classic wooden reformer (MR001) — more traditional look, slightly softer feel, very popular for boutique-style studios.\nBoth models come with adjustable resistance springs, smooth rail system, and can handle high-frequency classes.\n\nAluminum is easier to maintain long-term,\nwhile wood focuses more on aesthetics and feel.\nFor pricing:\n\nAR001 (aluminum): $498/ unit\nMR001 (wood): $575 / unit\n\nShipping depends on quantity and your location — I can calculate it for you once I know your plan.\nMost new studios usually start with 4–8 units depending on space — happy to suggest a layout for you as well.\n大多数新工作室通常从 4-8 个单位开始，具体取决于空间——我很乐意为您建议一个布局方案。\nGreat questions — happy to clarify\n1. Warranty:\nWe provide 5years for the frame, and 1 years for main moving parts like springs, carriage system, and upholstery.\n 2. Commercial use:\nYes — both models are designed for full commercial studio use, including multiple classes per day.\nThe aluminum model is especially preferred for higher frequency because it’s easier to maintain long-term.\n 3. Studio references:\nYes, we do have studios using them long-term.\nFor example, one of our clients in New York recently set up a studio with 14 reformers (still in setup phase), and we also have several smaller studios running daily classes.\n1. 保修：\n我们提供 5 年框架保修，以及 1 年主要运动部件（如弹簧、滑车系统和面料）保修。\n2. 商业用途：\n是——两款产品均设计用于全面的商业工作室使用，包括每天多个课程。\n铝制型号特别适合高频使用，因为它更易于长期维护。\n3. 工作室参考：\n是的，确实有工作室长期使用它们。\n例如，我们纽约的一家客户最近建立了一个配备 14 台 reformers 的工作室（目前仍在设置阶段），我们还有几家小型工作室每天开设课程。\nBy the way, how many reformers are you thinking for your studio?\n顺便问一下，您打算为您的工作室配备多少台改革机？\nI can also share some real production and shipment photos if helpful\nFor studio references:\nDue to client privacy, we usually don’t share direct contact details, but I can also share some real studio setup photos from our clients, so you can see how the machines are actually used in practice\nGreat questions — you’re looking at all the right things \n非常好的问题——你关注了所有正确的事情\nBy the way, are you thinking closer to 4–6 units or a larger setup?\nFor Vancouver landed cost:\nBased on recent shipments, the total landed cost is usually around $350–$450per unit (including shipping, duties, and taxes), depending on quantity and model.\nI can calculate an exact DDP cost for you once I know how many units you’re planning.\n对于温哥华到岸成本：\n根据最近的货运情况，每台设备的总落地成本通常在 350 至 450 美元之间（包括运费、关税和税费），具体取决于数量和型号。\n一旦我了解您计划订购的数量，我可以为您计算确切的 DDP 成本。\nFor spare parts:\nCommon parts like springs, wheels, and ropes are easy to replace and we keep them available.\nShipping usually takes about 5–10 days by express, and the cost is quite low (typically tens of USD per part).\n用于备件：\n弹簧、轮子和绳索等常见部件容易更换，我们随时备有这些部件。\n通过快递运输通常需要 5-10 天，费用相当低廉（每个部件通常只需几十美元）。",
+  "project_and_structured_text": "Emma加拿大（26.3.20日） Sabouri\nEmma加拿大（26.3.20日） Sabouri\n\n\n\n\n\n\n",
+  "customer_priority_analysis_text": "Hi\n嗨\nWhat’s MOQ?\n什么是最小起订量？\nOh great \n\nMy own studio\nThanks for the guidance\nCan you please send me pictures with specs as well as pricing\nI’d like to see both. Thank you\nThanks again for sharing — this is really helpful. \n\nI had a few quick questions:\n 1. What is the warranty on both models, and what parts are covered (frame, springs, carriage, upholstery)?\n 2. Are these reformers designed for full commercial studio use (multiple classes per day)?\n 3. Do you have any studios currently using these long-term that you could share as references?\n再次感谢分享——这真的很有帮助。\n\n我有一些快速的问题：\n1. 两款产品的保修期是多久，哪些部件在保修范围内（框架、弹簧、滑车、内饰）？\n2. 这些改革者是为全商业工作室使用设计的吗（每天多个班级）？\n3. 您目前是否有任何工作室正在长期使用这些设备，可以分享作为参考？\nThank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？\nHi\n嗨\nWhat’s MOQ?\n什么是最小起订量？\nOh great \n\nMy own studio\nThanks for the guidance\nCan you please send me pictures with specs as well as pricing\nI’d like to see both. Thank you\nThanks again for sharing — this is really helpful. \n\nI had a few quick questions:\n 1. What is the warranty on both models, and what parts are covered (frame, springs, carriage, upholstery)?\n 2. Are these reformers designed for full commercial studio use (multiple classes per day)?\n 3. Do you have any studios currently using these long-term that you could share as references?\n再次感谢分享——这真的很有帮助。\n\n我有一些快速的问题：\n1. 两款产品的保修期是多久，哪些部件在保修范围内（框架、弹簧、滑车、内饰）？\n2. 这些改革者是为全商业工作室使用设计的吗（每天多个班级）？\n3. 您目前是否有任何工作室正在长期使用这些设备，可以分享作为参考？\nThank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？\nEmma加拿大（26.3.20日） Sabouri\nEmma加拿大（26.3.20日） Sabouri\n\n\n\n\n\n\n",
+  "now_time": "2026-04-16T10:17:33.044Z",
+  "now_time_display": "2026-04-16 10:17",
+  "first_message": "Hi\n嗨",
+  "first_message_time": "2026-03-20T14:48:00+00:00",
+  "first_message_time_display": "2026-03-20 14:48",
+  "last_customer_message_time": "2026-03-25T23:57:00+00:00",
+  "last_customer_message_time_display": "2026-03-25 23:57",
+  "last_my_message_time": "2026-03-26T00:18:00+00:00",
+  "last_my_message_time_display": "2026-03-26 00:18",
+  "last_message_time": "2026-03-26T00:18:00+00:00",
+  "last_message_time_display": "2026-03-26 00:18",
+  "last_message_role": "me",
+  "timeline": {
+    "now_time": "2026-04-16T10:17:33.044Z",
+    "now_time_display": "2026-04-16 10:17",
+    "first_message_time": "2026-03-20T14:48:00+00:00",
+    "first_message_time_display": "2026-03-20 14:48",
+    "last_customer_message_time": "2026-03-25T23:57:00+00:00",
+    "last_customer_message_time_display": "2026-03-25 23:57",
+    "last_my_message_time": "2026-03-26T00:18:00+00:00",
+    "last_my_message_time_display": "2026-03-26 00:18",
+    "last_message_time": "2026-03-26T00:18:00+00:00",
+    "last_message_time_display": "2026-03-26 00:18",
+    "last_message_role": "me",
+    "who_stopped": "customer",
+    "who_should_reply_next": "customer",
+    "sequence": "我方最后发言，等待客户回复",
+    "conversation_status": "waiting_customer",
+    "gap_days_customer_vs_me": "0",
+    "gap_hours_customer_vs_me": "0",
+    "gap_minutes_customer_vs_me": "21",
+    "hours_since_last_customer_message": "514",
+    "hours_since_last_my_message": "513",
+    "days_since_last_customer_message": "21",
+    "days_since_last_my_message": "21",
+    "gap_hint": "21m",
+    "summary": "首次记录：2026-03-20 14:48；客户最后回复：2026-03-25 23:57；我方最后发送：2026-03-26 00:18；当前序列：我方最后发言，等待客户回复；最近双方消息间隔：21分钟",
+    "events": [
+      {
+        "role": "me",
+        "message_time": "2026-03-25T23:54:00+00:00",
+        "message_time_display": "2026-03-25 23:54",
+        "message": "By the way, how many reformers are you thinking for your studio?\n顺便问一下，您打算为您的工作室配备多少台改革机？"
+      },
+      {
+        "role": "me",
+        "message_time": "2026-03-25T23:54:00+00:00",
+        "message_time_display": "2026-03-25 23:54",
+        "message": "I can also share some real production and shipment photos if helpful"
+      },
+      {
+        "role": "customer",
+        "message_time": "2026-03-25T23:57:00+00:00",
+        "message_time_display": "2026-03-25 23:57",
+        "message": "Thank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？"
+      },
+      {
+        "role": "me",
+        "message_time": "2026-03-26T00:17:00+00:00",
+        "message_time_display": "2026-03-26 00:17",
+        "message": "For studio references:\nDue to client privacy, we usually don’t share direct contact details, but I can also share some real studio setup photos from our clients, so you can see how the machines are actually used in practice"
+      },
+      {
+        "role": "me",
+        "message_time": "2026-03-26T00:17:00+00:00",
+        "message_time_display": "2026-03-26 00:17",
+        "message": "Great questions — you’re looking at all the right things \n非常好的问题——你关注了所有正确的事情"
+      },
+      {
+        "role": "me",
+        "message_time": "2026-03-26T00:18:00+00:00",
+        "message_time_display": "2026-03-26 00:18",
+        "message": "By the way, are you thinking closer to 4–6 units or a larger setup?"
+      },
+      {
+        "role": "me",
+        "message_time": "2026-03-26T00:18:00+00:00",
+        "message_time_display": "2026-03-26 00:18",
+        "message": "For Vancouver landed cost:\nBased on recent shipments, the total landed cost is usually around $350–$450per unit (including shipping, duties, and taxes), depending on quantity and model.\nI can calculate an exact DDP cost for you once I know how many units you’re planning.\n对于温哥华到岸成本：\n根据最近的货运情况，每台设备的总落地成本通常在 350 至 450 美元之间（包括运费、关税和税费），具体取决于数量和型号。\n一旦我了解您计划订购的数量，我可以为您计算确切的 DDP 成本。"
+      },
+      {
+        "role": "me",
+        "message_time": "2026-03-26T00:18:00+00:00",
+        "message_time_display": "2026-03-26 00:18",
+        "message": "For spare parts:\nCommon parts like springs, wheels, and ropes are easy to replace and we keep them available.\nShipping usually takes about 5–10 days by express, and the cost is quite low (typically tens of USD per part).\n用于备件：\n弹簧、轮子和绳索等常见部件容易更换，我们随时备有这些部件。\n通过快递运输通常需要 5-10 天，费用相当低廉（每个部件通常只需几十美元）。"
+      }
+    ]
+  },
+  "timeline_summary": "首次记录：2026-03-20 14:48；客户最后回复：2026-03-25 23:57；我方最后发送：2026-03-26 00:18；当前序列：我方最后发言，等待客户回复；最近双方消息间隔：21分钟",
+  "dated_history_summary": "2026-03-25 23:57｜客户：Thank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？\n2026-03-26 00:17｜我方：For studio references:\nDue to client privacy, we usually don’t share direct contact details, but I can also share some real studio setup photos from our clients, so you can see how the machines are actually used in practice\n2026-03-26 00:17｜我方：Great questions — you’re looking at all the right things \n非常好的问题——你关注了所有正确的事情\n2026-03-26 00:18｜我方：By the way, are you thinking closer to 4–6 units or a larger setup?\n2026-03-26 00:18｜我方：For Vancouver landed cost:\nBased on recent shipments, the total landed cost is usually around $350–$450per unit (including shipping, duties, and taxes), depending on quantity and model.\nI can calculate an exact DDP cost for you once I know how many units you’re planning.\n对于温哥华到岸成本：\n根据最近的货运情况，每台设备的总落地成本通常在 350 至 450 美元之间（包括运费、关税和税费），具体取决于数量和型号。\n一旦我了解您计划订购的数量，我可以为您计算确切的 DDP 成本。\n2026-03-26 00:18｜我方：For spare parts:\nCommon parts like springs, wheels, and ropes are easy to replace and we keep them available.\nShipping usually takes about 5–10 days by express, and the cost is quite low (typically tens of USD per part).\n用于备件：\n弹簧、轮子和绳索等常见部件容易更换，我们随时备有这些部件。\n通过快递运输通常需要 5-10 天，费用相当低廉（每个部件通常只需几十美元）。",
+  "timeline_events": [
+    {
+      "role": "me",
+      "message_time": "2026-03-25T23:54:00+00:00",
+      "message_time_display": "2026-03-25 23:54",
+      "message": "By the way, how many reformers are you thinking for your studio?\n顺便问一下，您打算为您的工作室配备多少台改革机？"
+    },
+    {
+      "role": "me",
+      "message_time": "2026-03-25T23:54:00+00:00",
+      "message_time_display": "2026-03-25 23:54",
+      "message": "I can also share some real production and shipment photos if helpful"
+    },
+    {
+      "role": "customer",
+      "message_time": "2026-03-25T23:57:00+00:00",
+      "message_time_display": "2026-03-25 23:57",
+      "message": "Thank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？"
+    },
+    {
+      "role": "me",
+      "message_time": "2026-03-26T00:17:00+00:00",
+      "message_time_display": "2026-03-26 00:17",
+      "message": "For studio references:\nDue to client privacy, we usually don’t share direct contact details, but I can also share some real studio setup photos from our clients, so you can see how the machines are actually used in practice"
+    },
+    {
+      "role": "me",
+      "message_time": "2026-03-26T00:17:00+00:00",
+      "message_time_display": "2026-03-26 00:17",
+      "message": "Great questions — you’re looking at all the right things \n非常好的问题——你关注了所有正确的事情"
+    },
+    {
+      "role": "me",
+      "message_time": "2026-03-26T00:18:00+00:00",
+      "message_time_display": "2026-03-26 00:18",
+      "message": "By the way, are you thinking closer to 4–6 units or a larger setup?"
+    },
+    {
+      "role": "me",
+      "message_time": "2026-03-26T00:18:00+00:00",
+      "message_time_display": "2026-03-26 00:18",
+      "message": "For Vancouver landed cost:\nBased on recent shipments, the total landed cost is usually around $350–$450per unit (including shipping, duties, and taxes), depending on quantity and model.\nI can calculate an exact DDP cost for you once I know how many units you’re planning.\n对于温哥华到岸成本：\n根据最近的货运情况，每台设备的总落地成本通常在 350 至 450 美元之间（包括运费、关税和税费），具体取决于数量和型号。\n一旦我了解您计划订购的数量，我可以为您计算确切的 DDP 成本。"
+    },
+    {
+      "role": "me",
+      "message_time": "2026-03-26T00:18:00+00:00",
+      "message_time_display": "2026-03-26 00:18",
+      "message": "For spare parts:\nCommon parts like springs, wheels, and ropes are easy to replace and we keep them available.\nShipping usually takes about 5–10 days by express, and the cost is quite low (typically tens of USD per part).\n用于备件：\n弹簧、轮子和绳索等常见部件容易更换，我们随时备有这些部件。\n通过快递运输通常需要 5-10 天，费用相当低廉（每个部件通常只需几十美元）。"
+    }
+  ],
+  "who_stopped": "customer",
+  "who_should_reply_next": "customer",
+  "conversation_sequence": "我方最后发言，等待客户回复",
+  "timeline_conversation_status": "waiting_customer",
+  "gap_days_customer_vs_me": "0",
+  "gap_hours_customer_vs_me": "0",
+  "gap_minutes_customer_vs_me": "21",
+  "hours_since_last_customer_message": "514",
+  "hours_since_last_my_message": "513",
+  "days_since_last_customer_message": "21",
+  "days_since_last_my_message": "21",
+  "cleaned_message_count": 35,
+  "recent_message_count": 10,
+  "core_message_count": 20,
+  "full_conversation_length": 5965,
+  "customer_message_count": 8,
+  "my_message_count": 27,
+  "has_customer_reply": true,
+  "has_price_signal": true,
+  "has_timing_signal": false,
+  "has_not_now_signal": false,
+  "last_customer_gap_hint": "21m",
+  "is_my_turn_to_reply": false,
+  "should_reactivate_now": true,
+  "customer_replied_after_my_last_message": false,
+  "is_customer_silent_after_my_message": true,
+  "customer_last_message_type": "price_reaction_soft",
+  "last_exchange": {
+    "last_customer_message": "Thank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？",
+    "last_customer_message_time": "2026-03-25T23:57:00+00:00",
+    "last_customer_message_time_display": "2026-03-25 23:57",
+    "last_my_message": "For spare parts:\nCommon parts like springs, wheels, and ropes are easy to replace and we keep them available.\nShipping usually takes about 5–10 days by express, and the cost is quite low (typically tens of USD per part).\n用于备件：\n弹簧、轮子和绳索等常见部件容易更换，我们随时备有这些部件。\n通过快递运输通常需要 5-10 天，费用相当低廉（每个部件通常只需几十美元）。",
+    "last_my_message_time": "2026-03-26T00:18:00+00:00",
+    "last_my_message_time_display": "2026-03-26 00:18",
+    "last_message_role": "me",
+    "sequence": "我方最后发言，等待客户回复",
+    "who_stopped": "customer",
+    "who_should_reply_next": "customer"
+  },
+  "stage": "price",
+  "follow_up_priority": "medium",
+  "status": "waiting_for_customer",
+  "customer_type": "studio_owner",
+  "intent_level": "medium",
+  "purchase_stage": "pricing",
+  "product_interest": "unknown",
+  "quantity_signal": "unknown",
+  "concerns": "price, shipping, after_sales",
+  "key_signals": "关注交付节奏；价格敏感；偏B端/商用场景；已进入实质采购问题",
+  "current_blocker": "报价后暂未继续推进",
+  "strategy_direction": "轻推进报价确认",
+  "reply_angle": "围绕价格确认或落单条件切入",
+  "follow_up_focus": "围绕price, shipping, after_sales",
+  "primary_reply_anchor": "cheaper_option_difference",
+  "secondary_context": "price, shipping, after_sales",
+  "reply_risk": "avoid_pressure",
+  "reactivation_ai_payload": {
+    "timeline": {
+      "last_customer_message_time": "2026-03-25T23:57:00+00:00",
+      "last_my_message_time": "2026-03-26T00:18:00+00:00",
+      "gap_days": 0
+    },
+    "last_signal": {
+      "type": "price_reaction_soft",
+      "summary": "Thank you for the quick response. \n\nCould you share contact details or Instagram",
+      "confidence": "high",
+      "anchor_object": "cheaper_option_difference"
+    },
+    "stop_point": {
+      "where_it_stopped": "my_last_message",
+      "why_it_stopped": "my_last_message_unanswered",
+      "smallest_reply_to_trigger": "clarify_why_cheaper_here",
+      "anchor_object": "cheaper_option_difference",
+      "allowed_micro_triggers": [
+        "clarify_why_cheaper_here"
+      ],
+      "send_state": "rewrite_needed",
+      "hard_no_send": false
+    },
+    "constraints": {
+      "must_avoid": [
+        "multi-question message",
+        "pushing decision"
+      ],
+      "must_follow": [
+        "single trigger",
+        "low friction reply",
+        "single micro-trigger",
+        "concrete conversation anchor"
+      ],
+      "do_not_repeat": [
+        "repeat_same_question",
+        "repeat_selection_help",
+        "repeat_price_push",
+        "repeat_model_recommendation"
+      ],
+      "allowed_micro_triggers": [
+        "clarify_why_cheaper_here"
+      ]
+    },
+    "decision": {
+      "should_follow_up_now": true,
+      "best_trigger_type": "clarify_why_cheaper_here",
+      "best_trigger_reason": "customer_raised_cheaper_option_or_comparison",
+      "smallest_reply_goal": "clarify_why_cheaper_here",
+      "primary_anchor": "cheaper_option_difference",
+      "anchor_object": "cheaper_option_difference",
+      "allowed_micro_triggers": [
+        "clarify_why_cheaper_here"
+      ],
+      "send_state": "rewrite_needed",
+      "hard_no_send": false
+    }
+  },
+  "_project_signals": {
+    "project_has_stage_hint": false,
+    "project_has_qty_hint": false,
+    "project_has_model_hint": false
+  },
+  "stop_point_analysis": {
+    "where_it_stopped": "my_last_message",
+    "why_it_stopped_there": "my_last_message_unanswered",
+    "what_my_last_push_was": "For spare parts:\nCommon parts like springs, wheels, and ropes are easy to replace and we keep them available.\nShipping usually takes about 5–10 days by express, and the cost is quite low (typically tens of USD per part).\n用于备件：\n弹簧、轮子和绳索等常见部件容易更换，我们随时备有这些部件。\n通过快递运输通常需要 5-10 天，费用相当低廉（每个部件通常只需几十美元）。",
+    "what_customer_did_not_answer": "",
+    "did_my_last_push_fail": false,
+    "smallest_reply_to_trigger": "clarify_why_cheaper_here",
+    "anchor_object": "cheaper_option_difference",
+    "allowed_micro_triggers": [
+      "clarify_why_cheaper_here"
+    ],
+    "send_state": "rewrite_needed",
+    "hard_no_send": false
+  },
+  "forbidden_repeat_zone": {
+    "already_asked_questions": [
+      "Thanks for reaching out To make sure I point you to the right Pilates Reformer, could you tell me a bit about your plan?",
+      "Is this for a studio, gym, or resale business?",
+      "Roughly how many units are you considering?",
+      "Which country will the machines be delivered to?",
+      "Thanks for reaching out To make sure I point you to the right Pilates Reformer, could you tell me a bit about your pl...",
+      "Just to guide you properly — are you planning for resale, or for your own studio/gym use?",
+      "• aluminum, wood, or stainless steel?",
+      "• standard reformer, foldable, half tower, combo, Cadillac, or megaformer?",
+      "• and roughly how many units you need?",
+      "• aluminum, wood, or stainless steel? • standard reformer, foldable, half tower, combo, Cadillac, or megaformer? • an...",
+      "Do you prefer aluminum or wood reformers?",
+      "(Aluminum is more durable for daily classes, wood has a more classic feel) Also, roughly how many reformers are you p...",
+      "你更喜欢铝制还是木制 reformer？",
+      "（铝制更耐用，适合日常使用；木制更有经典感觉） 另外，你计划为你的工作室购买多少个 reformer？",
+      "Do you prefer aluminum or wood reformers? (Aluminum is more durable for daily classes, wood has a more classic feel)...",
+      "By the way, how many reformers are you thinking for your studio?",
+      "顺便问一下，您打算为您的工作室配备多少台改革机？",
+      "By the way, how many reformers are you thinking for your studio? 顺便问一下，您打算为您的工作室配备多少台改革机？",
+      "By the way, are you thinking closer to 4–6 units or a larger setup?",
+      "I can calculate an exact DDP cost for you once I know how many units you’re planning"
+    ],
+    "already_sent_topics": [
+      "delivery time",
+      "model recommendation",
+      "photos/videos",
+      "warranty",
+      "shipping",
+      "price"
+    ],
+    "already_used_angles": [
+      "selection help",
+      "comparison framing",
+      "price push"
+    ],
+    "do_not_repeat": [
+      "repeat_same_question",
+      "repeat_selection_help",
+      "repeat_price_push",
+      "repeat_model_recommendation"
+    ],
+    "allowed_micro_triggers": [
+      "clarify_why_cheaper_here"
+    ]
+  },
+  "reactivation_decision_basis": {
+    "should_follow_up_now": true,
+    "best_trigger_type": "clarify_why_cheaper_here",
+    "best_trigger_reason": "customer_raised_cheaper_option_or_comparison",
+    "must_avoid": [
+      "repeat_same_question",
+      "repeat_selection_help",
+      "repeat_price_push",
+      "repeat_model_recommendation"
+    ],
+    "smallest_reply_goal": "clarify_why_cheaper_here",
+    "primary_anchor": "cheaper_option_difference",
+    "anchor_object": "cheaper_option_difference",
+    "allowed_micro_triggers": [
+      "clarify_why_cheaper_here"
+    ],
+    "send_state": "rewrite_needed",
+    "hard_no_send": false
+  },
+  "reactivation_v6_core": {
+    "timeline_facts": {
+      "last_customer_message_time": "2026-03-25T23:57:00+00:00",
+      "last_my_message_time": "2026-03-26T00:18:00+00:00",
+      "who_should_reply_next": "customer",
+      "days_since_last_customer_message": "21",
+      "days_since_last_my_message": "21",
+      "conversation_status": "waiting_customer"
+    },
+    "last_customer_signal": {
+      "last_customer_message": "Thank you for the quick response. \n\nCould you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage?\n\nWhat would be the total landed cost per unit to Vancouver (including shipping, duties, and taxes)?\n\nIf parts need replacement (springs, wheels, ropes), how quickly can they be shipped and what is the typical cost?\n感谢您的快速回复。\n\n您能否分享目前正在使用您改革器的工作室的联系信息或 Instagram/网站（最好是北美地区），以便我了解实际使用情况？\n\n每单位到温哥华的总落地成本是多少（包括运费、关税和税金）？\n\n如果需要更换部件（弹簧、轮子、绳索），它们能多快发货？通常费用是多少？",
+      "last_customer_message_type": "price_reaction_soft"
+    },
+    "stop_point_analysis": {
+      "where_it_stopped": "my_last_message",
+      "why_it_stopped_there": "my_last_message_unanswered",
+      "what_my_last_push_was": "For spare parts:\nCommon parts like springs, wheels, and ropes are easy to replace and we keep them available.\nShipping usually takes about 5–10 days by express, and the cost is quite low (typically tens of USD per part).\n用于备件：\n弹簧、轮子和绳索等常见部件容易更换，我们随时备有这些部件。\n通过快递运输通常需要 5-10 天，费用相当低廉（每个部件通常只需几十美元）。",
+      "what_customer_did_not_answer": "",
+      "did_my_last_push_fail": false,
+      "smallest_reply_to_trigger": "clarify_why_cheaper_here",
+      "anchor_object": "cheaper_option_difference",
+      "allowed_micro_triggers": [
+        "clarify_why_cheaper_here"
+      ],
+      "send_state": "rewrite_needed",
+      "hard_no_send": false
+    },
+    "forbidden_repeat_zone": {
+      "already_asked_questions": [
+        "Thanks for reaching out To make sure I point you to the right Pilates Reformer, could you tell me a bit about your plan?",
+        "Is this for a studio, gym, or resale business?",
+        "Roughly how many units are you considering?",
+        "Which country will the machines be delivered to?",
+        "Thanks for reaching out To make sure I point you to the right Pilates Reformer, could you tell me a bit about your pl...",
+        "Just to guide you properly — are you planning for resale, or for your own studio/gym use?",
+        "• aluminum, wood, or stainless steel?",
+        "• standard reformer, foldable, half tower, combo, Cadillac, or megaformer?",
+        "• and roughly how many units you need?",
+        "• aluminum, wood, or stainless steel? • standard reformer, foldable, half tower, combo, Cadillac, or megaformer? • an...",
+        "Do you prefer aluminum or wood reformers?",
+        "(Aluminum is more durable for daily classes, wood has a more classic feel) Also, roughly how many reformers are you p...",
+        "你更喜欢铝制还是木制 reformer？",
+        "（铝制更耐用，适合日常使用；木制更有经典感觉） 另外，你计划为你的工作室购买多少个 reformer？",
+        "Do you prefer aluminum or wood reformers? (Aluminum is more durable for daily classes, wood has a more classic feel)...",
+        "By the way, how many reformers are you thinking for your studio?",
+        "顺便问一下，您打算为您的工作室配备多少台改革机？",
+        "By the way, how many reformers are you thinking for your studio? 顺便问一下，您打算为您的工作室配备多少台改革机？",
+        "By the way, are you thinking closer to 4–6 units or a larger setup?",
+        "I can calculate an exact DDP cost for you once I know how many units you’re planning"
+      ],
+      "already_sent_topics": [
+        "delivery time",
+        "model recommendation",
+        "photos/videos",
+        "warranty",
+        "shipping",
+        "price"
+      ],
+      "already_used_angles": [
+        "selection help",
+        "comparison framing",
+        "price push"
+      ],
+      "do_not_repeat": [
+        "repeat_same_question",
+        "repeat_selection_help",
+        "repeat_price_push",
+        "repeat_model_recommendation"
+      ],
+      "allowed_micro_triggers": [
+        "clarify_why_cheaper_here"
+      ]
+    },
+    "reactivation_decision_basis": {
+      "should_follow_up_now": true,
+      "best_trigger_type": "clarify_why_cheaper_here",
+      "best_trigger_reason": "customer_raised_cheaper_option_or_comparison",
+      "must_avoid": [
+        "repeat_same_question",
+        "repeat_selection_help",
+        "repeat_price_push",
+        "repeat_model_recommendation"
+      ],
+      "smallest_reply_goal": "clarify_why_cheaper_here",
+      "primary_anchor": "cheaper_option_difference",
+      "anchor_object": "cheaper_option_difference",
+      "allowed_micro_triggers": [
+        "clarify_why_cheaper_here"
+      ],
+      "send_state": "rewrite_needed",
+      "hard_no_send": false
+    },
+    "anchor_object": "cheaper_option_difference",
+    "allowed_micro_triggers": [
+      "clarify_why_cheaper_here"
+    ],
+    "send_state": "rewrite_needed",
+    "hard_no_send": false
+  },
+  "anchor_object": "cheaper_option_difference",
+  "allowed_micro_triggers": [
+    "clarify_why_cheaper_here"
+  ],
+  "send_state": "rewrite_needed",
+  "hard_no_send": false,
+  "output": [
+    {
+      "id": "msg_02dc399ff0524fc10069e0b75c5fdc819fb4be79a3563c3fe5",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "{\n  \"whatsapp_message\": \"Emma, I can clarify what makes the aluminum model cheaper so you can compare it easily — want me to send that here?\"\n}"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "ai_parsed": {
+    "whatsapp_message": "Emma, I can clarify what makes the aluminum model cheaper so you can compare it easily — want me to send that here?"
+  },
+  "order_group": "Emma加拿大（26.3.20日） Sabouri",
+  "_en": "Emma, I can clarify what makes the aluminum model cheaper so you can compare it easily — want me to send that here?",
+  "_cn": "我可以把关键差异整理成一条简单信息，要我发这里吗？",
+  "weak_candidate_message": "",
+  "needs_enforce_rewrite": false,
+  "telegram_messages": [
+    "【Emma加拿大（26.3.20日） Sabouri】\n\nEnglish:\nEmma, I can clarify what makes the aluminum model cheaper so you can compare it easily — want me to send that here?\n\n中文翻译:\n我可以把关键差异整理成一条简单信息，要我发这里吗？",
+    "Emma, I can clarify what makes the aluminum model cheaper so you can compare it easily — want me to send that here?"
+  ],
+  "enforce_parsed": {
+    "whatsapp_message": "Emma, I can clarify what makes the aluminum model cheaper so you can compare it easily — want me to send that here?"
+  },
+  "analysis_text": "客户名称：Emma加拿大（26.3.20日） Sabouri\n\n阶段：询价阶段 ｜ 优先级：中 ｜ 状态：等待客户回复\n\n客户分析：\n客户类型：工作室客户\n意向等级：中\n采购阶段：价格确认\n关注产品：unknown\n数量信号：unknown\n关注点：price, shipping, after_sales\n关键信号：关注交付节奏；价格敏感；偏B端/商用场景；已进入实质采购问题\n\n历史沟通回顾：\n2026-03-25 23:57｜客户：Thank you for the quick response. Could you share contact details or Instagram/website of studios currently using your reformers (ideally in North America) so I can see real usage? What would be the t ...  quite low (typically tens of USD per part). 用于备件： 弹簧、轮子和绳索等常见部件容易更换，我们随时备有这些部件。 通过快递运输通常需要 5-10 天，费用相当低廉（每个部件通常只需几十美元）。\n\n关键时间节点：\n客户最后回复：2026-03-25T23:57:00+00:00\n我方最后发送：2026-03-26T00:18:00+00:00\n\n时间间隔：\n21m\n\n当前判断：\n客户信号：关注交付节奏；价格敏感；偏B端/商用场景；已进入实质采购问题\n当前状态：waiting_customer\n\n当前阻碍：报价后暂未继续推进\n策略方向：轻推进报价确认\n回复角度：围绕价格确认或落单条件切入\n跟进焦点：围绕price, shipping, after_sales\n\n分析信心：\n中\n\nAI分析摘要：\n未输出\n\n推理摘要：\n围绕价格确认或落单条件切入\n\nEnforce执行检查：\nEnforce状态：pass\n目标回复：未输出\n多路径风险：低\n思考负担风险：高\n高风险词拦截：否\n泛化表达拦截：否\n弱锚点拦截：否\n\n建议跟进话术（最终英文）：\n✅ Emma, I can clarify what makes the aluminum model cheaper so you can compare it easily — want me to send that here?\n\n建议跟进话术（中文对照）：\n✅ 我可以把关键差异整理成一条简单信息，要我发这里吗？",
+  "whatsapp_text": "Emma, I can clarify what makes the aluminum model cheaper so you can compare it easily — want me to send that here?",
+  "whatsapp_message": "Emma, I can clarify what makes the aluminum model cheaper so you can compare it easily — want me to send that here?",
+  "whatsapp_message_cn": "我可以把关键差异整理成一条简单信息，要我发这里吗？",
+  "enforce_status": "pass",
+  "auto_send_pass": true
+}

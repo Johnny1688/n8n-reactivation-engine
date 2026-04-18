@@ -1,0 +1,718 @@
+{
+  "project_key": "Noku澳大利亚（26.1.24日）",
+  "messages": [
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "customer",
+      "message": "Hi do u do private individual sale?\n你好，你们做私人个人销售吗？",
+      "message_time": "2026-01-24T04:33:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "Hi \nYes, we do support individual purchases as well, especially for home or private studio use.\n\nTo make sure I recommend the right Pilates reformer for you, may I ask:\n\n嗨 \n是的，我们也支持个人购买，特别是用于家庭或私人工作室。\n\n为了确保我为您推荐合适的普拉提 reformer，我可以问一下：\nIs this for personal/home use or a studio setup?\n这是用于个人/家庭使用还是工作室设置？\nAre you looking for a wood reformer or aluminum reformer?\n您是在寻找木制改革器还是铝制改革器？\nWhich country will it be delivered to?\n它将运往哪个国家？\n\nOnce I have this, I can suggest the most suitable model and share the pricing and delivery options.\n\n一旦我有了这些信息，我就能建议最合适的型号，并分享价格和配送选项。",
+      "message_time": "2026-01-24T05:02:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "customer",
+      "message": "It’s for just home",
+      "message_time": "2026-01-24T05:45:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "To make the recommendation more accurate, could you share a rough budget range you’re considering?\nBased on that, I can suggest the most suitable options.\n\nAlso, are you leaning more toward a foldable reformer or a standard studio reformer?",
+      "message_time": "2026-01-24T06:01:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "For home use, we usually recommend two options.\n\nA foldable reformer if you want to save space and store it easily after training.\n\nOr a standard studio reformer if you prefer a more stable and professional feel.\n\nWould you prefer a foldable one or a standard reformer?\n对于家用，我们通常推荐两种选项。\n\n如果你想要节省空间并在训练后轻松存放，可以选择可折叠的改革者。\n\n或者，如果你更喜欢更稳定和专业的感觉，可以选择标准的工作室改革者。\n\n你更喜欢可折叠的改革者还是标准的改革者？",
+      "message_time": "2026-03-17T03:30:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "Hi Noku, just following up gently.\nSince this is for home use, I can simply send you 1–2 suitable reformer options that are usually chosen for home setup, so it’s easier for you to compare.\nIf you’d like, I can send you the most suitable one first.\n嗨 Noku，我只是轻轻跟进一下。\n既然这是用于家庭使用，我可以简单地给你发送 1-2 个适合家庭设置的改革者选项，这样你就更容易比较了。\n如果你愿意，我可以先给你发送最合适的一个。",
+      "message_time": "2026-03-25T11:22:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "customer",
+      "message": "Yes please send the most suitable first thanks",
+      "message_time": "2026-03-25T21:47:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "I’ll send you some real photos and a short video so you can see the details clearly.",
+      "message_time": "2026-03-25T23:38:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "Got it \nFor home use, I would recommend this foldable reformer — it’s the most popular choice for home setups.\n收到 \n对于家庭使用，我推荐这款折叠式改革器——它是家庭设置中最受欢迎的选择。",
+      "message_time": "2026-03-25T23:38:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "It saves space, is easy to store, and still gives a very smooth and stable training experience.",
+      "message_time": "2026-03-25T23:38:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "customer",
+      "message": "How much is that one?\n那一个多少钱？",
+      "message_time": "2026-03-25T23:45:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "This model is $421 per unit.\n这个型号每个 421 美元。",
+      "message_time": "2026-03-25T23:49:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "For Australia, we usually arrange door-to-door delivery (DDP), so everything is included and you don’t need to handle customs.",
+      "message_time": "2026-03-25T23:49:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "If you share your city or postcode, I can calculate the total cost for you directly.\n如果您提供您的城市或邮政编码，我可以直接为您计算总费用。",
+      "message_time": "2026-03-25T23:49:00+00:00"
+    }
+  ],
+  "customer_name": "Noku澳大利亚（26.1.24日）",
+  "message_count": 15,
+  "has_messages": true,
+  "last_customer_message": "How much is that one?\n那一个多少钱？",
+  "last_customer_message_time_normalized": "2026-03-25T23:45:00+00:00",
+  "last_my_message": "If you share your city or postcode, I can calculate the total cost for you directly.\n如果您提供您的城市或邮政编码，我可以直接为您计算总费用。",
+  "last_my_message_time_normalized": "2026-03-25T23:49:00+00:00",
+  "recent_messages": [
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "For home use, we usually recommend two options.\n\nA foldable reformer if you want to save space and store it easily after training.\n\nOr a standard studio reformer if you prefer a more stable and professional feel.\n\nWould you prefer a foldable one or a standard reformer?\n对于家用，我们通常推荐两种选项。\n\n如果你想要节省空间并在训练后轻松存放，可以选择可折叠的改革者。\n\n或者，如果你更喜欢更稳定和专业的感觉，可以选择标准的工作室改革者。\n\n你更喜欢可折叠的改革者还是标准的改革者？",
+      "message_time": "2026-03-17T03:30:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "Hi Noku, just following up gently.\nSince this is for home use, I can simply send you 1–2 suitable reformer options that are usually chosen for home setup, so it’s easier for you to compare.\nIf you’d like, I can send you the most suitable one first.\n嗨 Noku，我只是轻轻跟进一下。\n既然这是用于家庭使用，我可以简单地给你发送 1-2 个适合家庭设置的改革者选项，这样你就更容易比较了。\n如果你愿意，我可以先给你发送最合适的一个。",
+      "message_time": "2026-03-25T11:22:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "customer",
+      "message": "Yes please send the most suitable first thanks",
+      "message_time": "2026-03-25T21:47:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "I’ll send you some real photos and a short video so you can see the details clearly.",
+      "message_time": "2026-03-25T23:38:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "Got it \nFor home use, I would recommend this foldable reformer — it’s the most popular choice for home setups.\n收到 \n对于家庭使用，我推荐这款折叠式改革器——它是家庭设置中最受欢迎的选择。",
+      "message_time": "2026-03-25T23:38:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "It saves space, is easy to store, and still gives a very smooth and stable training experience.",
+      "message_time": "2026-03-25T23:38:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "customer",
+      "message": "How much is that one?\n那一个多少钱？",
+      "message_time": "2026-03-25T23:45:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "This model is $421 per unit.\n这个型号每个 421 美元。",
+      "message_time": "2026-03-25T23:49:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "For Australia, we usually arrange door-to-door delivery (DDP), so everything is included and you don’t need to handle customs.",
+      "message_time": "2026-03-25T23:49:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "If you share your city or postcode, I can calculate the total cost for you directly.\n如果您提供您的城市或邮政编码，我可以直接为您计算总费用。",
+      "message_time": "2026-03-25T23:49:00+00:00"
+    }
+  ],
+  "cleaned_full_conversation": "customer: Hi do u do private individual sale?\n你好，你们做私人个人销售吗？\nme: Hi \nYes, we do support individual purchases as well, especially for home or private studio use.\n\nTo make sure I recommend the right Pilates reformer for you, may I ask:\n\n嗨 \n是的，我们也支持个人购买，特别是用于家庭或私人工作室。\n\n为了确保我为您推荐合适的普拉提 reformer，我可以问一下：\nIs this for personal/home use or a studio setup?\n这是用于个人/家庭使用还是工作室设置？\nAre you looking for a wood reformer or aluminum reformer?\n您是在寻找木制改革器还是铝制改革器？\nWhich country will it be delivered to?\n它将运往哪个国家？\n\nOnce I have this, I can suggest the most suitable model and share the pricing and delivery options.\n\n一旦我有了这些信息，我就能建议最合适的型号，并分享价格和配送选项。\ncustomer: It’s for just home\nme: To make the recommendation more accurate, could you share a rough budget range you’re considering?\nBased on that, I can suggest the most suitable options.\n\nAlso, are you leaning more toward a foldable reformer or a standard studio reformer?\nme: For home use, we usually recommend two options.\n\nA foldable reformer if you want to save space and store it easily after training.\n\nOr a standard studio reformer if you prefer a more stable and professional feel.\n\nWould you prefer a foldable one or a standard reformer?\n对于家用，我们通常推荐两种选项。\n\n如果你想要节省空间并在训练后轻松存放，可以选择可折叠的改革者。\n\n或者，如果你更喜欢更稳定和专业的感觉，可以选择标准的工作室改革者。\n\n你更喜欢可折叠的改革者还是标准的改革者？\nme: Hi Noku, just following up gently.\nSince this is for home use, I can simply send you 1–2 suitable reformer options that are usually chosen for home setup, so it’s easier for you to compare.\nIf you’d like, I can send you the most suitable one first.\n嗨 Noku，我只是轻轻跟进一下。\n既然这是用于家庭使用，我可以简单地给你发送 1-2 个适合家庭设置的改革者选项，这样你就更容易比较了。\n如果你愿意，我可以先给你发送最合适的一个。\ncustomer: Yes please send the most suitable first thanks\nme: I’ll send you some real photos and a short video so you can see the details clearly.\nme: Got it \nFor home use, I would recommend this foldable reformer — it’s the most popular choice for home setups.\n收到 \n对于家庭使用，我推荐这款折叠式改革器——它是家庭设置中最受欢迎的选择。\nme: It saves space, is easy to store, and still gives a very smooth and stable training experience.\ncustomer: How much is that one?\n那一个多少钱？\nme: This model is $421 per unit.\n这个型号每个 421 美元。\nme: For Australia, we usually arrange door-to-door delivery (DDP), so everything is included and you don’t need to handle customs.\nme: If you share your city or postcode, I can calculate the total cost for you directly.\n如果您提供您的城市或邮政编码，我可以直接为您计算总费用。",
+  "_debug_source": "normalize_customer_data",
+  "original_message_count": 15,
+  "deduplicated_message_count": 14,
+  "_context_builder_version": "build_ai_context_v5.1_PRODUCTION_READY",
+  "core_messages": [
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "customer",
+      "message": "Hi do u do private individual sale?\n你好，你们做私人个人销售吗？",
+      "message_time": "2026-01-24T04:33:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "Hi \nYes, we do support individual purchases as well, especially for home or private studio use.\n\nTo make sure I recommend the right Pilates reformer for you, may I ask:\n\n嗨 \n是的，我们也支持个人购买，特别是用于家庭或私人工作室。\n\n为了确保我为您推荐合适的普拉提 reformer，我可以问一下：\nIs this for personal/home use or a studio setup?\n这是用于个人/家庭使用还是工作室设置？\nAre you looking for a wood reformer or aluminum reformer?\n您是在寻找木制改革器还是铝制改革器？\nWhich country will it be delivered to?\n它将运往哪个国家？\n\nOnce I have this, I can suggest the most suitable model and share the pricing and delivery options.\n\n一旦我有了这些信息，我就能建议最合适的型号，并分享价格和配送选项。",
+      "message_time": "2026-01-24T05:02:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "customer",
+      "message": "It’s for just home",
+      "message_time": "2026-01-24T05:45:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "To make the recommendation more accurate, could you share a rough budget range you’re considering?\nBased on that, I can suggest the most suitable options.\n\nAlso, are you leaning more toward a foldable reformer or a standard studio reformer?",
+      "message_time": "2026-01-24T06:01:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "For home use, we usually recommend two options.\n\nA foldable reformer if you want to save space and store it easily after training.\n\nOr a standard studio reformer if you prefer a more stable and professional feel.\n\nWould you prefer a foldable one or a standard reformer?\n对于家用，我们通常推荐两种选项。\n\n如果你想要节省空间并在训练后轻松存放，可以选择可折叠的改革者。\n\n或者，如果你更喜欢更稳定和专业的感觉，可以选择标准的工作室改革者。\n\n你更喜欢可折叠的改革者还是标准的改革者？",
+      "message_time": "2026-03-17T03:30:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "Hi Noku, just following up gently.\nSince this is for home use, I can simply send you 1–2 suitable reformer options that are usually chosen for home setup, so it’s easier for you to compare.\nIf you’d like, I can send you the most suitable one first.\n嗨 Noku，我只是轻轻跟进一下。\n既然这是用于家庭使用，我可以简单地给你发送 1-2 个适合家庭设置的改革者选项，这样你就更容易比较了。\n如果你愿意，我可以先给你发送最合适的一个。",
+      "message_time": "2026-03-25T11:22:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "customer",
+      "message": "Yes please send the most suitable first thanks",
+      "message_time": "2026-03-25T21:47:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "I’ll send you some real photos and a short video so you can see the details clearly.",
+      "message_time": "2026-03-25T23:38:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "Got it \nFor home use, I would recommend this foldable reformer — it’s the most popular choice for home setups.\n收到 \n对于家庭使用，我推荐这款折叠式改革器——它是家庭设置中最受欢迎的选择。",
+      "message_time": "2026-03-25T23:38:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "It saves space, is easy to store, and still gives a very smooth and stable training experience.",
+      "message_time": "2026-03-25T23:38:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "customer",
+      "message": "How much is that one?\n那一个多少钱？",
+      "message_time": "2026-03-25T23:45:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "This model is $421 per unit.\n这个型号每个 421 美元。",
+      "message_time": "2026-03-25T23:49:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "For Australia, we usually arrange door-to-door delivery (DDP), so everything is included and you don’t need to handle customs.",
+      "message_time": "2026-03-25T23:49:00+00:00"
+    },
+    {
+      "project_key": "Noku澳大利亚（26.1.24日）",
+      "role": "me",
+      "message": "If you share your city or postcode, I can calculate the total cost for you directly.\n如果您提供您的城市或邮政编码，我可以直接为您计算总费用。",
+      "message_time": "2026-03-25T23:49:00+00:00"
+    }
+  ],
+  "conversation": "me: For home use, we usually recommend two options.\n\nA foldable reformer if you want to save space and store it easily after training.\n\nOr a standard studio reformer if you prefer a more stable and professional feel.\n\nWould you prefer a foldable one or a standard reformer?\n对于家用，我们通常推荐两种选项。\n\n如果你想要节省空间并在训练后轻松存放，可以选择可折叠的改革者。\n\n或者，如果你更喜欢更稳定和专业的感觉，可以选择标准的工作室改革者。\n\n你更喜欢可折叠的改革者还是标准的改革者？\nme: Hi Noku, just following up gently.\nSince this is for home use, I can simply send you 1–2 suitable reformer options that are usually chosen for home setup, so it’s easier for you to compare.\nIf you’d like, I can send you the most suitable one first.\n嗨 Noku，我只是轻轻跟进一下。\n既然这是用于家庭使用，我可以简单地给你发送 1-2 个适合家庭设置的改革者选项，这样你就更容易比较了。\n如果你愿意，我可以先给你发送最合适的一个。\ncustomer: Yes please send the most suitable first thanks\nme: I’ll send you some real photos and a short video so you can see the details clearly.\nme: Got it \nFor home use, I would recommend this foldable reformer — it’s the most popular choice for home setups.\n收到 \n对于家庭使用，我推荐这款折叠式改革器——它是家庭设置中最受欢迎的选择。\nme: It saves space, is easy to store, and still gives a very smooth and stable training experience.\ncustomer: How much is that one?\n那一个多少钱？\nme: This model is $421 per unit.\n这个型号每个 421 美元。\nme: For Australia, we usually arrange door-to-door delivery (DDP), so everything is included and you don’t need to handle customs.\nme: If you share your city or postcode, I can calculate the total cost for you directly.\n如果您提供您的城市或邮政编码，我可以直接为您计算总费用。",
+  "conversation_core": "customer: Hi do u do private individual sale?\n你好，你们做私人个人销售吗？\nme: Hi \nYes, we do support individual purchases as well, especially for home or private studio use.\n\nTo make sure I recommend the right Pilates reformer for you, may I ask:\n\n嗨 \n是的，我们也支持个人购买，特别是用于家庭或私人工作室。\n\n为了确保我为您推荐合适的普拉提 reformer，我可以问一下：\nIs this for personal/home use or a studio setup?\n这是用于个人/家庭使用还是工作室设置？\nAre you looking for a wood reformer or aluminum reformer?\n您是在寻找木制改革器还是铝制改革器？\nWhich country will it be delivered to?\n它将运往哪个国家？\n\nOnce I have this, I can suggest the most suitable model and share the pricing and delivery options.\n\n一旦我有了这些信息，我就能建议最合适的型号，并分享价格和配送选项。\ncustomer: It’s for just home\nme: To make the recommendation more accurate, could you share a rough budget range you’re considering?\nBased on that, I can suggest the most suitable options.\n\nAlso, are you leaning more toward a foldable reformer or a standard studio reformer?\nme: For home use, we usually recommend two options.\n\nA foldable reformer if you want to save space and store it easily after training.\n\nOr a standard studio reformer if you prefer a more stable and professional feel.\n\nWould you prefer a foldable one or a standard reformer?\n对于家用，我们通常推荐两种选项。\n\n如果你想要节省空间并在训练后轻松存放，可以选择可折叠的改革者。\n\n或者，如果你更喜欢更稳定和专业的感觉，可以选择标准的工作室改革者。\n\n你更喜欢可折叠的改革者还是标准的改革者？\nme: Hi Noku, just following up gently.\nSince this is for home use, I can simply send you 1–2 suitable reformer options that are usually chosen for home setup, so it’s easier for you to compare.\nIf you’d like, I can send you the most suitable one first.\n嗨 Noku，我只是轻轻跟进一下。\n既然这是用于家庭使用，我可以简单地给你发送 1-2 个适合家庭设置的改革者选项，这样你就更容易比较了。\n如果你愿意，我可以先给你发送最合适的一个。\ncustomer: Yes please send the most suitable first thanks\nme: I’ll send you some real photos and a short video so you can see the details clearly.\nme: Got it \nFor home use, I would recommend this foldable reformer — it’s the most popular choice for home setups.\n收到 \n对于家庭使用，我推荐这款折叠式改革器——它是家庭设置中最受欢迎的选择。\nme: It saves space, is easy to store, and still gives a very smooth and stable training experience.\ncustomer: How much is that one?\n那一个多少钱？\nme: This model is $421 per unit.\n这个型号每个 421 美元。\nme: For Australia, we usually arrange door-to-door delivery (DDP), so everything is included and you don’t need to handle customs.\nme: If you share your city or postcode, I can calculate the total cost for you directly.\n如果您提供您的城市或邮政编码，我可以直接为您计算总费用。",
+  "customer_only_text": "Hi do u do private individual sale?\n你好，你们做私人个人销售吗？\nIt’s for just home\nYes please send the most suitable first thanks\nHow much is that one?\n那一个多少钱？",
+  "customer_recent_only_text": "Hi do u do private individual sale?\n你好，你们做私人个人销售吗？\nIt’s for just home\nYes please send the most suitable first thanks\nHow much is that one?\n那一个多少钱？",
+  "seller_only_text": "Hi \nYes, we do support individual purchases as well, especially for home or private studio use.\n\nTo make sure I recommend the right Pilates reformer for you, may I ask:\n\n嗨 \n是的，我们也支持个人购买，特别是用于家庭或私人工作室。\n\n为了确保我为您推荐合适的普拉提 reformer，我可以问一下：\nIs this for personal/home use or a studio setup?\n这是用于个人/家庭使用还是工作室设置？\nAre you looking for a wood reformer or aluminum reformer?\n您是在寻找木制改革器还是铝制改革器？\nWhich country will it be delivered to?\n它将运往哪个国家？\n\nOnce I have this, I can suggest the most suitable model and share the pricing and delivery options.\n\n一旦我有了这些信息，我就能建议最合适的型号，并分享价格和配送选项。\nTo make the recommendation more accurate, could you share a rough budget range you’re considering?\nBased on that, I can suggest the most suitable options.\n\nAlso, are you leaning more toward a foldable reformer or a standard studio reformer?\nFor home use, we usually recommend two options.\n\nA foldable reformer if you want to save space and store it easily after training.\n\nOr a standard studio reformer if you prefer a more stable and professional feel.\n\nWould you prefer a foldable one or a standard reformer?\n对于家用，我们通常推荐两种选项。\n\n如果你想要节省空间并在训练后轻松存放，可以选择可折叠的改革者。\n\n或者，如果你更喜欢更稳定和专业的感觉，可以选择标准的工作室改革者。\n\n你更喜欢可折叠的改革者还是标准的改革者？\nHi Noku, just following up gently.\nSince this is for home use, I can simply send you 1–2 suitable reformer options that are usually chosen for home setup, so it’s easier for you to compare.\nIf you’d like, I can send you the most suitable one first.\n嗨 Noku，我只是轻轻跟进一下。\n既然这是用于家庭使用，我可以简单地给你发送 1-2 个适合家庭设置的改革者选项，这样你就更容易比较了。\n如果你愿意，我可以先给你发送最合适的一个。\nI’ll send you some real photos and a short video so you can see the details clearly.\nGot it \nFor home use, I would recommend this foldable reformer — it’s the most popular choice for home setups.\n收到 \n对于家庭使用，我推荐这款折叠式改革器——它是家庭设置中最受欢迎的选择。\nIt saves space, is easy to store, and still gives a very smooth and stable training experience.\nThis model is $421 per unit.\n这个型号每个 421 美元。\nFor Australia, we usually arrange door-to-door delivery (DDP), so everything is included and you don’t need to handle customs.\nIf you share your city or postcode, I can calculate the total cost for you directly.\n如果您提供您的城市或邮政编码，我可以直接为您计算总费用。",
+  "project_and_structured_text": "Noku澳大利亚（26.1.24日）\nNoku澳大利亚（26.1.24日）\n\n\n\n\n\n\n",
+  "customer_priority_analysis_text": "Hi do u do private individual sale?\n你好，你们做私人个人销售吗？\nIt’s for just home\nYes please send the most suitable first thanks\nHow much is that one?\n那一个多少钱？\nHi do u do private individual sale?\n你好，你们做私人个人销售吗？\nIt’s for just home\nYes please send the most suitable first thanks\nHow much is that one?\n那一个多少钱？\nNoku澳大利亚（26.1.24日）\nNoku澳大利亚（26.1.24日）\n\n\n\n\n\n\n",
+  "now_time": "2026-04-16T10:17:32.783Z",
+  "now_time_display": "2026-04-16 10:17",
+  "first_message": "Hi do u do private individual sale?\n你好，你们做私人个人销售吗？",
+  "first_message_time": "2026-01-24T04:33:00+00:00",
+  "first_message_time_display": "2026-01-24 04:33",
+  "last_customer_message_time": "2026-03-25T23:45:00+00:00",
+  "last_customer_message_time_display": "2026-03-25 23:45",
+  "last_my_message_time": "2026-03-25T23:49:00+00:00",
+  "last_my_message_time_display": "2026-03-25 23:49",
+  "last_message_time": "2026-03-25T23:49:00+00:00",
+  "last_message_time_display": "2026-03-25 23:49",
+  "last_message_role": "me",
+  "timeline": {
+    "now_time": "2026-04-16T10:17:32.783Z",
+    "now_time_display": "2026-04-16 10:17",
+    "first_message_time": "2026-01-24T04:33:00+00:00",
+    "first_message_time_display": "2026-01-24 04:33",
+    "last_customer_message_time": "2026-03-25T23:45:00+00:00",
+    "last_customer_message_time_display": "2026-03-25 23:45",
+    "last_my_message_time": "2026-03-25T23:49:00+00:00",
+    "last_my_message_time_display": "2026-03-25 23:49",
+    "last_message_time": "2026-03-25T23:49:00+00:00",
+    "last_message_time_display": "2026-03-25 23:49",
+    "last_message_role": "me",
+    "who_stopped": "customer",
+    "who_should_reply_next": "customer",
+    "sequence": "我方最后发言，等待客户回复",
+    "conversation_status": "waiting_customer",
+    "gap_days_customer_vs_me": "0",
+    "gap_hours_customer_vs_me": "0",
+    "gap_minutes_customer_vs_me": "4",
+    "hours_since_last_customer_message": "514",
+    "hours_since_last_my_message": "514",
+    "days_since_last_customer_message": "21",
+    "days_since_last_my_message": "21",
+    "gap_hint": "4m",
+    "summary": "首次记录：2026-01-24 04:33；客户最后回复：2026-03-25 23:45；我方最后发送：2026-03-25 23:49；当前序列：我方最后发言，等待客户回复；最近双方消息间隔：4分钟",
+    "events": [
+      {
+        "role": "customer",
+        "message_time": "2026-03-25T21:47:00+00:00",
+        "message_time_display": "2026-03-25 21:47",
+        "message": "Yes please send the most suitable first thanks"
+      },
+      {
+        "role": "me",
+        "message_time": "2026-03-25T23:38:00+00:00",
+        "message_time_display": "2026-03-25 23:38",
+        "message": "I’ll send you some real photos and a short video so you can see the details clearly."
+      },
+      {
+        "role": "me",
+        "message_time": "2026-03-25T23:38:00+00:00",
+        "message_time_display": "2026-03-25 23:38",
+        "message": "Got it \nFor home use, I would recommend this foldable reformer — it’s the most popular choice for home setups.\n收到 \n对于家庭使用，我推荐这款折叠式改革器——它是家庭设置中最受欢迎的选择。"
+      },
+      {
+        "role": "me",
+        "message_time": "2026-03-25T23:38:00+00:00",
+        "message_time_display": "2026-03-25 23:38",
+        "message": "It saves space, is easy to store, and still gives a very smooth and stable training experience."
+      },
+      {
+        "role": "customer",
+        "message_time": "2026-03-25T23:45:00+00:00",
+        "message_time_display": "2026-03-25 23:45",
+        "message": "How much is that one?\n那一个多少钱？"
+      },
+      {
+        "role": "me",
+        "message_time": "2026-03-25T23:49:00+00:00",
+        "message_time_display": "2026-03-25 23:49",
+        "message": "This model is $421 per unit.\n这个型号每个 421 美元。"
+      },
+      {
+        "role": "me",
+        "message_time": "2026-03-25T23:49:00+00:00",
+        "message_time_display": "2026-03-25 23:49",
+        "message": "For Australia, we usually arrange door-to-door delivery (DDP), so everything is included and you don’t need to handle customs."
+      },
+      {
+        "role": "me",
+        "message_time": "2026-03-25T23:49:00+00:00",
+        "message_time_display": "2026-03-25 23:49",
+        "message": "If you share your city or postcode, I can calculate the total cost for you directly.\n如果您提供您的城市或邮政编码，我可以直接为您计算总费用。"
+      }
+    ]
+  },
+  "timeline_summary": "首次记录：2026-01-24 04:33；客户最后回复：2026-03-25 23:45；我方最后发送：2026-03-25 23:49；当前序列：我方最后发言，等待客户回复；最近双方消息间隔：4分钟",
+  "dated_history_summary": "2026-03-25 23:38｜我方：Got it \nFor home use, I would recommend this foldable reformer — it’s the most popular choice for home setups.\n收到 \n对于家庭使用，我推荐这款折叠式改革器——它是家庭设置中最受欢迎的选择。\n2026-03-25 23:38｜我方：It saves space, is easy to store, and still gives a very smooth and stable training experience.\n2026-03-25 23:45｜客户：How much is that one?\n那一个多少钱？\n2026-03-25 23:49｜我方：This model is $421 per unit.\n这个型号每个 421 美元。\n2026-03-25 23:49｜我方：For Australia, we usually arrange door-to-door delivery (DDP), so everything is included and you don’t need to handle customs.\n2026-03-25 23:49｜我方：If you share your city or postcode, I can calculate the total cost for you directly.\n如果您提供您的城市或邮政编码，我可以直接为您计算总费用。",
+  "timeline_events": [
+    {
+      "role": "customer",
+      "message_time": "2026-03-25T21:47:00+00:00",
+      "message_time_display": "2026-03-25 21:47",
+      "message": "Yes please send the most suitable first thanks"
+    },
+    {
+      "role": "me",
+      "message_time": "2026-03-25T23:38:00+00:00",
+      "message_time_display": "2026-03-25 23:38",
+      "message": "I’ll send you some real photos and a short video so you can see the details clearly."
+    },
+    {
+      "role": "me",
+      "message_time": "2026-03-25T23:38:00+00:00",
+      "message_time_display": "2026-03-25 23:38",
+      "message": "Got it \nFor home use, I would recommend this foldable reformer — it’s the most popular choice for home setups.\n收到 \n对于家庭使用，我推荐这款折叠式改革器——它是家庭设置中最受欢迎的选择。"
+    },
+    {
+      "role": "me",
+      "message_time": "2026-03-25T23:38:00+00:00",
+      "message_time_display": "2026-03-25 23:38",
+      "message": "It saves space, is easy to store, and still gives a very smooth and stable training experience."
+    },
+    {
+      "role": "customer",
+      "message_time": "2026-03-25T23:45:00+00:00",
+      "message_time_display": "2026-03-25 23:45",
+      "message": "How much is that one?\n那一个多少钱？"
+    },
+    {
+      "role": "me",
+      "message_time": "2026-03-25T23:49:00+00:00",
+      "message_time_display": "2026-03-25 23:49",
+      "message": "This model is $421 per unit.\n这个型号每个 421 美元。"
+    },
+    {
+      "role": "me",
+      "message_time": "2026-03-25T23:49:00+00:00",
+      "message_time_display": "2026-03-25 23:49",
+      "message": "For Australia, we usually arrange door-to-door delivery (DDP), so everything is included and you don’t need to handle customs."
+    },
+    {
+      "role": "me",
+      "message_time": "2026-03-25T23:49:00+00:00",
+      "message_time_display": "2026-03-25 23:49",
+      "message": "If you share your city or postcode, I can calculate the total cost for you directly.\n如果您提供您的城市或邮政编码，我可以直接为您计算总费用。"
+    }
+  ],
+  "who_stopped": "customer",
+  "who_should_reply_next": "customer",
+  "conversation_sequence": "我方最后发言，等待客户回复",
+  "timeline_conversation_status": "waiting_customer",
+  "gap_days_customer_vs_me": "0",
+  "gap_hours_customer_vs_me": "0",
+  "gap_minutes_customer_vs_me": "4",
+  "hours_since_last_customer_message": "514",
+  "hours_since_last_my_message": "514",
+  "days_since_last_customer_message": "21",
+  "days_since_last_my_message": "21",
+  "cleaned_message_count": 14,
+  "recent_message_count": 10,
+  "core_message_count": 14,
+  "full_conversation_length": 2368,
+  "customer_message_count": 4,
+  "my_message_count": 10,
+  "has_customer_reply": true,
+  "has_price_signal": true,
+  "has_timing_signal": false,
+  "has_not_now_signal": false,
+  "last_customer_gap_hint": "4m",
+  "is_my_turn_to_reply": false,
+  "should_reactivate_now": true,
+  "customer_replied_after_my_last_message": false,
+  "is_customer_silent_after_my_message": true,
+  "customer_last_message_type": "price_reaction_soft",
+  "last_exchange": {
+    "last_customer_message": "How much is that one?\n那一个多少钱？",
+    "last_customer_message_time": "2026-03-25T23:45:00+00:00",
+    "last_customer_message_time_display": "2026-03-25 23:45",
+    "last_my_message": "If you share your city or postcode, I can calculate the total cost for you directly.\n如果您提供您的城市或邮政编码，我可以直接为您计算总费用。",
+    "last_my_message_time": "2026-03-25T23:49:00+00:00",
+    "last_my_message_time_display": "2026-03-25 23:49",
+    "last_message_role": "me",
+    "sequence": "我方最后发言，等待客户回复",
+    "who_stopped": "customer",
+    "who_should_reply_next": "customer"
+  },
+  "stage": "price",
+  "follow_up_priority": "medium",
+  "status": "waiting_for_customer",
+  "customer_type": "unknown",
+  "intent_level": "medium",
+  "purchase_stage": "pricing",
+  "product_interest": "unknown",
+  "quantity_signal": "unknown",
+  "concerns": "price",
+  "key_signals": "价格敏感",
+  "current_blocker": "报价后暂未继续推进",
+  "strategy_direction": "轻推进报价确认",
+  "reply_angle": "围绕价格确认或落单条件切入",
+  "follow_up_focus": "围绕price",
+  "primary_reply_anchor": "cheaper_option_difference",
+  "secondary_context": "price",
+  "reply_risk": "avoid_pressure",
+  "reactivation_ai_payload": {
+    "timeline": {
+      "last_customer_message_time": "2026-03-25T23:45:00+00:00",
+      "last_my_message_time": "2026-03-25T23:49:00+00:00",
+      "gap_days": 0
+    },
+    "last_signal": {
+      "type": "price_reaction_soft",
+      "summary": "How much is that one?\n那一个多少钱？",
+      "confidence": "high",
+      "anchor_object": "cheaper_option_difference"
+    },
+    "stop_point": {
+      "where_it_stopped": "my_last_message",
+      "why_it_stopped": "my_last_message_unanswered",
+      "smallest_reply_to_trigger": "clarify_why_cheaper_here",
+      "anchor_object": "cheaper_option_difference",
+      "allowed_micro_triggers": [
+        "clarify_why_cheaper_here"
+      ],
+      "send_state": "rewrite_needed",
+      "hard_no_send": false
+    },
+    "constraints": {
+      "must_avoid": [
+        "multi-question message",
+        "pushing decision"
+      ],
+      "must_follow": [
+        "single trigger",
+        "low friction reply",
+        "single micro-trigger",
+        "concrete conversation anchor"
+      ],
+      "do_not_repeat": [
+        "repeat_same_question",
+        "repeat_selection_help",
+        "repeat_price_push",
+        "repeat_model_recommendation"
+      ],
+      "allowed_micro_triggers": [
+        "clarify_why_cheaper_here"
+      ]
+    },
+    "decision": {
+      "should_follow_up_now": true,
+      "best_trigger_type": "clarify_why_cheaper_here",
+      "best_trigger_reason": "customer_raised_cheaper_option_or_comparison",
+      "smallest_reply_goal": "clarify_why_cheaper_here",
+      "primary_anchor": "cheaper_option_difference",
+      "anchor_object": "cheaper_option_difference",
+      "allowed_micro_triggers": [
+        "clarify_why_cheaper_here"
+      ],
+      "send_state": "rewrite_needed",
+      "hard_no_send": false
+    }
+  },
+  "_project_signals": {
+    "project_has_stage_hint": false,
+    "project_has_qty_hint": false,
+    "project_has_model_hint": false
+  },
+  "stop_point_analysis": {
+    "where_it_stopped": "my_last_message",
+    "why_it_stopped_there": "my_last_message_unanswered",
+    "what_my_last_push_was": "If you share your city or postcode, I can calculate the total cost for you directly.\n如果您提供您的城市或邮政编码，我可以直接为您计算总费用。",
+    "what_customer_did_not_answer": "",
+    "did_my_last_push_fail": false,
+    "smallest_reply_to_trigger": "clarify_why_cheaper_here",
+    "anchor_object": "cheaper_option_difference",
+    "allowed_micro_triggers": [
+      "clarify_why_cheaper_here"
+    ],
+    "send_state": "rewrite_needed",
+    "hard_no_send": false
+  },
+  "forbidden_repeat_zone": {
+    "already_asked_questions": [
+      "为了确保我为您推荐合适的普拉提 reformer，我可以问一下： Is this for personal/home use or a studio setup?",
+      "这是用于个人/家庭使用还是工作室设置？",
+      "Are you looking for a wood reformer or aluminum reformer?",
+      "您是在寻找木制改革器还是铝制改革器？",
+      "Which country will it be delivered to?",
+      "它将运往哪个国家？",
+      "为了确保我为您推荐合适的普拉提 reformer，我可以问一下： Is this for personal/home use or a studio setup? 这是用于个人/家庭使用还是工作室设置？ Are you looking...",
+      "To make the recommendation more accurate, could you share a rough budget range you’re considering?",
+      "Also, are you leaning more toward a foldable reformer or a standard studio reformer?",
+      "Would you prefer a foldable one or a standard reformer?",
+      "你更喜欢可折叠的改革者还是标准的改革者？",
+      "Would you prefer a foldable one or a standard reformer? 对于家用，我们通常推荐两种选项"
+    ],
+    "already_sent_topics": [
+      "delivery time",
+      "model recommendation",
+      "photos/videos",
+      "shipping",
+      "price"
+    ],
+    "already_used_angles": [
+      "selection help",
+      "comparison framing",
+      "price push"
+    ],
+    "do_not_repeat": [
+      "repeat_same_question",
+      "repeat_selection_help",
+      "repeat_price_push",
+      "repeat_model_recommendation"
+    ],
+    "allowed_micro_triggers": [
+      "clarify_why_cheaper_here"
+    ]
+  },
+  "reactivation_decision_basis": {
+    "should_follow_up_now": true,
+    "best_trigger_type": "clarify_why_cheaper_here",
+    "best_trigger_reason": "customer_raised_cheaper_option_or_comparison",
+    "must_avoid": [
+      "repeat_same_question",
+      "repeat_selection_help",
+      "repeat_price_push",
+      "repeat_model_recommendation"
+    ],
+    "smallest_reply_goal": "clarify_why_cheaper_here",
+    "primary_anchor": "cheaper_option_difference",
+    "anchor_object": "cheaper_option_difference",
+    "allowed_micro_triggers": [
+      "clarify_why_cheaper_here"
+    ],
+    "send_state": "rewrite_needed",
+    "hard_no_send": false
+  },
+  "reactivation_v6_core": {
+    "timeline_facts": {
+      "last_customer_message_time": "2026-03-25T23:45:00+00:00",
+      "last_my_message_time": "2026-03-25T23:49:00+00:00",
+      "who_should_reply_next": "customer",
+      "days_since_last_customer_message": "21",
+      "days_since_last_my_message": "21",
+      "conversation_status": "waiting_customer"
+    },
+    "last_customer_signal": {
+      "last_customer_message": "How much is that one?\n那一个多少钱？",
+      "last_customer_message_type": "price_reaction_soft"
+    },
+    "stop_point_analysis": {
+      "where_it_stopped": "my_last_message",
+      "why_it_stopped_there": "my_last_message_unanswered",
+      "what_my_last_push_was": "If you share your city or postcode, I can calculate the total cost for you directly.\n如果您提供您的城市或邮政编码，我可以直接为您计算总费用。",
+      "what_customer_did_not_answer": "",
+      "did_my_last_push_fail": false,
+      "smallest_reply_to_trigger": "clarify_why_cheaper_here",
+      "anchor_object": "cheaper_option_difference",
+      "allowed_micro_triggers": [
+        "clarify_why_cheaper_here"
+      ],
+      "send_state": "rewrite_needed",
+      "hard_no_send": false
+    },
+    "forbidden_repeat_zone": {
+      "already_asked_questions": [
+        "为了确保我为您推荐合适的普拉提 reformer，我可以问一下： Is this for personal/home use or a studio setup?",
+        "这是用于个人/家庭使用还是工作室设置？",
+        "Are you looking for a wood reformer or aluminum reformer?",
+        "您是在寻找木制改革器还是铝制改革器？",
+        "Which country will it be delivered to?",
+        "它将运往哪个国家？",
+        "为了确保我为您推荐合适的普拉提 reformer，我可以问一下： Is this for personal/home use or a studio setup? 这是用于个人/家庭使用还是工作室设置？ Are you looking...",
+        "To make the recommendation more accurate, could you share a rough budget range you’re considering?",
+        "Also, are you leaning more toward a foldable reformer or a standard studio reformer?",
+        "Would you prefer a foldable one or a standard reformer?",
+        "你更喜欢可折叠的改革者还是标准的改革者？",
+        "Would you prefer a foldable one or a standard reformer? 对于家用，我们通常推荐两种选项"
+      ],
+      "already_sent_topics": [
+        "delivery time",
+        "model recommendation",
+        "photos/videos",
+        "shipping",
+        "price"
+      ],
+      "already_used_angles": [
+        "selection help",
+        "comparison framing",
+        "price push"
+      ],
+      "do_not_repeat": [
+        "repeat_same_question",
+        "repeat_selection_help",
+        "repeat_price_push",
+        "repeat_model_recommendation"
+      ],
+      "allowed_micro_triggers": [
+        "clarify_why_cheaper_here"
+      ]
+    },
+    "reactivation_decision_basis": {
+      "should_follow_up_now": true,
+      "best_trigger_type": "clarify_why_cheaper_here",
+      "best_trigger_reason": "customer_raised_cheaper_option_or_comparison",
+      "must_avoid": [
+        "repeat_same_question",
+        "repeat_selection_help",
+        "repeat_price_push",
+        "repeat_model_recommendation"
+      ],
+      "smallest_reply_goal": "clarify_why_cheaper_here",
+      "primary_anchor": "cheaper_option_difference",
+      "anchor_object": "cheaper_option_difference",
+      "allowed_micro_triggers": [
+        "clarify_why_cheaper_here"
+      ],
+      "send_state": "rewrite_needed",
+      "hard_no_send": false
+    },
+    "anchor_object": "cheaper_option_difference",
+    "allowed_micro_triggers": [
+      "clarify_why_cheaper_here"
+    ],
+    "send_state": "rewrite_needed",
+    "hard_no_send": false
+  },
+  "anchor_object": "cheaper_option_difference",
+  "allowed_micro_triggers": [
+    "clarify_why_cheaper_here"
+  ],
+  "send_state": "rewrite_needed",
+  "hard_no_send": false,
+  "output": [
+    {
+      "id": "msg_0de0755d8eb1367b0069e0b758d968819d94fdc766f822847d",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "{\n  \"whatsapp_message\": \"Noku, I can clarify why the foldable reformer is a popular choice so you can understand the benefits quickly — want me to send that here?\"\n}"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "ai_parsed": {
+    "whatsapp_message": "Noku, I can clarify why the foldable reformer is a popular choice so you can understand the benefits quickly — want me to send that here?"
+  },
+  "order_group": "Noku澳大利亚（26.1.24日）",
+  "_en": "Noku, I can clarify why the foldable reformer is a popular choice so you can understand the benefits quickly — want me to send that here?",
+  "_cn": "我可以把相关选项整理成一条简单信息，要我发这里吗？",
+  "weak_candidate_message": "",
+  "needs_enforce_rewrite": false,
+  "telegram_messages": [
+    "【Noku澳大利亚（26.1.24日）】\n\nEnglish:\nNoku, I can clarify why the foldable reformer is a popular choice so you can understand the benefits quickly — want me to send that here?\n\n中文翻译:\n我可以把相关选项整理成一条简单信息，要我发这里吗？",
+    "Noku, I can clarify why the foldable reformer is a popular choice so you can understand the benefits quickly — want me to send that here?"
+  ],
+  "enforce_parsed": {
+    "whatsapp_message": "Noku, I can clarify why the foldable reformer is a popular choice so you can understand the benefits quickly — want me to send that here?"
+  },
+  "analysis_text": "客户名称：Noku澳大利亚（26.1.24日）\n\n阶段：询价阶段 ｜ 优先级：中 ｜ 状态：等待客户回复\n\n客户分析：\n客户类型：未知\n意向等级：中\n采购阶段：价格确认\n关注产品：unknown\n数量信号：unknown\n关注点：price\n关键信号：价格敏感\n\n历史沟通回顾：\n2026-03-25 23:38｜我方：Got it For home use, I would recommend this foldable reformer — it’s the most popular choice for home setups. 收到 对于家庭使用，我推荐这款折叠式改革器——它是家庭设置中最受欢迎的选择。 2026-03-25 23:38｜我方：It saves space, is easy to stor ... :49｜我方：If you share your city or postcode, I can calculate the total cost for you directly. 如果您提供您的城市或邮政编码，我可以直接为您计算总费用。\n\n关键时间节点：\n客户最后回复：2026-03-25T23:45:00+00:00\n我方最后发送：2026-03-25T23:49:00+00:00\n\n时间间隔：\n4m\n\n当前判断：\n客户信号：价格敏感\n当前状态：waiting_customer\n\n当前阻碍：报价后暂未继续推进\n策略方向：轻推进报价确认\n回复角度：围绕价格确认或落单条件切入\n跟进焦点：围绕price\n\n分析信心：\n中\n\nAI分析摘要：\n未输出\n\n推理摘要：\n围绕价格确认或落单条件切入\n\nEnforce执行检查：\nEnforce状态：pass\n目标回复：未输出\n多路径风险：低\n思考负担风险：低\n高风险词拦截：否\n泛化表达拦截：否\n弱锚点拦截：否\n\n建议跟进话术（最终英文）：\n✅ Noku, I can clarify why the foldable reformer is a popular choice so you can understand the benefits quickly — want me to send that here?\n\n建议跟进话术（中文对照）：\n✅ 我可以把相关选项整理成一条简单信息，要我发这里吗？",
+  "whatsapp_text": "Noku, I can clarify why the foldable reformer is a popular choice so you can understand the benefits quickly — want me to send that here?",
+  "whatsapp_message": "Noku, I can clarify why the foldable reformer is a popular choice so you can understand the benefits quickly — want me to send that here?",
+  "whatsapp_message_cn": "我可以把相关选项整理成一条简单信息，要我发这里吗？",
+  "enforce_status": "pass",
+  "auto_send_pass": true
+}
