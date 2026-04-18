@@ -28,21 +28,28 @@ function splitTelegramMessages(items) {
 
   for (const item of items) {
     const data = item?.json || {};
-    const projectKey = toSafeString(data.project_key);
-    const orderGroup = toSafeString(data.order_group);
     const messages = Array.isArray(data.telegram_messages) ? data.telegram_messages : [];
 
-    for (let i = 0; i < messages.length; i++) {
-      const text = toSafeString(messages[i]);
-      if (!text) continue;
+    if (messages.length < 3) continue;
 
-      out.push({
-        project_key: projectKey,
-        order_group: orderGroup,
-        text,
-        _delay_before_ms: out.length * 1000
-      });
-    }
+    const msg1 = toSafeString(messages[0]);
+    const msg2 = toSafeString(messages[1]);
+    const msg3 = toSafeString(messages[2]);
+
+    if (!msg1 || !msg2 || !msg3) continue;
+
+    out.push({
+      project_key: toSafeString(data.project_key),
+      order_group: toSafeString(data.order_group),
+      msg_1_full: msg1,
+      msg_2_key: msg2,
+      msg_3_en: msg3,
+      whatsapp_message: toSafeString(data.whatsapp_message),
+      whatsapp_message_cn: toSafeString(data.whatsapp_message_cn),
+      analysis_text: toSafeString(data.analysis_text),
+      enforce_status: toSafeString(data.enforce_status),
+      auto_send_pass: !!data.auto_send_pass
+    });
   }
 
   return out;

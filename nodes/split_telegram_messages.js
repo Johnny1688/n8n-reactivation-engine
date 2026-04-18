@@ -1,11 +1,30 @@
+function toSafeString(value) {
+  if (value == null) return '';
+  return String(value).trim();
+}
+
 function splitTelegramMessages(input) {
-  const reviewText = input.telegram_review_text || '';
-  const finalText = input.telegram_final_text || '';
-  const englishMessage = input.whatsapp_message || '';
+  const messages = Array.isArray(input.telegram_messages) ? input.telegram_messages : [];
+
+  if (messages.length < 3) return null;
+
+  const msg1 = toSafeString(messages[0]);
+  const msg2 = toSafeString(messages[1]);
+  const msg3 = toSafeString(messages[2]);
+
+  if (!msg1 || !msg2 || !msg3) return null;
 
   return {
-    telegram_review_message: reviewText || finalText,
-    telegram_english_message: englishMessage
+    project_key: toSafeString(input.project_key),
+    order_group: toSafeString(input.order_group),
+    msg_1_full: msg1,
+    msg_2_key: msg2,
+    msg_3_en: msg3,
+    whatsapp_message: toSafeString(input.whatsapp_message),
+    whatsapp_message_cn: toSafeString(input.whatsapp_message_cn),
+    analysis_text: toSafeString(input.analysis_text),
+    enforce_status: toSafeString(input.enforce_status),
+    auto_send_pass: !!input.auto_send_pass
   };
 }
 
@@ -16,25 +35,17 @@ function getInputJsons() {
 }
 
 function toN8nItems(items) {
-  return items.map((json, i) => ({
-    json: {
-      ...json,
-      _delay_before_ms: i * 1000
-    }
-  }));
-}
-
-function runSplitTelegramMessages(input) {
-  return {
-    ...(input || {}),
-    ...splitTelegramMessages(input || {})
-  };
+  return items.map(json => ({ json }));
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { splitTelegramMessages, runSplitTelegramMessages };
+  module.exports = { splitTelegramMessages };
 }
 
 if (typeof $input !== 'undefined' || typeof $json !== 'undefined') {
-  return toN8nItems(getInputJsons().map(runSplitTelegramMessages));
+  return toN8nItems(
+    getInputJsons()
+      .map(splitTelegramMessages)
+      .filter(item => item !== null)
+  );
 }
