@@ -40,7 +40,7 @@ function splitTelegramMessages(items) {
         project_key: projectKey,
         order_group: orderGroup,
         text,
-        _delay_before_ms: out.length > 0 ? 500 : 0
+        _delay_before_ms: out.length * 1000
       });
     }
   }

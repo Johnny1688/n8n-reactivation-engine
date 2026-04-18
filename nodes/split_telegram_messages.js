@@ -19,7 +19,7 @@ function toN8nItems(items) {
   return items.map((json, i) => ({
     json: {
       ...json,
-      _delay_before_ms: i > 0 ? 500 : 0
+      _delay_before_ms: i * 1000
     }
   }));
 }
