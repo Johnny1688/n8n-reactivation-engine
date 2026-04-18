@@ -1,6 +1,22 @@
 const fs = require('fs');
 const path = require('path');
 
+function cleanCustomerName(raw) {
+  if (!raw) return '';
+  if (/^\+\d/.test(raw.trim())) return '';
+  let name = raw
+    .replace(/\d+台/g, '')
+    .replace(/[\u4e00-\u9fff]+/g, ' ')
+    .replace(/[（()）]+/g, ' ')
+    .replace(/\d{1,4}[\.\-\/]\d{1,2}[\.\-\/]?\d{0,2}日?/g, '')
+    .replace(/\b[A-Z]{2}\d{3}\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const words = name.split(/\s+/).filter(w => w.length > 0);
+  if (words.length === 0) return '';
+  return words[0];
+}
+
 function safeString(value) {
   if (value == null) return '';
   if (typeof value === 'string') return value;
@@ -110,7 +126,7 @@ function buildFinalQualityUserPrompt(json) {
     safeString(json.project_key),
     '',
     'Customer name:',
-    safeString(json.customer_name_clean || json.customer_name),
+    safeString(cleanCustomerName(json.project_key) || json.customer_name_clean || json.customer_name),
     '',
     '--------------------------------',
     'SEND STATE',
