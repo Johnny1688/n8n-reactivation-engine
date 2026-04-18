@@ -2,3 +2,12 @@
 .DS_Store
 production_batch_*.json
 batch*.json
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Baidu cloud sync
+._*.baiduyun.uploading.cfg
+**/._*.baiduyun.uploading.cfg
+
