@@ -90,14 +90,12 @@ function compressSummary(text, maxLen = 400) {
 }
 
 function getEnforceParsed(item) {
-  const rawText = item.json?.output?.[0]?.content?.[0]?.text || '{}';
+  const rawText =
+    item.json?.output?.[0]?.content?.[0]?.text ||
+    item.json?.content?.[0]?.text ||
+    '{}';
 
-  let parsed;
-  try {
-    parsed = JSON.parse(rawText);
-  } catch (e) {
-    parsed = {};
-  }
+  const parsed = parseJsonSafe(rawText);
 
   const whatsapp_message = (parsed.whatsapp_message || '').trim();
 

@@ -132,6 +132,7 @@ function buildChineseGloss(message) {
 function getNestedOutputText(source) {
   return firstNonEmptyString(
     source?.output?.[0]?.content?.[0]?.text,
+    source?.content?.[0]?.text,
     source?.output_text,
     source?.text,
     source?.message

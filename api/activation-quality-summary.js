@@ -90,6 +90,7 @@ function parseJsonSafe(raw) {
 function getAuditText(json) {
   return safeString(
     json?.output?.[0]?.content?.[0]?.text ||
+    json?.content?.[0]?.text ||
     json?.output?.[0]?.content?.text ||
     json?.output_text ||
     json?.text ||

@@ -52,6 +52,8 @@ return items
       aiParsed = parseJsonSafe(data.ai_parsed);
     } else if (data.output?.[0]?.content?.[0]?.text) {
       aiParsed = parseJsonSafe(data.output[0].content[0].text);
+    } else if (data.content?.[0]?.text) {
+      aiParsed = parseJsonSafe(data.content[0].text);
     } else if (data.output_text) {
       aiParsed = parseJsonSafe(data.output_text);
     } else if (data.text) {
