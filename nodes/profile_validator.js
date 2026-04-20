@@ -6,7 +6,10 @@
 // SCHEMA COPY — sync manually from schemas/customer_profile.schema.json
 // when schema changes. Last synced: 2026-04-20 (schema v1).
 
-const Ajv = require('ajv');
+// Use the Draft 2020-12 entry point of ajv because our schema
+// declares "$schema": "https://json-schema.org/draft/2020-12/schema".
+// The default `require('ajv')` is Draft-07 and will reject our schema.
+const Ajv = require('ajv/dist/2020');  // Draft 2020-12 JSON Schema
 const addFormats = require('ajv-formats');
 
 const SCHEMA = {

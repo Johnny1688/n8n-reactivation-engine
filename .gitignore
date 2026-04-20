@@ -17,3 +17,6 @@ enforce_input_bianca.txt
 
 # VS Code workspace config (user-specific)
 *.code-workspace
+
+# Node
+node_modules/
