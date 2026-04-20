@@ -189,3 +189,45 @@ It defaulted to "rewriting based on bug description" rather than reading + editi
    pending_my_reply in one place?
 4. Plugin auto-sync (setInterval) — still open from 2026-04-19 handoff
 5. closed_won / closed_lost — no workflow exists to set these; manual only
+
+## Claude.ai Project Sync Protocol
+
+### When to upload files to Project
+
+| Change type | Update Project |
+|---|---|
+| n8n node JS code changed | YES — update n8n_workflow_nodes.md |
+| n8n node config changed (cron / SQL only) | NO (not worth the churn) |
+| New workflow added | YES — export JSON, upload |
+| Workflow structure changed (new nodes) | YES — re-export JSON |
+| Supabase schema / view changed | YES — update SQL docs |
+| Prompt changes | YES — update .txt in prompts/ |
+| API code changed | YES — update api/*.js |
+| architecture_roadmap.md updated | YES |
+
+### Q6: Email channel extension
+
+**Question raised:** 2026-04-19 (clarified)
+
+Google Ads landing page → form → manual first email → email conversation.
+Need to extract thread history from Gmail + auto-generate follow-ups.
+
+**Key insight:** This is NOT a new project. It's extending the current 
+system with a second data channel. The activation logic (stages, cooldown, 
+AI prompts, Telegram review) is 80% reusable.
+
+**Architecture plan:**
+- Keep same Project + same Supabase
+- Add `channel` field to messages table ('whatsapp' | 'email')
+- Add `email` field to contacts table
+- New n8n workflow: Gmail Incoming (mirrors WhatsApp Incoming)
+- New n8n workflow: Email Reactivation Engine
+- Adapt build-context API to handle channel parameter
+- Adapt activation prompts for email format (subject + body + tone)
+
+**Key decision deferred:**
+- project_key convention for email-only customers (email:xxx vs phone fallback)
+- Gmail API sync cadence (15 min? 30 min?)
+- Manual send vs auto-send via Gmail API
+
+**Timeline:** ~1 week WhatsApp observation, then 2 weeks email implementation.

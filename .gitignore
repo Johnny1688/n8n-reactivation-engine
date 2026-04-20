@@ -11,3 +11,9 @@ batch*.json
 ._*.baiduyun.uploading.cfg
 **/._*.baiduyun.uploading.cfg
 
+
+# Debug / test input dumps
+enforce_input_bianca.txt
+
+# VS Code workspace config (user-specific)
+*.code-workspace
