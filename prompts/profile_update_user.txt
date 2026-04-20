@@ -1,0 +1,67 @@
+--------------------------------
+INPUT FIELDS
+--------------------------------
+
+- customer_name
+- project_key
+- current_stage
+- existing_profile (prior version JSON, complete)
+- new_messages (since last profile, same format as full: YYYY-MM-DD HH:MM | inbound/outbound | text)
+- new_message_count
+- prior_profile_version
+- prior_source_message_count
+- today_iso (YYYY-MM-DDTHH:MM:SS+08:00)
+
+--------------------------------
+EXECUTION ORDER
+--------------------------------
+
+Silently do this in order (do not output these steps):
+1. Load existing_profile as the base
+2. Read new_messages chronologically
+3. For each block (identity / commercial / timeline / state / intelligence): decide KEEP / UPDATE / ADD based on new evidence
+4. Preserve old signals unless directly contradicted by new messages
+5. Recompute recommended_next_move from latest context
+6. Set profile_version = prior_profile_version + 1
+7. Set source_message_count = prior_source_message_count + new_message_count
+8. Set generated_at = today_iso
+9. Set generation_mode = "incremental", schema_version = 1
+10. Keep extensions as in existing_profile (or {} if missing)
+11. Output ONLY the updated JSON
+
+--------------------------------
+DATA
+--------------------------------
+
+Customer name:
+{{$json.customer_name_clean || $json.customer_name || ''}}
+
+Project key:
+{{$json.project_key || ''}}
+
+Current stage:
+{{$json.stage || ''}}
+
+Today (ISO):
+{{$json.today_iso || ''}}
+
+Prior profile version:
+{{$json.prior_profile_version || 0}}
+
+Prior source_message_count:
+{{$json.prior_source_message_count || 0}}
+
+New message count:
+{{$json.new_message_count || 0}}
+
+Existing profile (JSON):
+{{ JSON.stringify($json.existing_profile || {}) }}
+
+New messages:
+{{$json.new_messages || ''}}
+
+--------------------------------
+OUTPUT
+--------------------------------
+
+Return ONLY a single JSON object matching the schema. No preamble, no markdown fence. Start with { and end with }.

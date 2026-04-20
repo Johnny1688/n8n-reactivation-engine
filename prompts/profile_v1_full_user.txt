@@ -1,0 +1,61 @@
+--------------------------------
+INPUT FIELDS
+--------------------------------
+
+- customer_name
+- project_key
+- current_stage
+- message_count
+- today_iso (YYYY-MM-DDTHH:MM:SS+08:00)
+- all_messages (complete history, each line: YYYY-MM-DD HH:MM | inbound/outbound | text)
+
+--------------------------------
+EXECUTION ORDER
+--------------------------------
+
+Silently do this in order (do not output these steps):
+1. Read all messages chronologically
+2. Extract identity (country, customer_type, decision_role, language_preference)
+3. Extract commercial (budget_tier, volume_signal, target_models, material_preference, style_preference, shipping_term, pricing_sent, competitors_mentioned)
+4. Extract timeline (decision_horizon, urgency_signals, last_inbound_at, last_outbound_at)
+5. Extract state (current_stage, open_objections, verification_status, outstanding_asks both directions)
+6. Keyword scan for sample_request_status
+7. Keyword scan for return_exchange_history (strict fact extraction only)
+8. Compute intelligence (value_tier, win_probability, key_risks, leverage_points)
+9. Write recommended_next_move (40 chars max, concrete action)
+10. Write narrative (Chinese, 200 chars max)
+11. Pick 2-5 key_quotes (verbatim from conversation, highest signal value)
+12. Assemble JSON exactly matching schema
+13. Set generated_at = today_iso
+14. Set source_message_count = message_count
+15. Set generation_mode = "full", profile_version = 1, schema_version = 1
+16. Set extensions = {}
+17. Output ONLY the JSON
+
+--------------------------------
+DATA
+--------------------------------
+
+Customer name:
+{{$json.customer_name_clean || $json.customer_name || ''}}
+
+Project key:
+{{$json.project_key || ''}}
+
+Current stage:
+{{$json.stage || ''}}
+
+Message count:
+{{$json.message_count || 0}}
+
+Today (ISO):
+{{$json.today_iso || ''}}
+
+All messages:
+{{$json.all_messages || ''}}
+
+--------------------------------
+OUTPUT
+--------------------------------
+
+Return ONLY a single JSON object matching the schema. No preamble, no markdown fence, no explanation. Start with { and end with }.
