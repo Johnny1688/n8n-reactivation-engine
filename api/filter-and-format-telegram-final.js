@@ -44,6 +44,28 @@ function truncate(str, max = 3500) {
   return s.length > max ? s.slice(0, max) + '\n\n...(truncated)' : s;
 }
 
+// 🆕 Fallback message generator — used when AI returns empty
+// Respects hard_no_send (still SKIP) but otherwise always generates a generic re-engagement message
+function generateFallbackMessage(customerName, hardNoSend) {
+  if (hardNoSend === true || hardNoSend === 'true') {
+    return '';  // Respect explicit "do not send" signal
+  }
+  const name = customerName && customerName !== '未命名客户'
+    ? customerName.split(/[（(\s]/)[0]
+    : 'there';
+  return `Hi ${name}, just circling back to see if you're still considering Pilates reformers. Happy to send updated pricing, photos, or answer any specific questions you might have.`;
+}
+
+function generateFallbackMessageCn(customerName, hardNoSend) {
+  if (hardNoSend === true || hardNoSend === 'true') {
+    return '';
+  }
+  const name = customerName && customerName !== '未命名客户'
+    ? customerName.split(/[（(\s]/)[0]
+    : '您好';
+  return `${name}您好，想跟进一下您之前考虑的普拉提床。如果方便，我可以发更新的价格、产品照片，或者回答您的具体问题。`;
+}
+
 // Banned phrase detection — hard-coded regex since AI doesn't reliably follow prompt-level bans
 const BANNED_PATTERNS = [
   { name: 'simplify_last', regex: /simplify\s+(my|our|the)\s+last\s+(point|message|interaction|chat|reply|exchange|response)/i },
@@ -382,9 +404,9 @@ function filterAndFormatTelegramFinalItems(items) {
 
     const aiSummary = safe(aiParsed.analysis_text, '未输出');
 
-    const finalMessage = safe(enforceParsed.whatsapp_message, '');
+    let finalMessage = safe(enforceParsed.whatsapp_message, '');
 
-    const finalMessageCn = safe(
+    let finalMessageCn = safe(
       pick(
         enforceParsed.whatsapp_message_cn,
         current.whatsapp_message_cn,
@@ -394,9 +416,21 @@ function filterAndFormatTelegramFinalItems(items) {
       ''
     );
 
+    // 🆕 FALLBACK: If AI returned empty message, use generic re-engagement template
+    // (unless hard_no_send=true — respect explicit "do not send" signal)
+    let usedFallback = false;
+    if (isEmptyMessage(finalMessage)) {
+      const fallbackEn = generateFallbackMessage(customerName, current.hard_no_send);
+      if (fallbackEn) {
+        finalMessage = fallbackEn;
+        finalMessageCn = generateFallbackMessageCn(customerName, current.hard_no_send);
+        usedFallback = true;
+      }
+    }
+
     const targetReply = safe(aiParsed.target_reply, '未输出');
 
-    const emptyMessage = isEmptyMessage(finalMessage);
+    const emptyMessage = isEmptyMessage(finalMessage);  // Now only true if hard_no_send blocked fallback
     const highRisk = hasHighRiskPattern(finalMessage);
     const multiQuestionRisk = hasTooManyQuestions(finalMessage);
     const orRisk = hasOrRisk(finalMessage);
@@ -409,11 +443,13 @@ function filterAndFormatTelegramFinalItems(items) {
     const multiRisk = multiQuestionRisk || orRisk ? '高' : '低';
     const thinkRisk = decisionRisk ? '高' : '低';
 
-    const enforceStatus = emptyMessage
-      ? 'empty_skip'
-      : shouldBlock
-        ? 'blocked'
-        : 'pass';
+    const enforceStatus = usedFallback
+      ? 'fallback_used'
+      : emptyMessage
+        ? 'empty_skip'
+        : shouldBlock
+          ? 'blocked'
+          : 'pass';
 
     const analysisText = truncate([
       `客户名称：${customerName}`,
@@ -475,9 +511,12 @@ function filterAndFormatTelegramFinalItems(items) {
 
     const bannedHits = detectBannedPhrases(finalMessage);
 
-    const reviewHeader = bannedHits.length > 0
-      ? `⚠️ BANNED_PHRASE_DETECTED ⚠️\nMatched: "${bannedHits.map(h => h.matched).join('" / "')}"\n请在 Telegram 审核时手动改写后再发送。\n\n`
-      : '';
+    let reviewHeader = '';
+    if (bannedHits.length > 0) {
+      reviewHeader = `⚠️ BANNED_PHRASE_DETECTED ⚠️\nMatched: "${bannedHits.map(h => h.matched).join('" / "')}"\n请在 Telegram 审核时手动改写后再发送。\n\n`;
+    } else if (usedFallback) {
+      reviewHeader = `🔄 FALLBACK 通用破冰模板\nAI 没有足够上下文，使用了通用模板。建议根据客户情况手动改写后再发送。\n\n`;
+    }
 
     const telegramMessages = !shouldBlock
       ? [
@@ -502,7 +541,8 @@ function filterAndFormatTelegramFinalItems(items) {
       telegram_messages: telegramMessages,
       enforce_status: enforceStatus,
       auto_send_pass: !shouldBlock,
-      banned_phrase_hits: bannedHits
+      banned_phrase_hits: bannedHits,
+      used_fallback: usedFallback
     });
   }
 
