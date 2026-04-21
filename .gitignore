@@ -20,3 +20,7 @@ enforce_input_bianca.txt
 
 # Node
 node_modules/
+
+# DB backups contain customer PII (phone numbers, business labels)
+# Repository is PUBLIC — never commit raw customer data
+db/backups/
