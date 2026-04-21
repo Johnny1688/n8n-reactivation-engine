@@ -151,6 +151,17 @@ Either revive (seed next_follow_up_at for all customers) or delete.
 
 ---
 
+## Decisions Made Today (2026-04-21)
+
+| Decision | Choice | Rationale |
+|---|---|---|
+| Stale next_follow_up_at cleanup | Cleared 174 rows | View OR-condition allowed stale next_follow_up_at to bypass stage cooldowns; root cause was historic batch-set on 4/1 |
+| New status value: migrated_to_group | Added to view exclusion list | Customers upgraded from 1-on-1 to 2-person group chat need to be excluded from auto reactivation |
+| View permanent fix (OR→AND) | Deferred to next sprint | Stale data cleared = short-term issue resolved; structural refactor deserves dedicated commit window |
+| v3 prompt production cron | Deferred to 4/27 | Plugin sync delay (Luis case: 14h) creates risk of duplicate customer outreach if cron runs before sync completes |
+
+---
+
 ## Lessons Learned
 
 ### 2026-04-19 — Claude Code fabricated n8n node fix
@@ -178,6 +189,26 @@ It defaulted to "rewriting based on bug description" rather than reading + editi
   with explicit "output must match structure exactly, change only these
   specific lines" instructions, then re-import
 
+### 2026-04-21 — Plugin sync delay invalidates real-time activation assumption
+
+Discovered during followup_candidates audit that WhatsApp Plugin sync 
+can be delayed by 14+ hours. Customer "Luis Gabriel" was actually 
+messaged on 2026-04-20 12:28 but didn't appear in messages table 
+until 2026-04-21 02:24 — a 14-hour gap during which the activation 
+engine would have considered him "not yet contacted."
+
+What this means:
+- pipeline_state.last_my_message_time can be hours-to-days stale
+- Daily cron activation reads stale state → may re-activate already-contacted customers
+- Real-world impact: B2B customers receive duplicate outreach, damaging trust
+
+Mitigation needed before cron goes live:
+- Either: trigger Plugin force-sync before each activation run, then wait for completion
+- Or: add a "minimum hours since pipeline_state.updated_at" guard in followup_candidates view
+- Or: accept the risk and accept 5-10% duplicate-outreach rate
+
+Decision deferred to 4/27 reactivation sprint.
+
 ---
 
 ## Open Questions for Future
@@ -189,6 +220,13 @@ It defaulted to "rewriting based on bug description" rather than reading + editi
    pending_my_reply in one place?
 4. Plugin auto-sync (setInterval) — still open from 2026-04-19 handoff
 5. closed_won / closed_lost — no workflow exists to set these; manual only
+6. Plugin sync SLA — what's acceptable max delay before we treat 
+   pipeline_state as stale?
+7. Should daily activation cron force-trigger Plugin sync first 
+   and wait for completion?
+8. How to handle "quoted with no message context" customers — 
+   manual notes backfill, stage downgrade to stalled, or skip 
+   from activation pool entirely?
 
 ## Claude.ai Project Sync Protocol
 
@@ -231,3 +269,5 @@ AI prompts, Telegram review) is 80% reusable.
 - Manual send vs auto-send via Gmail API
 
 **Timeline:** ~1 week WhatsApp observation, then 2 weeks email implementation.
+
+
