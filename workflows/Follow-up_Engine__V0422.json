@@ -1,0 +1,1194 @@
+{
+  "name": "Follow-up Engine (Telegram Alert) - V0420",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 10 * * 1-6"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        48
+      ],
+      "id": "0732adaf-e1da-4d91-a07c-e29953a5cc02",
+      "name": "Trigger – Follow-up Check"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const summary = ($json.conversation_summary ?? '').trim();\nconst summaryUpdatedAt = $json.summary_updated_at;\nconst lastInteractionTime = $json.last_interaction_time;\n\nlet useFullMessages = false;\n\n// 没有 summary，就查全量消息\nif (!summary) {\n  useFullMessages = true;\n} else if (!summaryUpdatedAt) {\n  // 有 summary 但没有更新时间，也查全量\n  useFullMessages = true;\n} else if (lastInteractionTime && new Date(lastInteractionTime) > new Date(summaryUpdatedAt)) {\n  // 如果最后互动时间比 summary 更新时间还新，说明 summary 过期了\n  useFullMessages = true;\n}\n\nreturn {\n  json: {\n    ...$json,\n    use_full_messages: useFullMessages\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        48
+      ],
+      "id": "211f9138-dda3-4cbd-b230-c3e4d072810e",
+      "name": "Decide Message Scope"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3935669e-5eec-499c-b88b-458342c4d079",
+              "leftValue": "={{ $json.use_full_messages }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        48
+      ],
+      "id": "00e0d9e3-c2d1-482c-a6b8-9c71ca37936a",
+      "name": "Use Full Messages?"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const input = $json;\nconst messages = Array.isArray(input.messages) ? input.messages : [];\n\n// 去重（只在当前客户内部）\nconst seen = new Set();\n\nconst uniqueMessages = messages.filter(m => {\n  const key = `${m.role || ''}__${m.message || ''}__${m.message_time || ''}`;\n  \n  if (seen.has(key)) return false;\n  seen.add(key);\n  return true;\n});\n\nreturn {\n  ...input,\n  messages: uniqueMessages,\n  original_message_count: messages.length,\n  deduplicated_message_count: uniqueMessages.length\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        -80
+      ],
+      "id": "9b02d050-4c62-45f3-ba42-59d00a470262",
+      "name": "消息去重"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH top50 AS (\n  SELECT \n    *,\n    ROW_NUMBER() OVER () AS original_order\n  FROM followup_candidates LIMIT 50\n),\nenriched AS (\n  SELECT \n    top50.*,\n    phone_lookup.customer_phone,\n    CASE\n      WHEN top50.customer_name ~ '澳大利亚|澳洲|新西兰|菲律宾' THEN 1\n      WHEN phone_lookup.customer_phone LIKE '+61%' THEN 1\n      WHEN phone_lookup.customer_phone LIKE '+64%' THEN 1\n      WHEN phone_lookup.customer_phone LIKE '+63%' THEN 1\n      ELSE 2\n    END AS country_priority\n  FROM top50\n  LEFT JOIN LATERAL (\n    SELECT customer_phone FROM contacts \n    WHERE contacts.project_key = top50.project_key\n      AND customer_phone IS NOT NULL\n    LIMIT 1\n  ) phone_lookup ON true\n)\nSELECT * FROM enriched\nORDER BY country_priority, original_order;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        384,
+        48
+      ],
+      "id": "a5410624-4b20-4269-91bc-ecba76c56e28",
+      "name": "Load today_followups_填写数量",
+      "credentials": {
+        "postgres": {
+          "id": "P2YAWZISt6YM3EZr",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const row = $json || {};\nconst rawMessages = Array.isArray(row.messages) ? row.messages : [];\n\n// 1) 按时间排序\nconst messages = [...rawMessages].sort((a, b) => {\n  const ta = new Date(a.message_time || 0).getTime();\n  const tb = new Date(b.message_time || 0).getTime();\n  return ta - tb;\n});\n\n// 2) 最后一条客户消息\nconst lastCustomerObj = [...messages].reverse().find(m => m.role === 'customer') || null;\nconst lastCustomerMessage = lastCustomerObj?.message || '';\nconst lastCustomerMessageTime = lastCustomerObj?.message_time || null;\n\n// 3) 最后一条我方消息\nconst lastMyObj = [...messages].reverse().find(m => m.role === 'me') || null;\nconst lastMyMessage = lastMyObj?.message || '';\nconst lastMyMessageTime = lastMyObj?.message_time || null;\n\n// 4) 最近消息\nconst recentMessages = messages.slice(-12);\n\n// 5) 完整对话文本\nconst cleanedFullConversation = messages\n  .map((m) => {\n    const role = m.role || 'unknown';\n    const msg = (m.message || '').toString().replace(/\\s+/g, ' ').trim();\n    return `${role}: ${msg}`;\n  })\n  .join('\\n');\n\n// 6) 最近对话文本\nconst recentConversation = recentMessages\n  .map((m) => {\n    const role = m.role || 'unknown';\n    const msg = (m.message || '').toString().replace(/\\s+/g, ' ').trim();\n    return `${role}: ${msg}`;\n  })\n  .join('\\n');\n\n// 7) 输出\nreturn {\n  json: {\n    ...row,\n    project_key: row.project_key || '',\n    customer_name: row.customer_name || row.project_key || '',\n    messages,\n    message_count: messages.length,\n    has_messages: messages.length > 0,\n    last_customer_message: lastCustomerMessage,\n    last_customer_message_time_normalized: lastCustomerMessageTime,\n    last_my_message: lastMyMessage,\n    last_my_message_time_normalized: lastMyMessageTime,\n    recent_messages: recentMessages,\n    cleaned_full_conversation: cleanedFullConversation,\n    recent_conversation: recentConversation,\n    _debug_source: 'normalize_customer_data'\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        64
+      ],
+      "id": "6f5ea430-d3dd-4899-97c4-64def6edfaa3",
+      "name": "Normalize Customer Data"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        5616,
+        -48
+      ],
+      "id": "546dd7d6-fd76-4a10-be90-4b88630d31ac",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Johnny1688/n8n-reactivation-engine/main/prompts/reactivation_system.txt",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "system_prompt"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2240,
+        336
+      ],
+      "id": "74529036-af7c-47c1-aab3-714c000bc6f7",
+      "name": "Load Reactivation System Prompt"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Johnny1688/n8n-reactivation-engine/refs/heads/main/prompts/reactivation_user.txt",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "user_prompt"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2240,
+        528
+      ],
+      "id": "3d9c72f0-d40e-4ae4-ab70-7eb01485b1af",
+      "name": "Load Reactivation User Prompt"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n-reactivation-engine.vercel.app/api/build-context",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1936,
+        -80
+      ],
+      "id": "7120f1b9-eee6-45fc-9ed4-3e4837a94ee5",
+      "name": "Build AI Context API"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const json = item.json || {};\n  const payload = json.reactivation_ai_payload || {};\n  const userPrompt = json.user_prompt || \"\";\n\n  const finalUserPrompt = userPrompt\n    .replace(\"{{customer_name}}\", String(json.customer_name || \"\"))\n    .replace(\"{{project_key}}\", String(json.project_key || \"\"))\n    .replace(\"{{conversation_core}}\", String(json.conversation_core || \"\"))\n    .replace(\"{{conversation}}\", String(json.conversation || \"\"))\n    .replace(\"{{reactivation_ai_payload}}\", JSON.stringify(payload, null, 2));\n\n  return {\n    json: {\n      ...item.json,\n      final_user_prompt: finalUserPrompt\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2672,
+        288
+      ],
+      "id": "01c68cac-a578-4d07-8188-3d74afcb816e",
+      "name": "Build Final Prompt"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n-reactivation-engine.vercel.app/api/format-telegram-message",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3904,
+        -64
+      ],
+      "id": "ca55ae9a-7d70-4ecf-b17f-1301ecc4afcd",
+      "name": "Format – Telegram Message API"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4704,
+        224
+      ],
+      "id": "44451dec-0d26-4c0c-a720-26f225b38a78",
+      "name": "Merge3"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Johnny1688/n8n-reactivation-engine/main/prompts/enforce_quality_user.txt",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "quality_user_prompt"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4432,
+        448
+      ],
+      "id": "99272026-caad-4ac6-ac5e-0b1fb4baa87b",
+      "name": "Load Enforce Message Quality User Prompt"
+    },
+    {
+      "parameters": {
+        "url": "https://raw.githubusercontent.com/Johnny1688/n8n-reactivation-engine/main/prompts/enforce_quality_system.txt",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "quality_system_prompt"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4432,
+        256
+      ],
+      "id": "863132c6-eef6-44e5-9d00-c2d4bab521d4",
+      "name": "Load Enforce Message Quality System Prompt"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n-reactivation-engine.vercel.app/api/filter-and-format-telegram-final",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        5824,
+        -48
+      ],
+      "id": "bcc01b1e-448a-4b52-9b38-c22314372729",
+      "name": "Filter & Format Telegram Final API"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n-reactivation-engine.vercel.app/api/split-telegram-messages",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        6256,
+        -48
+      ],
+      "id": "d14e2992-5325-4e36-9285-88da37306f57",
+      "name": "split-telegram-messages API"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2448,
+        272
+      ],
+      "id": "81c63092-20ab-4114-b645-60d9f4b7f894",
+      "name": "Merge4"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3664,
+        -64
+      ],
+      "id": "7eb23b2c-6164-4278-b924-32343f249ba8",
+      "name": "Merge – Reactivation Raw Bundle"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n-reactivation-engine.vercel.app/api/compile-enforce-prompt",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4896,
+        240
+      ],
+      "id": "3c841ea3-e7bd-4713-a3fb-8d79695bec73",
+      "name": "Compile Enforce Prompt API"
+    },
+    {
+      "parameters": {
+        "tableId": "activation_messages",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "project_key",
+              "fieldValue": "={{ $json.project_key }}"
+            },
+            {
+              "fieldId": "customer_name",
+              "fieldValue": "={{ $json.customer_name }}"
+            },
+            {
+              "fieldId": "customer_name_clean",
+              "fieldValue": "={{ $json.customer_name_clean || $json.customer_name }}"
+            },
+            {
+              "fieldId": "is_my_turn_to_reply",
+              "fieldValue": "={{ String($json.is_my_turn_to_reply) }}"
+            },
+            {
+              "fieldId": "has_not_now_signal",
+              "fieldValue": "={{ String($json.has_not_now_signal) }}"
+            },
+            {
+              "fieldId": "hard_no_send",
+              "fieldValue": "={{ String($json.hard_no_send) }}"
+            },
+            {
+              "fieldId": "last_customer_message",
+              "fieldValue": "={{ ($json.last_customer_message ?? '').substring(0, 500) }}"
+            },
+            {
+              "fieldId": "last_my_message",
+              "fieldValue": "={{ ($json.last_my_message ?? '').substring(0, 500) }}"
+            },
+            {
+              "fieldId": "ai_message",
+              "fieldValue": "={{ $json._en ?? '' }}"
+            },
+            {
+              "fieldId": "banned_phrase_flagged",
+              "fieldValue": "={{ $json.banned_phrase_hits && $json.banned_phrase_hits.length > 0 }}"
+            },
+            {
+              "fieldId": "banned_phrase_details",
+              "fieldValue": "={{ JSON.stringify($json.banned_phrase_hits ?? []) }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        6288,
+        432
+      ],
+      "id": "7cff2c2d-40fb-41af-a174-2dc675c2eea9",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "LnpqY1yydbLUJvk5",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "claude-sonnet-4-6"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.items[0].json.final_quality_user_prompt }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "options": {
+          "system": "={{ $json.items[0].json.final_quality_system_prompt }}",
+          "maxTokens": 1000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        5088,
+        240
+      ],
+      "id": "da655c1d-4bf0-4a62-9b50-f7e31e5a23e9",
+      "name": "AI-Enforce Message Quality1",
+      "credentials": {
+        "anthropicApi": {
+          "id": "AkQXh4gtg75Z33D9",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const content = item.json.content;\n  if (Array.isArray(content) && content.length > 0 && content[0].text) {\n    try {\n      const parsed = JSON.parse(content[0].text);\n      item.json.ai_parsed = parsed;\n      item.json.whatsapp_message = parsed.whatsapp_message || '';\n      item.json.whatsapp_message_cn = parsed.whatsapp_message_cn || '';\n      item.json.output = [{\n        content: [{ text: content[0].text }]\n      }];\n    } catch (e) {\n      item.json.ai_parsed = { whatsapp_message: '' };\n      item.json.whatsapp_message = '';\n      item.json.whatsapp_message_cn = '';\n    }\n  }\n  return item;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3360,
+        192
+      ],
+      "id": "5ce5518c-b787-4ea6-8453-652255403ccb",
+      "name": "Parse Anthropic Output"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const content = item.json.content;\n  if (Array.isArray(content) && content.length > 0 && content[0].text) {\n    try {\n      const parsed = JSON.parse(content[0].text);\n      item.json.ai_parsed = parsed;\n      item.json.whatsapp_message = parsed.whatsapp_message || '';\n      item.json.whatsapp_message_cn = parsed.whatsapp_message_cn || '';\n      item.json.output = [{\n        content: [{ text: content[0].text }]\n      }];\n    } catch (e) {\n      item.json.ai_parsed = { whatsapp_message: '' };\n      item.json.whatsapp_message = '';\n      item.json.whatsapp_message_cn = '';\n    }\n  }\n  return item;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5424,
+        128
+      ],
+      "id": "a4d31667-5b24-48d9-8cd4-b0678262ea35",
+      "name": "Parse Anthropic Output1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "claude-sonnet-4-6"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json[\"final_user_prompt\"] }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "options": {
+          "system": "={{ $json[\"system_prompt\"] }}",
+          "maxTokens": 1000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        2944,
+        288
+      ],
+      "id": "9484fbe1-4538-4833-8fb6-6a25f93ae25b",
+      "name": "AI-Reactivation",
+      "retryOnFail": false,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "anthropicApi": {
+          "id": "AkQXh4gtg75Z33D9",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1712,
+        -80
+      ],
+      "id": "7b731de0-e1a8-4484-8305-f2ba5e81119f",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\n\n// 第一个客户进来时清空上次的数据\nif (items[0]?.json?.project_key && (!staticData.lastBatchDate || staticData.lastBatchDate !== new Date().toISOString().slice(0,10))) {\n  staticData.allResults = [];\n  staticData.lastBatchDate = new Date().toISOString().slice(0,10);\n}\n\nif (!staticData.allResults) {\n  staticData.allResults = [];\n}\n\nfor (const item of items) {\n  staticData.allResults.push(item.json);\n}\n\nreturn [{ json: { total: staticData.allResults.length, results: staticData.allResults } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6048,
+        -336
+      ],
+      "id": "71d720bc-d543-4bde-a951-17b25a6adf67",
+      "name": "Accumulate Results"
+    },
+    {
+      "parameters": {
+        "jsCode": "await new Promise(resolve => setTimeout(resolve, 20000));\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6048,
+        176
+      ],
+      "id": "c790ac1d-c242-413a-bf7f-0084ad9d213c",
+      "name": "Delay 20s"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        6768,
+        -48
+      ],
+      "id": "336371a3-2480-48f1-8b50-5fbd922dc7f9",
+      "name": "Wait",
+      "webhookId": "9693e0ec-0683-47f7-baff-780bfbfaea65"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8721012574:AAH-rwEi01Lh3N7kuDMqwu6YDusmnPnrjOw/sendMessage",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $json.msg_1_full }}"
+            },
+            {
+              "name": "chat_id",
+              "value": "8546540202"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        6544,
+        -48
+      ],
+      "id": "d64eaa1b-26fc-48b6-9a43-e1e3c5d433cf",
+      "name": "Send – Telegram Alert1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8721012574:AAH-rwEi01Lh3N7kuDMqwu6YDusmnPnrjOw/sendMessage",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $('split-telegram-messages API').item.json.msg_2_key }}"
+            },
+            {
+              "name": "chat_id",
+              "value": "8546540202"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        7024,
+        -48
+      ],
+      "id": "160a8779-2460-4ced-9aa0-48420442480b",
+      "name": "Send – Telegram Alert2"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        7296,
+        -48
+      ],
+      "id": "a9bc9a4f-e844-4528-8a85-f79587ba4c51",
+      "name": "Wait1",
+      "webhookId": "d26c0986-79c5-4cc4-9c79-cf40ea506d04"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8721012574:AAH-rwEi01Lh3N7kuDMqwu6YDusmnPnrjOw/sendMessage",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $('split-telegram-messages API').item.json.msg_3_en }}"
+            },
+            {
+              "name": "chat_id",
+              "value": "8546540202"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        7600,
+        -48
+      ],
+      "id": "6f064498-2846-4428-a49f-cf4b1197aab8",
+      "name": "Send – Telegram Alert3"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select\n  '{{ $json.project_key }}' as project_key,\n  coalesce(\n    json_agg(\n      json_build_object(\n        'project_key', m.project_key,\n        'role', m.role,\n        'message', m.message,\n        'message_time', m.message_time\n      )\n      order by m.message_time asc nulls last, m.created_at asc\n    ) filter (where m.id is not null),\n    '[]'::json\n  ) as messages\nfrom public.messages m\nwhere m.project_key = '{{ $json.project_key }}';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1120,
+        -112
+      ],
+      "id": "fe54e67a-7fc3-488b-843d-a956d60d328d",
+      "name": "Get Full Messages",
+      "credentials": {
+        "postgres": {
+          "id": "P2YAWZISt6YM3EZr",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "select\n  '{{ $json.project_key }}' as project_key,\n  coalesce(\n    json_agg(\n      json_build_object(\n        'project_key', m.project_key,\n        'role', m.role,\n        'message', m.message,\n        'message_time', m.message_time\n      )\n      order by m.message_time asc nulls last, m.created_at asc\n    ) filter (where m.id is not null),\n    '[]'::json\n  ) as messages\nfrom public.messages m\nwhere m.project_key = '{{ $json.project_key }}';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1120,
+        240
+      ],
+      "id": "8f7e1b0b-67d5-4285-ae1f-6a7170b4be96",
+      "name": "Get Recent 10 Messages1",
+      "credentials": {
+        "postgres": {
+          "id": "P2YAWZISt6YM3EZr",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Trigger – Follow-up Check": {
+      "main": [
+        [
+          {
+            "node": "Load today_followups_填写数量",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decide Message Scope": {
+      "main": [
+        [
+          {
+            "node": "Use Full Messages?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Use Full Messages?": {
+      "main": [
+        [
+          {
+            "node": "Get Full Messages",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Recent 10 Messages1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "消息去重": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load today_followups_填写数量": {
+      "main": [
+        [
+          {
+            "node": "Decide Message Scope",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Customer Data": {
+      "main": [
+        [
+          {
+            "node": "消息去重",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Filter & Format Telegram Final API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Reactivation System Prompt": {
+      "main": [
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Load Reactivation User Prompt": {
+      "main": [
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Build AI Context API": {
+      "main": [
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Load Reactivation System Prompt",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Load Reactivation User Prompt",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge – Reactivation Raw Bundle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Final Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI-Reactivation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge3": {
+      "main": [
+        [
+          {
+            "node": "Compile Enforce Prompt API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format – Telegram Message API": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Load Enforce Message Quality System Prompt",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Load Enforce Message Quality User Prompt",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Enforce Message Quality User Prompt": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Load Enforce Message Quality System Prompt": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Filter & Format Telegram Final API": {
+      "main": [
+        [
+          {
+            "node": "Accumulate Results",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delay 20s",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "split-telegram-messages API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "split-telegram-messages API": {
+      "main": [
+        [
+          {
+            "node": "Send – Telegram Alert1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge4": {
+      "main": [
+        [
+          {
+            "node": "Build Final Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge – Reactivation Raw Bundle": {
+      "main": [
+        [
+          {
+            "node": "Format – Telegram Message API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compile Enforce Prompt API": {
+      "main": [
+        [
+          {
+            "node": "AI-Enforce Message Quality1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI-Enforce Message Quality1": {
+      "main": [
+        [
+          {
+            "node": "Parse Anthropic Output1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Anthropic Output": {
+      "main": [
+        [
+          {
+            "node": "Merge – Reactivation Raw Bundle",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Parse Anthropic Output1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "AI-Reactivation": {
+      "main": [
+        [
+          {
+            "node": "Parse Anthropic Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Build AI Context API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accumulate Results": {
+      "main": [
+        []
+      ]
+    },
+    "Delay 20s": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send – Telegram Alert2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send – Telegram Alert1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send – Telegram Alert2": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Send – Telegram Alert3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send – Telegram Alert3": {
+      "main": [
+        []
+      ]
+    },
+    "Get Full Messages": {
+      "main": [
+        [
+          {
+            "node": "Normalize Customer Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent 10 Messages1": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "cb6eee37-735e-4201-ba1e-67c1ac9d5cd2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "180a2f5d3fca08263e00a3e16caeb63578ad9ea5b06d6f855b1858aaa2dd81c7"
+  },
+  "id": "mrWMiMkNDtdqLHGq",
+  "tags": []
+}
