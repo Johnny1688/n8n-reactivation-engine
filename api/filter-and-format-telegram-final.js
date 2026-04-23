@@ -78,7 +78,12 @@ const BANNED_PATTERNS = [
   { name: 'new_model_options_vague', regex: /(line\s+up|keep)\s+(the\s+)?new\s+model\s+options/i },
   { name: 'see_whats_available', regex: /see\s+what[''\u2019]?s\s+available/i },
   { name: 'make_informed_choice', regex: /make\s+(an|a)\s+informed\s+choice/i },
-  { name: 'at_your_convenience', regex: /at\s+your\s+convenience/i }
+  { name: 'at_your_convenience', regex: /at\s+your\s+convenience/i },
+  // 2026-04-23: defense against sparse-history fallback drift (4/22 batch 5/50)
+  { name: 'circling_back', regex: /circling\s+back/i },
+  { name: 'still_considering', regex: /still\s+considering/i },
+  // Chinese chars in greeting (before first comma) — name-pollution defense
+  { name: 'chinese_in_greeting', regex: /^[^,]*[\u4e00-\u9fff]/ }
 ];
 
 function detectBannedPhrases(message) {
@@ -150,6 +155,8 @@ function hasHighRiskPattern(msg) {
     'checking in',
     'any update',
     'following up',
+    'circling back',
+    'still considering',
     'let me know',
     'still interested',
     'would love to help',
