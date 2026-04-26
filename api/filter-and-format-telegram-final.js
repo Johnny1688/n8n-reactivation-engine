@@ -450,13 +450,17 @@ function filterAndFormatTelegramFinalItems(items) {
     const multiRisk = multiQuestionRisk || orRisk ? '高' : '低';
     const thinkRisk = decisionRisk ? '高' : '低';
 
+    const hardNoSend = current.hard_no_send === true || current.hard_no_send === 'true';
+
     const enforceStatus = usedFallback
       ? 'fallback_used'
       : emptyMessage
         ? 'empty_skip'
         : shouldBlock
           ? 'blocked'
-          : 'pass';
+          : hardNoSend
+            ? 'hard_no_send_flagged'
+            : 'pass';
 
     const analysisText = truncate([
       `客户名称：${customerName}`,
@@ -518,12 +522,16 @@ function filterAndFormatTelegramFinalItems(items) {
 
     const bannedHits = detectBannedPhrases(finalMessage);
 
-    let reviewHeader = '';
-    if (bannedHits.length > 0) {
-      reviewHeader = `⚠️ BANNED_PHRASE_DETECTED ⚠️\nMatched: "${bannedHits.map(h => h.matched).join('" / "')}"\n请在 Telegram 审核时手动改写后再发送。\n\n`;
-    } else if (usedFallback) {
-      reviewHeader = `🔄 FALLBACK 通用破冰模板\nAI 没有足够上下文，使用了通用模板。建议根据客户情况手动改写后再发送。\n\n`;
+    const headerParts = [];
+    if (hardNoSend) {
+      headerParts.push('⛔ HARD_NO_SEND ⛔\n客户曾发出"暂时不要联系"信号,默认不发,如确实要发请人工 review 客户最新消息后再决定。');
     }
+    if (bannedHits.length > 0) {
+      headerParts.push(`⚠️ BANNED_PHRASE_DETECTED ⚠️\nMatched: "${bannedHits.map(h => h.matched).join('" / "')}"\n请在 Telegram 审核时手动改写后再发送。`);
+    } else if (usedFallback) {
+      headerParts.push('🔄 FALLBACK 通用破冰模板\nAI 没有足够上下文，使用了通用模板。建议根据客户情况手动改写后再发送。');
+    }
+    const reviewHeader = headerParts.length > 0 ? headerParts.join('\n\n') + '\n\n' : '';
 
     const telegramMessages = !shouldBlock
       ? [

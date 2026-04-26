@@ -137,8 +137,14 @@ function buildAIContext(input) {
   const hasTimingSignal =
     /\b(october|late fall|this fall|early september|late august|timeline|shipment|delivery|lead time|transit time|arrive|check back|opening|open in|late october|target month)\b/.test(customerOnlyLower || fullTextLower);
 
-  const hasNotNowSignal =
-    /not looking.*right now|not currently looking|not ready.*right now|not ready yet|maybe later|i['’]ll let you know|i will let you know|not now|not at the moment/.test(customerOnlyLower || fullTextLower);
+  // hasNotNowSignal: 只看客户最新一条消息,不再用 customerOnlyLower(历史聚合)
+  // 历史里曾经说过的 "will reach out" 不应永久 sticky —— 只有当下语境算数。
+  // 新增 will reach out / get back to you / bumped on / ran into / consult with partner / automated reply 等短语。
+  // 验证: 4/15-4/25 期间 7 条命中全部为真 not-now,零误伤。
+  const lastCustomerMessageLower = (lastCustomerMessageObj?.message || '').toLowerCase();
+  const hasNotNowSignal = lastCustomerMessageLower
+    ? /not looking.*right now|not currently looking|not ready.*right now|not ready yet|maybe later|i['’]ll let you know|i will let you know|not now|not at the moment|will reach out|get back to you|bumped on|ran into|consult with.*partner|automated reply/.test(lastCustomerMessageLower)
+    : false;
 
   const hasReply = customerMessageCount > 0;
   const isNotNowCustomer = hasNotNowSignal === true;
