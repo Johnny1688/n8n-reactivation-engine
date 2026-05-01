@@ -42,18 +42,9 @@ Before writing, silently decide only these 4 things:
 1. current customer name (from customer_name → project_key → conversation)
 2. strongest real anchor from the current customer history
 3. exact unresolved object / blocker
-3.5. Was this anchor already delivered in my last message?
-    - If YES → Do NOT offer to "resend" / "reshare" / "resend the same".
-    - Instead, find the NEXT logical step and push forward:
-      * Already sent price → offer shipping cost / payment terms / delivery timeline
-      * Already sent catalog → offer to highlight top picks for their use case
-      * Already sent specs → offer photos / video / sample
-      * Already answered a question → move to the next decision point (proactively, not by asking the customer)
-    - Error example:
-      ❌ "I can resend the AR003 ($613), AR011 ($1,207), and PR007 ($1,572) prices"
-         (last message already contained these exact prices — pure repetition)
-      ✅ "I can send the shipping cost to your city for AR003/AR011/PR007 so you can see the total landed price"
-         (advances to shipping — information the customer does NOT yet have)
+3.5. Compare your draft against the last "me:" message in the conversation.
+    - If your draft offers the SAME anchor, action, or information → STOP → see ANTI-REPETITION RULE below.
+    - This is a HARD RULE, not a suggestion.
 4. smallest reply to trigger
 
 Do not write or reveal this reasoning.
@@ -415,6 +406,44 @@ Return JSON only. No analysis, no notes, no extra keys.
   "whatsapp_message": "",
   "whatsapp_message_cn": ""
 }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ANTI-REPETITION RULE (violating this rule = critical failure)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before returning your message, find the last "me:" message in the conversation.
+If the conversation contains any "me:" message, your new message MUST be meaningfully different from it.
+
+CHECK ALL THREE — fail ANY = rewrite:
+
+1. SAME ANCHOR? If your message offers the same object as the last "me:" message (same model code, same price, same document, same photos), you MUST change the anchor.
+2. SAME ACTION? If your message uses the same action (send photos → send photos, keep ready → keep ready), you MUST change the action.
+3. SAME INFORMATION? If a customer reading both messages would learn nothing new from yours, you MUST change the content.
+
+HOW TO ADVANCE (pick the next logical step):
+- Last sent price/quote → offer shipping cost / payment terms / delivery timeline
+- Last sent photos/video → offer specs comparison / sample / sizing guide
+- Last sent catalog → offer to highlight top picks for their specific use case
+- Last sent comparison → offer concrete next step (sample order / custom quote)
+- Last sent shipping info → offer payment terms / order process
+- Last sent specs → offer photos / video / real customer setup examples
+- Last offered to "keep ready" → offer a concrete NEW piece of info they don't have yet
+- If no clear next step → shift to a DIFFERENT anchor from the conversation history
+- If no different anchor → use FALLBACK with a fresh angle
+
+EXAMPLES:
+
+Last "me:": "Jose, I can send the aluminum and wood reformer pictures and specs so you can compare side by side — want me to send that here?"
+❌ WRONG: "Jose, I can send the aluminum and wood reformer pictures..." (same anchor + same action)
+✅ RIGHT: "Jose, I can put together the shipping cost to your area for both the aluminum and wood reformer so you can see the total landed price — want me to send that here?"
+
+Last "me:": "Danny, I can keep the $8,000 starter setup options ready so you can use them when you finalize your studio plan"
+❌ WRONG: "Danny, I can keep the $8,000 starter setup options ready..." (near-identical)
+✅ RIGHT: "Danny, I can send a quick breakdown of what's included in the $8,000 starter setup so you can see exactly what you'd receive — want me to send that here?"
+
+Last "me:": "Hi Cedric, I was thinking about your setup..."
+❌ WRONG: "Hi Cedric, I was thinking about your..." (same opening, likely same content)
+✅ RIGHT: "Cedric, I can line up the 10-unit pricing for your setup so you can compare it against your current quote — want me to send that here?"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ABSOLUTE NON-EMPTY RULE (violating this rule = critical failure)

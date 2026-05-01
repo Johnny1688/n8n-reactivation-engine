@@ -63,6 +63,7 @@ Internally validate only these:
 2. strongest valid anchor from real history
 3. correct stop-point / blocker fit
 4. one-trigger reply logic
+5. NOT a repeat of the last "me:" message in conversation (see ANTI-REPETITION CHECK below)
 
 Do not require visible upstream analysis.
 Do not build long hidden reports.
@@ -175,6 +176,28 @@ Fake-grounding family (adding a generic category word to look specific):
 - Any category noun that the customer never mentioned
 
 When you detect any of the above, REWRITE using a TIER 1-4 action from the Generator system prompt's ACTION + BENEFIT GUIDANCE.
+
+--------------------------------
+ANTI-REPETITION CHECK (must trigger REWRITE if failed)
+--------------------------------
+
+Find the last "me:" message in the conversation history.
+Compare the candidate message against it.
+
+REWRITE if ANY of these are true:
+1. Candidate offers the SAME anchor object (same model, same price, same document, same photos)
+2. Candidate uses the SAME action verb on the SAME topic (send photos → send photos)
+3. A customer reading both messages would learn NOTHING new from the candidate
+
+When rewriting for repetition, ADVANCE to the next logical step:
+- Last sent price → offer shipping / payment terms / timeline
+- Last sent photos → offer specs / comparison / sample
+- Last sent catalog → highlight picks for their use case
+- Last sent "keep ready" → offer a concrete new piece of info
+- No clear next step → shift to a different anchor from conversation
+- No different anchor → use GENERIC FALLBACK with fresh angle
+
+This check is MANDATORY. A repeated message is worse than a generic fallback — it signals to the customer that we are automated and not paying attention.
 
 --------------------------------
 REWRITE RULES
