@@ -44,26 +44,15 @@ function truncate(str, max = 3500) {
   return s.length > max ? s.slice(0, max) + '\n\n...(truncated)' : s;
 }
 
-// 🆕 Fallback message generator — used when AI returns empty
-// Respects hard_no_send (still SKIP) but otherwise always generates a generic re-engagement message
+// Empty-message fallback gate.
+// Do not manufacture a generic re-engagement message here: repeated fallback
+// copy is a quality issue and should be held for manual rewrite.
 function generateFallbackMessage(customerName, hardNoSend) {
-  if (hardNoSend === true || hardNoSend === 'true') {
-    return '';  // Respect explicit "do not send" signal
-  }
-  const name = customerName && customerName !== '未命名客户'
-    ? customerName.split(/[（(\s]/)[0]
-    : 'there';
-  return `Hi ${name}, just circling back to see if you're still considering Pilates reformers. Happy to send updated pricing, photos, or answer any specific questions you might have.`;
+  return '';
 }
 
 function generateFallbackMessageCn(customerName, hardNoSend) {
-  if (hardNoSend === true || hardNoSend === 'true') {
-    return '';
-  }
-  const name = customerName && customerName !== '未命名客户'
-    ? customerName.split(/[（(\s]/)[0]
-    : '您好';
-  return `${name}您好，想跟进一下您之前考虑的普拉提床。如果方便，我可以发更新的价格、产品照片，或者回答您的具体问题。`;
+  return '';
 }
 
 // Banned phrase detection — hard-coded regex since AI doesn't reliably follow prompt-level bans
@@ -227,6 +216,9 @@ function hasGenericRisk(msg) {
 
 function hasWeakAnchorRisk(msg) {
   const text = normalizeText(msg);
+  if (/\b(?:ar|mr|or|fr|mg|pr|pc|bs)\d{3}\b/i.test(String(msg || ''))) {
+    return false;
+  }
 
   const anchorPatterns = [
     'pricing',
@@ -247,10 +239,173 @@ function hasWeakAnchorRisk(msg) {
     'houston',
     '77044',
     'warranty',
-    'shipping'
+    'shipping',
+    'landed cost',
+    'postal code',
+    'zip code',
+    'production',
+    'payment',
+    'invoice'
   ];
 
   return !anchorPatterns.some(p => text.includes(p));
+}
+
+function normalizeForSimilarity(msg) {
+  return String(msg || '')
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/g, ' ')
+    .replace(/[^a-z0-9$]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function tokenizeForSimilarity(msg) {
+  const stopWords = new Set([
+    'the', 'and', 'for', 'you', 'your', 'that', 'this', 'with', 'can', 'our',
+    'here', 'want', 'send', 'share', 'see', 'what', 'good', 'fit', 'just',
+    'have', 'will', 'would', 'could', 'please', 'thanks', 'thank'
+  ]);
+
+  return normalizeForSimilarity(msg)
+    .split(' ')
+    .filter(token => token.length > 2 && !stopWords.has(token));
+}
+
+function similarityScore(a, b) {
+  const aTokens = new Set(tokenizeForSimilarity(a));
+  const bTokens = new Set(tokenizeForSimilarity(b));
+  if (!aTokens.size || !bTokens.size) return 0;
+
+  let overlap = 0;
+  for (const token of aTokens) {
+    if (bTokens.has(token)) overlap += 1;
+  }
+
+  return overlap / Math.min(aTokens.size, bTokens.size);
+}
+
+function looksTooSimilar(candidate, previous) {
+  const a = normalizeForSimilarity(candidate);
+  const b = normalizeForSimilarity(previous);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  if (a.length >= 45 && b.includes(a)) return true;
+  if (b.length >= 45 && a.includes(b)) return true;
+  return similarityScore(a, b) >= 0.72;
+}
+
+function parseMaybeJsonArray(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== 'string') return [];
+  const trimmed = value.trim();
+  if (!trimmed) return [];
+  try {
+    const parsed = JSON.parse(trimmed);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function historyTextsFrom(value) {
+  return parseMaybeJsonArray(value)
+    .map(item => {
+      if (typeof item === 'string') return item;
+      if (!item || typeof item !== 'object') return '';
+      return item.ai_message || item.whatsapp_message || item.message || item.text || '';
+    })
+    .filter(text => has(text));
+}
+
+function getDoNotRepeatList(current) {
+  const direct = current.forbidden_repeat_zone?.do_not_repeat;
+  const payload = current.reactivation_ai_payload?.constraints?.do_not_repeat;
+  const core = current.reactivation_v6_core?.forbidden_repeat_zone?.do_not_repeat;
+  const values = [direct, payload, core].find(Array.isArray);
+  return Array.isArray(values) ? values : [];
+}
+
+function getAlreadyAskedQuestions(current) {
+  const direct = current.forbidden_repeat_zone?.already_asked_questions;
+  const core = current.reactivation_v6_core?.forbidden_repeat_zone?.already_asked_questions;
+  const values = [direct, core].find(Array.isArray);
+  return Array.isArray(values) ? values : [];
+}
+
+function detectRepeatQualityHits(message, current, usedFallback) {
+  const hits = [];
+  const text = normalizeText(message);
+  const doNotRepeat = getDoNotRepeatList(current);
+  const priorTexts = [
+    current.last_my_message,
+    ...historyTextsFrom(current.previous_activation_messages),
+    ...historyTextsFrom(current.prior_activation_messages),
+    ...historyTextsFrom(current.recent_activation_messages),
+    ...historyTextsFrom(current.previous_ai_messages)
+  ].filter(value => has(value));
+
+  for (const previous of priorTexts) {
+    if (looksTooSimilar(message, previous)) {
+      hits.push({ name: 'repeat_prior_message', matched: String(previous).slice(0, 140) });
+      break;
+    }
+  }
+
+  if (usedFallback && (current.message_count || current.last_my_message || current.last_customer_message)) {
+    hits.push({ name: 'fallback_used_with_history', matched: 'fallback template used despite existing history' });
+  }
+
+  if (/most popular studio setup options|studio setup options|good fit/i.test(message)) {
+    hits.push({ name: 'generic_studio_setup_fallback', matched: 'most popular studio setup options' });
+  }
+
+  if (
+    doNotRepeat.includes('repeat_selection_help') &&
+    /\b(option|options|setup|model|models|recommend|suitable|fit)\b/i.test(message)
+  ) {
+    hits.push({ name: 'repeat_selection_help', matched: 'selection/options angle already used' });
+  }
+
+  if (
+    doNotRepeat.includes('repeat_model_recommendation') &&
+    /\b(model|models|reformer|reformers|recommend|options)\b/i.test(message)
+  ) {
+    hits.push({ name: 'repeat_model_recommendation', matched: 'model recommendation angle already used' });
+  }
+
+  if (
+    doNotRepeat.includes('repeat_price_push') &&
+    /\b(price|pricing|cost|quote|rate|total|landed)\b/i.test(message)
+  ) {
+    hits.push({ name: 'repeat_price_push', matched: 'price/quote angle already used' });
+  }
+
+  if (doNotRepeat.includes('repeat_same_question')) {
+    const alreadyAsked = getAlreadyAskedQuestions(current);
+    const candidateQuestion = (String(message).match(/[^?？.!。！]*[?？]/g) || []).join(' ');
+    if (candidateQuestion && alreadyAsked.some(question => looksTooSimilar(candidateQuestion, question))) {
+      hits.push({ name: 'repeat_same_question', matched: candidateQuestion.slice(0, 140) });
+    }
+  }
+
+  if (!text) {
+    hits.push({ name: 'empty_message', matched: 'empty message' });
+  }
+
+  return hits;
+}
+
+function uniqueHits(hits) {
+  const seen = new Set();
+  const out = [];
+  for (const hit of hits) {
+    const key = `${hit.name}:${hit.matched || ''}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(hit);
+  }
+  return out;
 }
 
 const zh = {
@@ -423,8 +578,8 @@ function filterAndFormatTelegramFinalItems(items) {
       ''
     );
 
-    // 🆕 FALLBACK: If AI returned empty message, use generic re-engagement template
-    // (unless hard_no_send=true — respect explicit "do not send" signal)
+    // If AI returned empty, keep it empty so n8n can route it to missing_ai_message
+    // or quality review. Do not fill with a repeated generic fallback.
     let usedFallback = false;
     if (isEmptyMessage(finalMessage)) {
       const fallbackEn = generateFallbackMessage(customerName, current.hard_no_send);
@@ -444,6 +599,7 @@ function filterAndFormatTelegramFinalItems(items) {
     const decisionRisk = hasDecisionRisk(finalMessage);
     const genericRisk = hasGenericRisk(finalMessage);
     const weakAnchorRisk = hasWeakAnchorRisk(finalMessage);
+    const repeatQualityHits = detectRepeatQualityHits(finalMessage, current, usedFallback);
 
     const shouldBlock = emptyMessage;
 
@@ -512,6 +668,7 @@ function filterAndFormatTelegramFinalItems(items) {
       `高风险词拦截：${highRisk ? '是' : '否'}`,
       `泛化表达拦截：${genericRisk ? '是' : '否'}`,
       `弱锚点拦截：${weakAnchorRisk ? '是' : '否'}`,
+      `重复角度拦截：${repeatQualityHits.length > 0 ? '是' : '否'}`,
       '',
       '建议跟进话术（最终英文）：',
       finalMessage ? `✅ ${finalMessage}` : '⛔ 空消息，不发送',
@@ -520,7 +677,14 @@ function filterAndFormatTelegramFinalItems(items) {
       finalMessageCn ? `✅ ${finalMessageCn}` : '⛔ 未提供中文对照'
     ].join('\n'), 3500);
 
-    const bannedHits = detectBannedPhrases(finalMessage);
+    const deterministicQualityHits = [
+      ...detectBannedPhrases(finalMessage),
+      ...(highRisk ? [{ name: 'high_risk_pattern', matched: 'high-risk or banned follow-up pattern' }] : []),
+      ...(genericRisk ? [{ name: 'generic_expression', matched: 'generic expression' }] : []),
+      ...(weakAnchorRisk ? [{ name: 'weak_anchor', matched: 'no concrete product/order/logistics anchor' }] : []),
+      ...repeatQualityHits
+    ];
+    const bannedHits = uniqueHits(deterministicQualityHits);
 
     const headerParts = [];
     if (hardNoSend) {
@@ -533,7 +697,7 @@ function filterAndFormatTelegramFinalItems(items) {
     }
     const reviewHeader = headerParts.length > 0 ? headerParts.join('\n\n') + '\n\n' : '';
 
-    const telegramMessages = !shouldBlock
+    const telegramMessages = !shouldBlock && bannedHits.length === 0
       ? [
           `${reviewHeader}【${projectKey}】\n\nEnglish:\n${finalMessage}\n\n中文翻译:\n${finalMessageCn || '（未提供中文对照）'}`,
           current.project_key || '',
@@ -555,8 +719,11 @@ function filterAndFormatTelegramFinalItems(items) {
       whatsapp_message_cn: finalMessageCn,
       telegram_messages: telegramMessages,
       enforce_status: enforceStatus,
-      auto_send_pass: !shouldBlock,
+      auto_send_pass: !shouldBlock && bannedHits.length === 0,
+      banned_phrase_flagged: bannedHits.length > 0,
       banned_phrase_hits: bannedHits,
+      banned_phrase_details: JSON.stringify(bannedHits),
+      quality_issue_hits: bannedHits,
       used_fallback: usedFallback
     });
   }

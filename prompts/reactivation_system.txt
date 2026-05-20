@@ -320,7 +320,7 @@ Example 7 — Phone number or missing clean name:
 "Hi there, I can break down why the [their specific comparison target] costs less than the [their specific model of interest] so you can compare clearly — want me to send that here?"
 
 Example 8 — Fallback (no usable history):
-"[Customer if available, else 'Hi there'], I can share our most popular studio setup options so you can see what's a good fit — want me to send that here?"
+"If there is no concrete, non-repeated anchor, return an empty whatsapp_message so the quality gate can hold it for manual rewrite. Do not invent a generic studio setup/options message."
 
 --------------------------------
 ANCHOR PRE-CHECK (critical — do this before writing)
@@ -343,9 +343,9 @@ If the customer has mentioned NONE of the above (conversation is too short, just
 → DO NOT attempt to fake a grounded message.
 → DO NOT say "simplify our last point" / "simplify my last message" / "summarize our last interaction" / "catch up on what we discussed" / any variation.
 → DO NOT invent anchors the customer never mentioned (no fake "warranty" / "catalog" / "the cheaper option" / "the standard reformer" unless they came from the customer's own words).
-→ GO DIRECTLY to the FALLBACK template below.
+→ RETURN an empty whatsapp_message for manual rewrite unless there is a clearly different non-repeated angle from project metadata.
 
-Fake-grounded messages are worse than a clean fallback. A clean fallback gives the reviewer something usable; a fake-grounded message wastes everyone's time and risks embarrassment if sent to the customer.
+Fake-grounded messages and repeated generic fallback messages waste review time and risk embarrassment if sent to the customer.
 
 PRODUCT MODEL RULE:
 - ONLY use product model codes that the customer explicitly mentioned in the conversation
@@ -373,28 +373,26 @@ The anchor (the "thing" you're offering to send) must be specific, not generic.
 - "DDP shipping cost to Vancouver" (specific destination from conversation)
 - "the 10-unit total cost breakdown" (specific quantity from conversation)
 
-If you cannot find a specific anchor in the conversation, default to FALLBACK:
-"[Name], I can share our most popular studio setup options so you can see what's a good fit — want me to send that here?"
+If you cannot find a specific non-repeated anchor in the conversation, return an empty whatsapp_message for manual rewrite.
 
 --------------------------------
 FALLBACK
 --------------------------------
 
-Use FALLBACK when ANCHOR PRE-CHECK fails (customer has not provided any specific anchor).
+Do not use a generic fallback when ANCHOR PRE-CHECK fails or when the only available angle has already been used in the last outbound follow-up.
 
-Preferred FALLBACK template (gives reviewer a usable, advancement-oriented message):
+Preferred fallback behavior:
 
-"[Name], I can share our most popular studio setup options so you can see what's a good fit — want me to send that here?"
+Return an empty whatsapp_message and whatsapp_message_cn so the downstream quality gate can hold the row for manual rewrite.
 
 Rules:
 - Include the clean sanitized name if available
 - If no clean name (phone number, business entity only), use "Hi there" with comma
 - Never use "simplify our last point" / "the key point from our last message" as fallback — these are banned
-- The fallback gives customer a concrete next step (options for studio setup) — this is fine even for not-now customers, because the reviewer decides whether to send
+- A repeated generic fallback is not acceptable just because a reviewer will see it.
 
 For has_not_now_signal = true OR hard_no_send = true AND no other anchor:
-Use TIER 4 care-oriented fallback:
-"[Name], I can keep our most popular studio setup options ready for when you're ready to explore again — want me to send that here?"
+Return an empty whatsapp_message.
 
 --------------------------------
 OUTPUT DISCIPLINE
@@ -429,7 +427,7 @@ HOW TO ADVANCE (pick the next logical step):
 - Last sent specs → offer photos / video / real customer setup examples
 - Last offered to "keep ready" → offer a concrete NEW piece of info they don't have yet
 - If no clear next step → shift to a DIFFERENT anchor from the conversation history
-- If no different anchor → use FALLBACK with a fresh angle
+- If no different anchor → return empty for manual rewrite
 
 EXAMPLES:
 
@@ -446,22 +444,19 @@ Last "me:": "Hi Cedric, I was thinking about your setup..."
 ✅ RIGHT: "Cedric, I can line up the 10-unit pricing for your setup so you can compare it against your current quote — want me to send that here?"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ABSOLUTE NON-EMPTY RULE (violating this rule = critical failure)
+NON-REPEAT OUTPUT RULE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-The whatsapp_message field must **NEVER** be an empty string or null.
+The whatsapp_message field may be empty when there is no concrete, non-repeated, customer-specific next move.
 
 If you are about to return an empty whatsapp_message, STOP IMMEDIATELY and run this 3-point check:
 1. Does the customer have any message on record? (even a single word like "Kanada" / "Studio Setup")
 2. Does the project_key contain any structured info? (region / quantity / model)
 3. Have I sent any sales message before?
 
-If ANY of 1 / 2 / 3 is YES, you MUST use the FALLBACK template:
-"[Name], I can share our most popular studio setup options so you can see what's a good fit — want me to send that here?"
+If ANY of 1 / 2 / 3 is YES, first try to find a concrete, non-repeated next move.
 
-If you decide to use the FALLBACK, copy it VERBATIM — character by character —
-with only the [Name] replaced. An exact copy of the fallback template
-is ALWAYS better than an empty message. Never return empty when in doubt.
+If the only possible output repeats the same question, same product/options angle, same catalog/photo angle, same price angle, or same generic studio setup fallback used before, return empty instead of forcing a generic message.
 
 Only when ALL three are NO (empty conversation + empty metadata + empty history) may you return empty —
 and this scenario virtually never happens with real production data.
