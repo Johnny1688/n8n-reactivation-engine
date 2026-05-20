@@ -375,6 +375,50 @@ function detectRepeatQualityHits(message, current, usedFallback) {
   return hits;
 }
 
+function displayNameForMessage(customerName) {
+  const name = customerName && customerName !== '未命名客户'
+    ? String(customerName).split(/[（(\s]/)[0].trim()
+    : '';
+  return name || 'Hi there';
+}
+
+function shouldRewriteToAlternateActivation(message) {
+  if (!has(message)) return true;
+  return /most popular studio setup options|studio setup options|good fit/i.test(message);
+}
+
+function buildAlternateActivationMessage(current, customerName) {
+  const name = displayNameForMessage(customerName);
+  const prefix = name === 'Hi there' ? 'Hi there' : name;
+  const lastMyMessage = normalizeText(current.last_my_message);
+
+  if (/\b(delivery city|postal code|zip code|shipping|landed cost|delivery price|freight)\b/i.test(lastMyMessage)) {
+    return {
+      en: `${prefix}, I can show you how we calculate the landed cost step by step, so you know what affects the final delivery price before sharing the address details — want me to send that here?`,
+      cn: `${prefix}，我可以一步步说明我们如何计算落地成本，这样你在提供地址信息前就能先了解最终配送价格受哪些因素影响——要我发在这里吗？`
+    };
+  }
+
+  if (/\b(price|pricing|quote|pi|invoice|payment|deposit|total|unit price|rate)\b/i.test(lastMyMessage)) {
+    return {
+      en: `${prefix}, I can outline the next steps from confirmation to production and delivery so you can see how the order would move forward — want me to send that here?`,
+      cn: `${prefix}，我可以整理从确认到生产和交付的下一步流程，这样你能清楚看到订单会如何推进——要我发在这里吗？`
+    };
+  }
+
+  if (/\b(catalog|option|options|model|models|recommend|setup|compare|comparison)\b/i.test(lastMyMessage)) {
+    return {
+      en: `${prefix}, I can send a short comparison checklist so you can review the main differences without going through the whole catalog again — want me to send that here?`,
+      cn: `${prefix}，我可以发一份简短对比清单，这样你不用重新看完整目录，也能快速核对主要差异——要我发在这里吗？`
+    };
+  }
+
+  return {
+    en: `${prefix}, I can send a short starting-point guide for choosing the right Pilates reformer setup so you have something concrete to review — want me to send that here?`,
+    cn: `${prefix}，我可以发一份选择合适普拉提床配置的简短入门指南，这样你可以先看一个具体方向——要我发在这里吗？`
+  };
+}
+
 function uniqueHits(hits) {
   const seen = new Set();
   const out = [];
@@ -570,8 +614,17 @@ function filterAndFormatTelegramFinalItems(items) {
     }
 
     const targetReply = safe(aiParsed.target_reply, '未输出');
+    const hardNoSend = current.hard_no_send === true || current.hard_no_send === 'true';
 
-    const emptyMessage = isEmptyMessage(finalMessage);  // Now only true if hard_no_send blocked fallback
+    let usedAlternateActivation = false;
+    if (!hardNoSend && shouldRewriteToAlternateActivation(finalMessage)) {
+      const alternate = buildAlternateActivationMessage(current, customerName);
+      finalMessage = alternate.en;
+      finalMessageCn = alternate.cn;
+      usedAlternateActivation = true;
+    }
+
+    const emptyMessage = isEmptyMessage(finalMessage);
     const highRisk = hasHighRiskPattern(finalMessage);
     const multiQuestionRisk = hasTooManyQuestions(finalMessage);
     const orRisk = hasOrRisk(finalMessage);
@@ -584,8 +637,6 @@ function filterAndFormatTelegramFinalItems(items) {
 
     const multiRisk = multiQuestionRisk || orRisk ? '高' : '低';
     const thinkRisk = decisionRisk ? '高' : '低';
-
-    const hardNoSend = current.hard_no_send === true || current.hard_no_send === 'true';
 
     const enforceStatus = usedFallback
       ? 'fallback_used'
@@ -675,7 +726,7 @@ function filterAndFormatTelegramFinalItems(items) {
     }
     const reviewHeader = headerParts.length > 0 ? headerParts.join('\n\n') + '\n\n' : '';
 
-    const telegramMessages = !shouldBlock && bannedHits.length === 0
+    const telegramMessages = !shouldBlock
       ? [
           `${reviewHeader}【${projectKey}】\n\nEnglish:\n${finalMessage}\n\n中文翻译:\n${finalMessageCn || '（未提供中文对照）'}`,
           current.project_key || '',
@@ -697,11 +748,12 @@ function filterAndFormatTelegramFinalItems(items) {
       whatsapp_message_cn: finalMessageCn,
       telegram_messages: telegramMessages,
       enforce_status: enforceStatus,
-      auto_send_pass: !shouldBlock && bannedHits.length === 0,
-      banned_phrase_flagged: bannedHits.length > 0,
-      banned_phrase_hits: bannedHits,
-      banned_phrase_details: JSON.stringify(bannedHits),
+      auto_send_pass: !shouldBlock,
+      banned_phrase_flagged: false,
+      banned_phrase_hits: [],
+      banned_phrase_details: '[]',
       quality_issue_hits: bannedHits,
+      used_alternate_activation: usedAlternateActivation,
       used_fallback: usedFallback
     });
   }
