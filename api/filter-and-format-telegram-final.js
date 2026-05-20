@@ -360,27 +360,6 @@ function detectRepeatQualityHits(message, current, usedFallback) {
     hits.push({ name: 'generic_studio_setup_fallback', matched: 'most popular studio setup options' });
   }
 
-  if (
-    doNotRepeat.includes('repeat_selection_help') &&
-    /\b(option|options|setup|model|models|recommend|suitable|fit)\b/i.test(message)
-  ) {
-    hits.push({ name: 'repeat_selection_help', matched: 'selection/options angle already used' });
-  }
-
-  if (
-    doNotRepeat.includes('repeat_model_recommendation') &&
-    /\b(model|models|reformer|reformers|recommend|options)\b/i.test(message)
-  ) {
-    hits.push({ name: 'repeat_model_recommendation', matched: 'model recommendation angle already used' });
-  }
-
-  if (
-    doNotRepeat.includes('repeat_price_push') &&
-    /\b(price|pricing|cost|quote|rate|total|landed)\b/i.test(message)
-  ) {
-    hits.push({ name: 'repeat_price_push', matched: 'price/quote angle already used' });
-  }
-
   if (doNotRepeat.includes('repeat_same_question')) {
     const alreadyAsked = getAlreadyAskedQuestions(current);
     const candidateQuestion = (String(message).match(/[^?？.!。！]*[?？]/g) || []).join(' ');
@@ -681,7 +660,6 @@ function filterAndFormatTelegramFinalItems(items) {
       ...detectBannedPhrases(finalMessage),
       ...(highRisk ? [{ name: 'high_risk_pattern', matched: 'high-risk or banned follow-up pattern' }] : []),
       ...(genericRisk ? [{ name: 'generic_expression', matched: 'generic expression' }] : []),
-      ...(weakAnchorRisk ? [{ name: 'weak_anchor', matched: 'no concrete product/order/logistics anchor' }] : []),
       ...repeatQualityHits
     ];
     const bannedHits = uniqueHits(deterministicQualityHits);

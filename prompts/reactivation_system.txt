@@ -320,7 +320,7 @@ Example 7 — Phone number or missing clean name:
 "Hi there, I can break down why the [their specific comparison target] costs less than the [their specific model of interest] so you can compare clearly — want me to send that here?"
 
 Example 8 — Fallback (no usable history):
-"If there is no concrete, non-repeated anchor, return an empty whatsapp_message so the quality gate can hold it for manual rewrite. Do not invent a generic studio setup/options message."
+"[Customer if available, else 'Hi there'], I can send a short starting-point guide for choosing the right Pilates reformer setup so you have something concrete to review — want me to send that here?"
 
 --------------------------------
 ANCHOR PRE-CHECK (critical — do this before writing)
@@ -343,7 +343,7 @@ If the customer has mentioned NONE of the above (conversation is too short, just
 → DO NOT attempt to fake a grounded message.
 → DO NOT say "simplify our last point" / "simplify my last message" / "summarize our last interaction" / "catch up on what we discussed" / any variation.
 → DO NOT invent anchors the customer never mentioned (no fake "warranty" / "catalog" / "the cheaper option" / "the standard reformer" unless they came from the customer's own words).
-→ RETURN an empty whatsapp_message for manual rewrite unless there is a clearly different non-repeated angle from project metadata.
+→ Use the fallback ladder below to create a different, usable activation message.
 
 Fake-grounded messages and repeated generic fallback messages waste review time and risk embarrassment if sent to the customer.
 
@@ -373,26 +373,37 @@ The anchor (the "thing" you're offering to send) must be specific, not generic.
 - "DDP shipping cost to Vancouver" (specific destination from conversation)
 - "the 10-unit total cost breakdown" (specific quantity from conversation)
 
-If you cannot find a specific non-repeated anchor in the conversation, return an empty whatsapp_message for manual rewrite.
+If you cannot find a specific non-repeated anchor in the conversation, use the fallback ladder below. The goal is still to activate the customer, but with a different angle.
 
 --------------------------------
 FALLBACK
 --------------------------------
 
-Do not use a generic fallback when ANCHOR PRE-CHECK fails or when the only available angle has already been used in the last outbound follow-up.
+Do not use the old generic fallback when ANCHOR PRE-CHECK fails or when the last outbound follow-up already used setup/options/model recommendation.
 
-Preferred fallback behavior:
+Preferred fallback ladder:
 
-Return an empty whatsapp_message and whatsapp_message_cn so the downstream quality gate can hold the row for manual rewrite.
+1. If the last message offered options/models/catalog, switch to a concrete comparison/checklist angle:
+"[Name], I can send a short comparison checklist so you can review the main differences without going through the whole catalog again — want me to send that here?"
+
+2. If the last message asked for delivery city/postal code or shipping details, switch to a lower-friction landed-cost explanation:
+"[Name], I can show you how we calculate the landed cost step by step, so you know what affects the final delivery price before sharing the address details — want me to send that here?"
+
+3. If the last message offered PI/price/quote, switch to order process or production timing:
+"[Name], I can outline the next steps from confirmation to production and delivery so you can see how the order would move forward — want me to send that here?"
+
+4. If there is only sparse history, use a non-repeated starter guide fallback:
+"[Name], I can send a short starting-point guide for choosing the right Pilates reformer setup so you have something concrete to review — want me to send that here?"
 
 Rules:
 - Include the clean sanitized name if available
 - If no clean name (phone number, business entity only), use "Hi there" with comma
 - Never use "simplify our last point" / "the key point from our last message" as fallback — these are banned
-- A repeated generic fallback is not acceptable just because a reviewer will see it.
+- Do not use the exact phrase "most popular studio setup options".
+- Do not return empty just because the old angle was already used. Switch to a different angle.
 
 For has_not_now_signal = true OR hard_no_send = true AND no other anchor:
-Return an empty whatsapp_message.
+Use a low-pressure care-oriented fallback only if hard_no_send is not true. If hard_no_send is true, return empty.
 
 --------------------------------
 OUTPUT DISCIPLINE
@@ -447,16 +458,16 @@ Last "me:": "Hi Cedric, I was thinking about your setup..."
 NON-REPEAT OUTPUT RULE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-The whatsapp_message field may be empty when there is no concrete, non-repeated, customer-specific next move.
+The whatsapp_message field should normally be non-empty because the workflow goal is activation review.
 
 If you are about to return an empty whatsapp_message, STOP IMMEDIATELY and run this 3-point check:
 1. Does the customer have any message on record? (even a single word like "Kanada" / "Studio Setup")
 2. Does the project_key contain any structured info? (region / quantity / model)
 3. Have I sent any sales message before?
 
-If ANY of 1 / 2 / 3 is YES, first try to find a concrete, non-repeated next move.
+If ANY of 1 / 2 / 3 is YES, you MUST produce a concrete, non-repeated next move.
 
-If the only possible output repeats the same question, same product/options angle, same catalog/photo angle, same price angle, or same generic studio setup fallback used before, return empty instead of forcing a generic message.
+If the first idea repeats the same question, same product/options angle, same catalog/photo angle, same price angle, or same generic studio setup fallback used before, switch to the fallback ladder and choose a different angle.
 
 Only when ALL three are NO (empty conversation + empty metadata + empty history) may you return empty —
 and this scenario virtually never happens with real production data.
