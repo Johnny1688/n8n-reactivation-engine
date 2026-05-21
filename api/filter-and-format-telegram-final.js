@@ -472,6 +472,28 @@ function synthesizeChineseReference(message) {
   return `${cnName}我可以把这一步需要看的重点内容整理出来，方便你快速确认是否继续推进——要我发在这里吗？`;
 }
 
+function sanitizeCustomerGreeting(message, current, fallbackName) {
+  if (!has(message)) return message;
+  const text = String(message).trim();
+  const commaIndex = text.indexOf(',');
+  if (commaIndex < 0 || commaIndex > 80) return text;
+
+  const greeting = text.slice(0, commaIndex).trim();
+  const rest = text.slice(commaIndex + 1).trimStart();
+  if (!greeting || !rest) return text;
+
+  const hasDirtyGreeting =
+    /[\u4e00-\u9fff]/.test(greeting) ||
+    /\d+台/.test(greeting) ||
+    /\b(?:ar|mr|or|fr|mg|pr|pc|bs)\d{3}\b/i.test(greeting) ||
+    /^\+?\d[\d\s().-]*$/.test(greeting);
+
+  if (!hasDirtyGreeting) return text;
+
+  const cleanName = displayNameForMessage(current, fallbackName);
+  return `${cleanName}, ${rest}`;
+}
+
 function uniqueHits(hits) {
   const seen = new Set();
   const out = [];
@@ -676,6 +698,8 @@ function filterAndFormatTelegramFinalItems(items) {
       finalMessageCn = alternate.cn;
       usedAlternateActivation = true;
     }
+
+    finalMessage = sanitizeCustomerGreeting(finalMessage, current, customerName);
 
     if (!has(finalMessageCn)) {
       finalMessageCn = synthesizeChineseReference(finalMessage);
