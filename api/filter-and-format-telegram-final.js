@@ -375,10 +375,32 @@ function detectRepeatQualityHits(message, current, usedFallback) {
   return hits;
 }
 
-function displayNameForMessage(customerName) {
-  const name = customerName && customerName !== '未命名客户'
-    ? String(customerName).split(/[（(\s]/)[0].trim()
-    : '';
+function cleanDisplayName(raw) {
+  if (!raw) return '';
+  const value = String(raw).trim();
+  if (!value || value === '未命名客户' || /^\+?\d[\d\s().-]*$/.test(value)) return '';
+
+  const cleaned = value
+    .replace(/\b(?:ar|mr|or|fr|mg|pr|pc|bs)\d{3}\b/gi, ' ')
+    .replace(/\d+台/g, ' ')
+    .replace(/[\u4e00-\u9fff]+/g, ' ')
+    .replace(/[（()）]+/g, ' ')
+    .replace(/\d{1,4}[\.\-\/]\d{1,2}[\.\-\/]?\d{0,2}日?/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const match = cleaned.match(/[A-Za-z][A-Za-z.'-]*/);
+  return match ? match[0] : '';
+}
+
+function displayNameForMessage(current, fallbackName) {
+  const name = cleanDisplayName(
+    current.customer_name_for_ai ||
+    current.customer_name_clean ||
+    fallbackName ||
+    current.customer_name ||
+    current.project_key
+  );
   return name || 'Hi there';
 }
 
@@ -388,7 +410,7 @@ function shouldRewriteToAlternateActivation(message) {
 }
 
 function buildAlternateActivationMessage(current, customerName) {
-  const name = displayNameForMessage(customerName);
+  const name = displayNameForMessage(current, customerName);
   const prefix = name === 'Hi there' ? 'Hi there' : name;
   const lastMyMessage = normalizeText(current.last_my_message);
 
@@ -417,6 +439,37 @@ function buildAlternateActivationMessage(current, customerName) {
     en: `${prefix}, I can send a short starting-point guide for choosing the right Pilates reformer setup so you have something concrete to review — want me to send that here?`,
     cn: `${prefix}，我可以发一份选择合适普拉提床配置的简短入门指南，这样你可以先看一个具体方向——要我发在这里吗？`
   };
+}
+
+function synthesizeChineseReference(message) {
+  if (!has(message)) return '';
+  const text = String(message).trim();
+  const nameMatch = text.match(/^([^,]+),\s+/);
+  const name = nameMatch ? nameMatch[1].trim() : '';
+  const cnName = name && name !== 'Hi there' ? `${name}，` : '';
+
+  const orderMatch = text.match(/put together the unit pricing and delivery timeline for your (.+?) so you can plan the resale rollout/i);
+  if (orderMatch) {
+    return `${cnName}我可以整理你这笔 ${orderMatch[1].trim()} 的单价和交付时间线，这样你可以规划后续转售推进——要我发在这里吗？`;
+  }
+
+  if (/outline the next steps from confirmation to production and delivery/i.test(text)) {
+    return `${cnName}我可以整理从确认到生产和交付的下一步流程，这样你能清楚看到订单会如何推进——要我发在这里吗？`;
+  }
+
+  if (/short comparison checklist/i.test(text)) {
+    return `${cnName}我可以发一份简短对比清单，这样你不用重新看完整目录，也能快速核对主要差异——要我发在这里吗？`;
+  }
+
+  if (/calculate the landed cost step by step/i.test(text)) {
+    return `${cnName}我可以一步步说明我们如何计算落地成本，这样你在提供地址信息前就能先了解最终配送价格受哪些因素影响——要我发在这里吗？`;
+  }
+
+  if (/starting-point guide for choosing the right Pilates reformer setup/i.test(text)) {
+    return `${cnName}我可以发一份选择合适普拉提床配置的简短入门指南，这样你可以先看一个具体方向——要我发在这里吗？`;
+  }
+
+  return `${cnName}我可以把这一步需要看的重点内容整理出来，方便你快速确认是否继续推进——要我发在这里吗？`;
 }
 
 function uniqueHits(hits) {
@@ -622,6 +675,10 @@ function filterAndFormatTelegramFinalItems(items) {
       finalMessage = alternate.en;
       finalMessageCn = alternate.cn;
       usedAlternateActivation = true;
+    }
+
+    if (!has(finalMessageCn)) {
+      finalMessageCn = synthesizeChineseReference(finalMessage);
     }
 
     const emptyMessage = isEmptyMessage(finalMessage);
