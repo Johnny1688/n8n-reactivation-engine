@@ -469,7 +469,19 @@ function synthesizeChineseReference(message) {
     return `${cnName}我可以发一份选择合适普拉提床配置的简短入门指南，这样你可以先看一个具体方向——要我发在这里吗？`;
   }
 
-  return `${cnName}我可以把这一步需要看的重点内容整理出来，方便你快速确认是否继续推进——要我发在这里吗？`;
+  if (/shipping and setup works for the Philippines/i.test(text) || /from delivery to assembly/i.test(text)) {
+    return `${cnName}我可以简单说明发货和安装/组装在菲律宾这边是怎么进行的，这样你可以清楚了解从送达到组装具体涉及哪些内容——要我发在这里吗？`;
+  }
+
+  return '';
+}
+
+function hasIncompleteChineseReference(value) {
+  if (!has(value)) return true;
+  const text = String(value).trim();
+  if (text.includes('未提供中文对照')) return true;
+  if (text.includes('相关选项') || text.includes('这一步需要看的重点内容')) return true;
+  return !/[\u4e00-\u9fff]/.test(text);
 }
 
 function sanitizeCustomerGreeting(message, current, fallbackName) {
@@ -701,7 +713,7 @@ function filterAndFormatTelegramFinalItems(items) {
 
     finalMessage = sanitizeCustomerGreeting(finalMessage, current, customerName);
 
-    if (!has(finalMessageCn)) {
+    if (hasIncompleteChineseReference(finalMessageCn)) {
       finalMessageCn = synthesizeChineseReference(finalMessage);
     }
 
@@ -714,7 +726,8 @@ function filterAndFormatTelegramFinalItems(items) {
     const weakAnchorRisk = hasWeakAnchorRisk(finalMessage);
     const repeatQualityHits = detectRepeatQualityHits(finalMessage, current, usedFallback);
 
-    const shouldBlock = emptyMessage;
+    const missingChineseReference = hasIncompleteChineseReference(finalMessageCn);
+    const shouldBlock = emptyMessage || missingChineseReference;
 
     const multiRisk = multiQuestionRisk || orRisk ? '高' : '低';
     const thinkRisk = decisionRisk ? '高' : '低';
@@ -780,6 +793,7 @@ function filterAndFormatTelegramFinalItems(items) {
       `泛化表达拦截：${genericRisk ? '是' : '否'}`,
       `弱锚点拦截：${weakAnchorRisk ? '是' : '否'}`,
       `重复角度拦截：${repeatQualityHits.length > 0 ? '是' : '否'}`,
+      `完整中文翻译缺失：${missingChineseReference ? '是' : '否'}`,
       '',
       '建议跟进话术（最终英文）：',
       finalMessage ? `✅ ${finalMessage}` : '⛔ 空消息，不发送',
@@ -802,6 +816,8 @@ function filterAndFormatTelegramFinalItems(items) {
     }
     if (bannedHits.length > 0) {
       headerParts.push(`⚠️ BANNED_PHRASE_DETECTED ⚠️\nMatched: "${bannedHits.map(h => h.matched).join('" / "')}"\n请在 Telegram 审核时手动改写后再发送。`);
+    } else if (missingChineseReference) {
+      headerParts.push('⛔ MISSING_COMPLETE_CN_TRANSLATION ⛔\n缺少完整中文翻译，不能进入正常 Telegram 发送。请先让上游 AI/API 输出 whatsapp_message_cn。');
     } else if (usedFallback) {
       headerParts.push('🔄 FALLBACK 通用破冰模板\nAI 没有足够上下文，使用了通用模板。建议根据客户情况手动改写后再发送。');
     }
@@ -834,6 +850,7 @@ function filterAndFormatTelegramFinalItems(items) {
       banned_phrase_hits: [],
       banned_phrase_details: '[]',
       quality_issue_hits: bannedHits,
+      missing_chinese_reference: missingChineseReference,
       used_alternate_activation: usedAlternateActivation,
       used_fallback: usedFallback
     });

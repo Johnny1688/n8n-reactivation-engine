@@ -49,5 +49,6 @@ OUTPUT
 
 Return ONLY:
 {
-  "whatsapp_message": ""
+  "whatsapp_message": "",
+  "whatsapp_message_cn": ""
 }
