@@ -219,6 +219,10 @@ function buildFinalQualityUserPrompt(json) {
     '2) Validate the candidate message against the real conversation, customer context, and payload.',
     '3) If invalid but sendable → REWRITE using the strongest anchor from real history.',
     '4) The final message must be grounded in the real conversation and must not be generic.',
+    '5) Always provide whatsapp_message_cn as a FULL Chinese translation of whatsapp_message.',
+    '   Translate all specific details from the English message, including names, locations, prices, quantities, model codes, and delivery/setup details.',
+    '   Keep product/model names in English, but translate the conversational sentence completely.',
+    '   Do not summarize, loosely paraphrase, or use a generic Chinese template.',
     '',
     '--------------------------------',
     'OUTPUT',
@@ -227,7 +231,8 @@ function buildFinalQualityUserPrompt(json) {
     'Return ONLY:',
     '',
     '{',
-    '  "whatsapp_message": "FINAL MESSAGE OR EMPTY STRING"',
+    '  "whatsapp_message": "FINAL MESSAGE OR EMPTY STRING",',
+    '  "whatsapp_message_cn": "完整中文翻译，必须逐句覆盖英文里的具体信息"',
     '}'
   ].join('\n');
 }
