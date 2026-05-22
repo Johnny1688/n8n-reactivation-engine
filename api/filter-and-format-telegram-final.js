@@ -727,7 +727,7 @@ function filterAndFormatTelegramFinalItems(items) {
     const repeatQualityHits = detectRepeatQualityHits(finalMessage, current, usedFallback);
 
     const missingChineseReference = hasIncompleteChineseReference(finalMessageCn);
-    const shouldBlock = emptyMessage || missingChineseReference;
+    const shouldBlock = emptyMessage;
 
     const multiRisk = multiQuestionRisk || orRisk ? '高' : '低';
     const thinkRisk = decisionRisk ? '高' : '低';
@@ -817,7 +817,7 @@ function filterAndFormatTelegramFinalItems(items) {
     if (bannedHits.length > 0) {
       headerParts.push(`⚠️ BANNED_PHRASE_DETECTED ⚠️\nMatched: "${bannedHits.map(h => h.matched).join('" / "')}"\n请在 Telegram 审核时手动改写后再发送。`);
     } else if (missingChineseReference) {
-      headerParts.push('⛔ MISSING_COMPLETE_CN_TRANSLATION ⛔\n缺少完整中文翻译，不能进入正常 Telegram 发送。请先让上游 AI/API 输出 whatsapp_message_cn。');
+      headerParts.push('⚠️ MISSING_COMPLETE_CN_TRANSLATION ⚠️\n缺少完整中文翻译；英文客户可复制文案仍保留，避免浪费本次 AI 结果。发送客户前请先人工核对/补中文。');
     } else if (usedFallback) {
       headerParts.push('🔄 FALLBACK 通用破冰模板\nAI 没有足够上下文，使用了通用模板。建议根据客户情况手动改写后再发送。');
     }
