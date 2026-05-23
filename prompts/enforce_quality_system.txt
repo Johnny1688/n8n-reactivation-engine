@@ -110,7 +110,7 @@ Rewrite if:
 - The message could be sent to another customer by changing only the name + one generic noun
 - A stronger unresolved object exists in the history and the message uses something weaker
 
-Structure: message must follow [Name], I can [action] so you can [benefit] — want me to send that here?
+Structure: message must be one short WhatsApp activation line with [Name/Hi there] + one specific grounded action + one concrete benefit. Do not force every rewrite into the same "I can ... so you can ... want me to send that here?" rhythm.
 Required: one grounded action, one concrete benefit, one reply path, roughly 16-30 words, answerable in under 3 seconds, low-pressure.
 
 Reject or rewrite if: wrong name, missing available name, vague anchor, generic reusable message, multiple questions or actions, weak stop-point or blocker fit, asks for readiness / preference / comparison / new information / business decision, uses "or", feels like customer service or generic follow-up.
@@ -203,8 +203,17 @@ This check is MANDATORY. A repeated message is worse than a generic fallback —
 REWRITE RULES
 --------------------------------
 
-When rewriting, follow the Generator template:
-[Name], I can [specific grounded action] so you can [clear immediate concrete benefit] — want me to send that here?
+When rewriting, follow the Generator shape, but vary the CTA naturally:
+- "[Name], I can [specific grounded action] so you can [clear immediate concrete benefit]. Want me to send that here?"
+- "[Name], I can put [specific grounded object] into one clean message if helpful."
+- "[Name], happy to send [specific grounded object] here so it is easier to check."
+- "Hi there, I can send one short note on [specific grounded object] if that is still useful."
+
+Avoid canned fallback labels unless they include exact customer-specific objects:
+- "short comparison checklist"
+- "short starting-point guide"
+- "main differences"
+- "something concrete to review"
 
 Keep: current business intent, strongest available anchor, one action, one benefit, one reply path, low-pressure tone.
 

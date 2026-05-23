@@ -223,9 +223,17 @@ Build the message from:
 
 [current customer name] + [specific grounded action] + [clear immediate benefit] + [single yes/no reply path]
 
-Preferred structure:
+Preferred shape:
 
-[Name], I can [specific grounded action] so you can [clear immediate benefit] — want me to send that here?
+Use natural WhatsApp language, not a fixed template. Vary the CTA.
+
+Allowed CTA styles:
+- "[Name], I can [specific grounded action] so you can [clear immediate benefit]. Want me to send that here?"
+- "[Name], I can [specific grounded action]. That should make [specific benefit] easier to review."
+- "[Name], I can put [specific grounded object] into one clean message if helpful."
+- "[Name], happy to send [specific grounded object] here so it is easier to check."
+
+Do NOT make every message use the same "I can ... so you can ... — want me to send that here?" rhythm.
 
 Hard rules:
 - one WhatsApp message only
@@ -383,23 +391,24 @@ Do not use the old generic fallback when ANCHOR PRE-CHECK fails or when the last
 
 Preferred fallback ladder:
 
-1. If the last message offered options/models/catalog, switch to a concrete comparison/checklist angle:
-"[Name], I can send a short comparison checklist so you can review the main differences without going through the whole catalog again — want me to send that here?"
+1. If the last message offered options/models/catalog, switch to a concrete side-by-side note using exact models, quantity, use-case, or market from the conversation.
+Good shape: "[Name], I can pull AR003 and AR011 into one side-by-side note for your 5–10 unit gym setup, so the tradeoffs are easier to scan."
 
-2. If the last message asked for delivery city/postal code or shipping details, switch to a lower-friction landed-cost explanation:
-"[Name], I can show you how we calculate the landed cost step by step, so you know what affects the final delivery price before sharing the address details — want me to send that here?"
+2. If the last message asked for delivery city/postal code or shipping details, switch to a lower-friction landed-cost explanation using the exact model, quantity, or destination already known.
+Good shape: "[Name], I can lay out what affects DDP shipping for the 6 PR007 units before we update the final landed number."
 
-3. If the last message offered PI/price/quote, switch to order process or production timing:
-"[Name], I can outline the next steps from confirmation to production and delivery so you can see how the order would move forward — want me to send that here?"
+3. If the last message offered PI/price/quote, switch to a concrete recap with production / delivery timing and the exact known price or model.
+Good shape: "[Name], I can put the PR012 photos, $1,821 unit price, and Dundalk DDP shipping into one recap so everything is easy to check."
 
-4. If there is only sparse history, use a non-repeated starter guide fallback:
-"[Name], I can send a short starting-point guide for choosing the right Pilates reformer setup so you have something concrete to review — want me to send that here?"
+4. If there is only sparse history, use a light first-step note, but make it sound human and avoid canned labels.
+Good shape: "Hi there, I can send one short note on the usual first step for choosing a studio Reformer setup if that is still useful."
 
 Rules:
 - Include the clean sanitized name if available
 - If no clean name (phone number, business entity only), use "Hi there" with comma
 - Never use "simplify our last point" / "the key point from our last message" as fallback — these are banned
 - Do not use the exact phrase "most popular studio setup options".
+- Do not use these canned fallback labels unless they are followed by exact customer-specific objects: "short comparison checklist", "short starting-point guide", "main differences", "something concrete to review".
 - Do not return empty just because the old angle was already used. Switch to a different angle.
 
 For has_not_now_signal = true OR hard_no_send = true AND no other anchor:

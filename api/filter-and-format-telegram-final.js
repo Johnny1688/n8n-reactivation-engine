@@ -378,7 +378,13 @@ function detectRepeatQualityHits(message, current, usedFallback) {
 function cleanDisplayName(raw) {
   if (!raw) return '';
   const value = String(raw).trim();
-  if (!value || value === '未命名客户' || /^\+?\d[\d\s().-]*$/.test(value)) return '';
+  if (
+    !value ||
+    value === '未命名客户' ||
+    /^hi\s+there$/i.test(value) ||
+    /^there$/i.test(value) ||
+    /^\+?\d[\d\s().-]*$/.test(value)
+  ) return '';
 
   const cleaned = value
     .replace(/\b(?:ar|mr|or|fr|mg|pr|pc|bs)\d{3}\b/gi, ' ')
@@ -406,38 +412,161 @@ function displayNameForMessage(current, fallbackName) {
 
 function shouldRewriteToAlternateActivation(message) {
   if (!has(message)) return true;
-  return /most popular studio setup options|studio setup options|good fit/i.test(message);
+  return /most popular studio setup options|studio setup options|good fit|short comparison checklist|main differences without going through the whole catalog|short starting-point guide|something concrete to review|next steps from confirmation to production and delivery|calculate the landed cost step by step/i.test(message);
+}
+
+function textFromMessages(messages) {
+  if (!Array.isArray(messages)) return '';
+  return messages
+    .map(message => {
+      if (!message || typeof message !== 'object') return '';
+      return message.message || message.text || '';
+    })
+    .filter(value => has(value))
+    .join(' ');
+}
+
+function contextText(current) {
+  return [
+    current.last_customer_message,
+    current.last_my_message,
+    current.recent_conversation,
+    current.cleaned_full_conversation,
+    current.conversation_core,
+    current.timeline_summary,
+    current.dated_history_summary,
+    textFromMessages(current.messages),
+    textFromMessages(current.recent_messages)
+  ].filter(value => has(value)).join(' ');
+}
+
+function uniqueMatches(text, regex, limit = 3) {
+  const matches = [];
+  const seen = new Set();
+  const source = String(text || '');
+  let match;
+  while ((match = regex.exec(source)) !== null) {
+    const value = (match[1] || match[0] || '').trim();
+    const key = value.toLowerCase();
+    if (value && !seen.has(key)) {
+      seen.add(key);
+      matches.push(value);
+    }
+    if (matches.length >= limit) break;
+  }
+  return matches;
+}
+
+function extractContextSignals(current) {
+  const fullText = contextText(current);
+  const lastMy = String(current.last_my_message || '');
+  const lastCustomer = String(current.last_customer_message || '');
+  const priorityText = [lastCustomer, lastMy, fullText].filter(value => has(value)).join(' ');
+
+  return {
+    text: fullText,
+    lastMy,
+    lastCustomer,
+    models: uniqueMatches(priorityText, /\b(?:AR|MR|OR|FR|MG|PR|PC|BS)\d{3}\b/gi, 4),
+    prices: uniqueMatches(priorityText, /(?:USD\s*)?\$[\d,]+(?:\.\d+)?|\bUSD\s*[\d,]+(?:\.\d+)?/gi, 4),
+    quantities: uniqueMatches(priorityText, /\b\d+\s*[–-]\s*\d+\s*(?:units?|pcs?|pieces?|reformers?|towers?)\b|\b\d+\s*(?:units?|pcs?|pieces?|reformers?|towers?)\b/gi, 3),
+    zips: uniqueMatches(priorityText, /\b[A-Z]\d[A-Z]\s?\d[A-Z]\d\b|\b\d{5}(?:-\d{4})?\b/gi, 2),
+    countries: uniqueMatches(priorityText, /\b(?:Philippines|Canada|USA|US|Australia|New Zealand|Sri Lanka)\b/gi, 2)
+  };
+}
+
+function joinHumanList(values, fallback) {
+  const arr = (values || []).filter(value => has(value));
+  if (!arr.length) return fallback;
+  if (arr.length === 1) return arr[0];
+  if (arr.length === 2) return `${arr[0]} and ${arr[1]}`;
+  return `${arr.slice(0, -1).join(', ')}, and ${arr[arr.length - 1]}`;
+}
+
+function objectFromSignals(signals, fallback = 'Reformer setup') {
+  const modelPart = joinHumanList(signals.models, '');
+  const quantityPart = joinHumanList(signals.quantities, '');
+  if (modelPart && quantityPart) {
+    const compactQuantity = quantityPart.replace(/\s+units?\b/i, '-unit');
+    return `${compactQuantity} ${modelPart} setup`;
+  }
+  if (modelPart) return modelPart;
+  if (quantityPart) return `${quantityPart} Reformer setup`;
+  return fallback;
+}
+
+function objectForChinese(object) {
+  if (!has(object)) return 'Reformer 配置';
+  if (object === 'the models we discussed') return '之前讨论的型号';
+  return object;
+}
+
+function placeForSentence(place) {
+  if (!has(place)) return 'your delivery area';
+  if (/^(Philippines|USA|US|United States|UK|UAE)$/i.test(place)) return `the ${place}`;
+  return place;
+}
+
+function withHumanCta(prefix, body) {
+  return `${prefix}, ${body}`;
 }
 
 function buildAlternateActivationMessage(current, customerName) {
   const name = displayNameForMessage(current, customerName);
   const prefix = name === 'Hi there' ? 'Hi there' : name;
   const lastMyMessage = normalizeText(current.last_my_message);
+  const lastCustomerMessage = normalizeText(current.last_customer_message);
+  const signals = extractContextSignals(current);
+  const object = objectFromSignals(signals);
+  const prices = joinHumanList(signals.prices, '');
+  const country = joinHumanList(signals.countries, '');
+  const zip = joinHumanList(signals.zips, '');
+  const cnObject = objectForChinese(object);
+
+  if (current.hard_no_send === true || current.hard_no_send === 'true' || current.has_not_now_signal === true || current.has_not_now_signal === 'true') {
+    const timing = /expansion|ready|overseas|trip|will reach out|let you know/i.test(signals.text)
+      ? 'when your expansion timing is clearer'
+      : 'when the timing is better on your side';
+    return {
+      en: withHumanCta(prefix, `I can keep the ${object} notes in one short recap for later, so they are easy to pick up ${timing}.`),
+      cn: `${prefix}，我可以先把 ${cnObject} 的要点整理成一条简短记录留着，这样等${timing === 'when your expansion timing is clearer' ? '你的扩张时间更明确时' : '你那边时间更合适时'}可以很容易接着看。`
+    };
+  }
+
+  if (/yes please|sure|ok|okay|thank/i.test(lastCustomerMessage) && /\b(photo|photos|video|videos)\b/i.test(lastMyMessage)) {
+    return {
+      en: withHumanCta(prefix, `I can pull the key ${object} frame and finish details from the photos into one quick note, so you do not need to replay every file.`),
+      cn: `${prefix}，我可以把照片里 ${cnObject} 的框架和做工重点整理成一条简短说明，这样你不用反复打开每个文件。`
+    };
+  }
 
   if (/\b(delivery city|postal code|zip code|shipping|landed cost|delivery price|freight)\b/i.test(lastMyMessage)) {
+    const place = placeForSentence(zip || country || 'your delivery area');
     return {
-      en: `${prefix}, I can show you how we calculate the landed cost step by step, so you know what affects the final delivery price before sharing the address details — want me to send that here?`,
-      cn: `${prefix}，我可以一步步说明我们如何计算落地成本，这样你在提供地址信息前就能先了解最终配送价格受哪些因素影响——要我发在这里吗？`
+      en: withHumanCta(prefix, `I can lay out what affects shipping the ${object} to ${place}, so the landed-cost part is clearer before we calculate the final number.`),
+      cn: `${prefix}，我可以先说明 ${cnObject} 发到 ${place} 时会影响落地成本的因素，这样在计算最终数字前，运费部分会更清楚。`
     };
   }
 
   if (/\b(price|pricing|quote|pi|invoice|payment|deposit|total|unit price|rate)\b/i.test(lastMyMessage)) {
+    const pricePart = prices ? ` with ${prices}` : '';
     return {
-      en: `${prefix}, I can outline the next steps from confirmation to production and delivery so you can see how the order would move forward — want me to send that here?`,
-      cn: `${prefix}，我可以整理从确认到生产和交付的下一步流程，这样你能清楚看到订单会如何推进——要我发在这里吗？`
+      en: withHumanCta(prefix, `I can put the ${object}${pricePart} into a clean recap with production and delivery timing, so the next step is easier to review.`),
+      cn: `${prefix}，我可以把 ${cnObject}${pricePart ? ` 和 ${prices}` : ''} 整理成一条清楚的记录，并带上生产和交付时间，这样下一步更容易核对。`
     };
   }
 
   if (/\b(catalog|option|options|model|models|recommend|setup|compare|comparison)\b/i.test(lastMyMessage)) {
+    const modelPart = joinHumanList(signals.models, 'the models we discussed');
     return {
-      en: `${prefix}, I can send a short comparison checklist so you can review the main differences without going through the whole catalog again — want me to send that here?`,
-      cn: `${prefix}，我可以发一份简短对比清单，这样你不用重新看完整目录，也能快速核对主要差异——要我发在这里吗？`
+      en: withHumanCta(prefix, `I can pull ${modelPart} into a side-by-side note with the practical differences, so you can scan it without reopening the whole catalog.`),
+      cn: `${prefix}，我可以把 ${objectForChinese(modelPart)} 整理成一条并排对比说明，重点放在实际差异上，这样你不用重新打开完整目录也能快速看。`
     };
   }
 
   return {
-    en: `${prefix}, I can send a short starting-point guide for choosing the right Pilates reformer setup so you have something concrete to review — want me to send that here?`,
-    cn: `${prefix}，我可以发一份选择合适普拉提床配置的简短入门指南，这样你可以先看一个具体方向——要我发在这里吗？`
+    en: withHumanCta(prefix, `I can put together a simple first-step note for ${object}, so you have a clearer place to restart the conversation if it is still relevant.`),
+    cn: `${prefix}，我可以先把 ${cnObject} 的第一步要点整理成一条简单说明，如果这个项目还相关，你就有一个更清楚的切入点。`
   };
 }
 
@@ -704,7 +833,8 @@ function filterAndFormatTelegramFinalItems(items) {
     const hardNoSend = current.hard_no_send === true || current.hard_no_send === 'true';
 
     let usedAlternateActivation = false;
-    if (!hardNoSend && shouldRewriteToAlternateActivation(finalMessage)) {
+    const hasNotNowSignal = current.has_not_now_signal === true || current.has_not_now_signal === 'true';
+    if (hardNoSend || hasNotNowSignal || shouldRewriteToAlternateActivation(finalMessage)) {
       const alternate = buildAlternateActivationMessage(current, customerName);
       finalMessage = alternate.en;
       finalMessageCn = alternate.cn;
