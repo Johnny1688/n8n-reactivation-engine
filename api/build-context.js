@@ -89,6 +89,101 @@ function detectProductCode(text) {
   return match ? match[0].toLowerCase() : '';
 }
 
+function isTruthy(value) {
+  if (value === true) return true;
+  if (typeof value === 'string') {
+    return ['true', 'yes', '1'].includes(value.trim().toLowerCase());
+  }
+  return false;
+}
+
+function isSendableState(sendState) {
+  return !['no_send', 'manual_context_required'].includes(safeString(sendState));
+}
+
+function hasUsableConversationSummary(result) {
+  const summary = result.conversation_summary;
+  if (summary == null) return false;
+
+  if (typeof summary === 'string') {
+    const trimmed = summary.trim();
+    return trimmed.length >= 40 && !['null', '{}', '[]'].includes(trimmed);
+  }
+
+  if (Array.isArray(summary)) return summary.length > 0;
+  if (typeof summary === 'object') return Object.keys(summary).length > 0;
+  return Boolean(summary);
+}
+
+function hasConcreteAnchorSignal(result, text) {
+  if (detectProductCode(text)) return true;
+  if (/\$\s*\d|\busd\s*\d|\b\d+\s*(?:units?|pcs|pieces|reformers?|machines?)\b/i.test(text)) return true;
+  if (/\b(?:catalog|brochure|pdf|photos?|pictures?|videos?|warranty|shipping|freight|delivery|ddp|invoice|pi|deposit|payment|quote|pricing|price|october|studio|distributor|dealer|reseller)\b/i.test(text)) return true;
+  if (hasAny(text, [
+    /\b[A-Z]\d[A-Z]\s?\d[A-Z]\d\b/i,
+    /\b\d{5}(?:-\d{4})?\b/,
+    /\b(?:canada|usa|united states|australia|new zealand|philippines|sri lanka|qatar|iraq|mexico)\b/i
+  ])) return true;
+  return false;
+}
+
+function hasVeryShortCustomerContext(result) {
+  const lastCustomer = safeString(result.last_customer_message);
+  const customerText = [result.customer_only_text, result.customer_recent_only_text]
+    .map(safeString)
+    .join(' ')
+    .trim();
+
+  return lastCustomer.length > 0 && lastCustomer.length < 20 && customerText.length < 80;
+}
+
+function hasMissingCustomerContext(result) {
+  const lastCustomer = safeString(result.last_customer_message);
+  const customerText = [result.customer_only_text, result.customer_recent_only_text]
+    .map(safeString)
+    .join(' ')
+    .trim();
+
+  return !lastCustomer && !customerText;
+}
+
+function hasWeakIdentity(result) {
+  const cleanName = cleanCustomerName(result.customer_name || result.project_key);
+  const rawName = safeString(result.customer_name || result.project_key);
+  if (!cleanName) return true;
+  if (/^\+?\d[\d\s().-]{6,}$/.test(rawName)) return true;
+  return /^(unknown|test|facebook|facebook business|meta|meta business)$/i.test(rawName);
+}
+
+function deriveManualContextHold(result, text) {
+  const reasons = [];
+  const concreteAnchor = hasConcreteAnchorSignal(result, text);
+
+  if (isTruthy(result.is_my_turn_to_reply)) {
+    reasons.push('my_turn_requires_manual_reply');
+  }
+  if (hasMissingCustomerContext(result)) {
+    reasons.push('missing_customer_context');
+  }
+  if (hasVeryShortCustomerContext(result) && !concreteAnchor) {
+    reasons.push('very_short_customer_context_without_anchor');
+  }
+  if (!hasUsableConversationSummary(result) && !concreteAnchor) {
+    reasons.push('missing_summary_without_concrete_anchor');
+  }
+  if (hasWeakIdentity(result) && !concreteAnchor) {
+    reasons.push('weak_identity_without_concrete_anchor');
+  }
+  if (
+    /quote|quoted|pricing|price|payment|deposit|invoice|pi/i.test(text) &&
+    !/\$\s*\d|\busd\s*\d|\b(?:invoice|pi|deposit|payment|quote|pricing|price)\b/i.test(text)
+  ) {
+    reasons.push('quote_payment_context_gap');
+  }
+
+  return reasons;
+}
+
 function deriveExecutionGuidance(result) {
   const text = buildContextText(result);
   const customerType = safeString(result.customer_last_message_type);
@@ -104,6 +199,19 @@ function deriveExecutionGuidance(result) {
       hardNoSend: true,
       primaryTrigger: 'no_send_not_now',
       triggerReason: 'explicit_not_now_or_do_not_push_signal'
+    };
+  }
+
+  const manualHoldReasons = deriveManualContextHold(result, text);
+  if (manualHoldReasons.length > 0) {
+    return {
+      anchorObject: 'manual_context_required',
+      allowedMicroTriggers: [],
+      sendState: 'manual_context_required',
+      hardNoSend: false,
+      manualHoldReasons,
+      primaryTrigger: 'manual_context_required',
+      triggerReason: manualHoldReasons.join(',')
     };
   }
 
@@ -334,7 +442,8 @@ function buildStopPoint(result, guidance) {
     anchor_object: guidance.anchorObject,
     allowed_micro_triggers: guidance.allowedMicroTriggers,
     send_state: guidance.sendState,
-    hard_no_send: guidance.hardNoSend
+    hard_no_send: guidance.hardNoSend,
+    manual_hold_reasons: guidance.manualHoldReasons || []
   };
 }
 
@@ -356,9 +465,10 @@ function buildDecisionBasis(result, guidance, forbiddenRepeatZone) {
     allowed_micro_triggers: guidance.allowedMicroTriggers,
     send_state: guidance.sendState,
     hard_no_send: guidance.hardNoSend,
+    manual_hold_reasons: guidance.manualHoldReasons || [],
     must_avoid: Array.isArray(forbiddenRepeatZone.do_not_repeat) ? forbiddenRepeatZone.do_not_repeat : [],
     // Legacy/debug compatibility only. Downstream execution should use send_state and hard_no_send.
-    should_follow_up_now: guidance.sendState !== 'no_send'
+    should_follow_up_now: isSendableState(guidance.sendState)
   };
 }
 
@@ -392,7 +502,8 @@ function buildReactivationPayload(result, guidance, stopPointAnalysis, forbidden
       anchor_object: guidance.anchorObject,
       allowed_micro_triggers: guidance.allowedMicroTriggers,
       send_state: guidance.sendState,
-      hard_no_send: guidance.hardNoSend
+      hard_no_send: guidance.hardNoSend,
+      manual_hold_reasons: guidance.manualHoldReasons || []
     },
     constraints: {
       ...existingConstraints,
@@ -411,8 +522,9 @@ function buildReactivationPayload(result, guidance, stopPointAnalysis, forbidden
       allowed_micro_triggers: guidance.allowedMicroTriggers,
       send_state: guidance.sendState,
       hard_no_send: guidance.hardNoSend,
+      manual_hold_reasons: guidance.manualHoldReasons || [],
       // Legacy/debug compatibility only. Downstream execution should use send_state and hard_no_send.
-      should_follow_up_now: guidance.sendState !== 'no_send'
+      should_follow_up_now: isSendableState(guidance.sendState)
     }
   };
 }
@@ -428,7 +540,8 @@ function buildReactivationV6Core(result, guidance, stopPointAnalysis, forbiddenR
     anchor_object: guidance.anchorObject,
     allowed_micro_triggers: guidance.allowedMicroTriggers,
     send_state: guidance.sendState,
-    hard_no_send: guidance.hardNoSend
+    hard_no_send: guidance.hardNoSend,
+    manual_hold_reasons: guidance.manualHoldReasons || []
   };
 }
 
@@ -461,6 +574,7 @@ function enhanceBuildContextResult(result) {
     primary_reply_anchor: guidance.anchorObject,
     anchor_object: guidance.anchorObject,
     allowed_micro_triggers: guidance.allowedMicroTriggers,
+    manual_hold_reasons: guidance.manualHoldReasons || [],
     send_state: guidance.sendState,
     hard_no_send: guidance.hardNoSend,
     stop_point_analysis: stopPointAnalysis,

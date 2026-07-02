@@ -18,6 +18,8 @@ Values are "true", "false", or "unknown".
 - has_not_now_signal: {{$json.has_not_now_signal}}
 - is_my_turn_to_reply: {{$json.is_my_turn_to_reply}}
 - should_reactivate_now: {{$json.should_reactivate_now}}
+- send_state: {{$json.send_state}}
+- manual_hold_reasons: {{ JSON.stringify($json.manual_hold_reasons || $json.reactivation_ai_payload?.decision?.manual_hold_reasons || []) }}
 
 --------------------------------
 ANCHOR
@@ -52,7 +54,7 @@ REACTIVATION AI PAYLOAD
 TASK
 --------------------------------
 
-1. If hard_no_send = true → return EMPTY.
+1. If hard_no_send = true, has_not_now_signal = true, is_my_turn_to_reply = true, send_state = "no_send", send_state = "manual_context_required", or manual_hold_reasons is non-empty → return EMPTY.
 2. Validate the candidate message against the real conversation, customer context, and payload.
 3. If invalid but sendable → REWRITE using the strongest anchor from real history.
 4. The final message must be grounded in the real conversation and must not be generic.

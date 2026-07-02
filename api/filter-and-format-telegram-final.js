@@ -33,6 +33,14 @@ function safe(v, d = '—') {
   return has(v) ? String(v).trim() : d;
 }
 
+function boolFlag(value) {
+  if (value === true) return true;
+  if (typeof value === 'string') {
+    return ['true', 'yes', '1'].includes(value.trim().toLowerCase());
+  }
+  return false;
+}
+
 function list(v) {
   if (Array.isArray(v)) return v.length ? v.join(', ') : 'unknown';
   if (typeof v === 'string') return v.trim() || 'unknown';
@@ -475,6 +483,93 @@ function extractContextSignals(current) {
   };
 }
 
+function normalizeReasonList(value) {
+  if (Array.isArray(value)) return value.map(v => String(v || '').trim()).filter(Boolean);
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) return normalizeReasonList(parsed);
+    } catch {
+      // Fall through to comma splitting.
+    }
+    return trimmed.split(',').map(v => v.trim()).filter(Boolean);
+  }
+  return [];
+}
+
+function hasUsableConversationSummaryValue(value) {
+  if (value == null) return false;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed.length >= 40 && !['null', '{}', '[]', '信息不足'].includes(trimmed);
+  }
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === 'object') return Object.keys(value).length > 0;
+  return Boolean(value);
+}
+
+function hasConcreteContextAnchor(current) {
+  const signals = extractContextSignals(current);
+  if (signals.models.length || signals.prices.length || signals.quantities.length || signals.zips.length || signals.countries.length) {
+    return true;
+  }
+
+  return /\b(?:catalog|brochure|pdf|photos?|pictures?|videos?|warranty|shipping|freight|delivery|ddp|invoice|pi|deposit|payment|quote|pricing|price|october|studio|distributor|dealer|reseller)\b/i
+    .test(signals.text);
+}
+
+function hasWeakIdentity(current) {
+  const raw = String(current.customer_name_for_ai || current.customer_name_clean || current.customer_name || current.project_key || '').trim();
+  if (!raw) return true;
+  if (/^hi\s+there$/i.test(raw) || /^there$/i.test(raw)) return true;
+  if (/^\+?\d[\d\s().-]{6,}$/.test(raw)) return true;
+  return /^(unknown|test|facebook|facebook business|meta|meta business|未命名客户)$/i.test(raw);
+}
+
+function getManualHoldReasons(current) {
+  const directReasons = [
+    ...normalizeReasonList(current.manual_hold_reasons),
+    ...normalizeReasonList(current.reactivation_ai_payload?.decision?.manual_hold_reasons),
+    ...normalizeReasonList(current.reactivation_ai_payload?.stop_point?.manual_hold_reasons),
+    ...normalizeReasonList(current.reactivation_decision_basis?.manual_hold_reasons),
+    ...normalizeReasonList(current.reactivation_v6_core?.manual_hold_reasons)
+  ];
+
+  const reasons = [...directReasons];
+  const sendState = String(current.send_state || current.reactivation_ai_payload?.decision?.send_state || '').trim();
+  const hardNoSend = boolFlag(current.hard_no_send);
+  const hasNotNowSignal = boolFlag(current.has_not_now_signal);
+  const isMyTurnToReply = boolFlag(current.is_my_turn_to_reply);
+  const concreteAnchor = hasConcreteContextAnchor(current);
+  const lastCustomer = String(current.last_customer_message || '').trim();
+  const customerText = [
+    current.customer_only_text,
+    current.customer_recent_only_text,
+    textFromMessages(current.messages),
+    textFromMessages(current.recent_messages)
+  ].filter(value => has(value)).join(' ').trim();
+
+  if (hardNoSend) reasons.push('hard_no_send');
+  if (hasNotNowSignal) reasons.push('has_not_now_signal');
+  if (sendState === 'no_send') reasons.push('send_state_no_send');
+  if (sendState === 'manual_context_required') reasons.push('send_state_manual_context_required');
+  if (isMyTurnToReply) reasons.push('my_turn_requires_manual_reply');
+  if (!lastCustomer && !customerText) reasons.push('missing_customer_context');
+  if (lastCustomer && lastCustomer.length < 20 && customerText.length < 80 && !concreteAnchor) {
+    reasons.push('very_short_customer_context_without_anchor');
+  }
+  if (!hasUsableConversationSummaryValue(current.conversation_summary) && !concreteAnchor) {
+    reasons.push('missing_summary_without_concrete_anchor');
+  }
+  if (hasWeakIdentity(current) && !concreteAnchor) {
+    reasons.push('weak_identity_without_concrete_anchor');
+  }
+
+  return [...new Set(reasons)];
+}
+
 function joinHumanList(values, fallback) {
   const arr = (values || []).filter(value => has(value));
   if (!arr.length) return fallback;
@@ -830,11 +925,12 @@ function filterAndFormatTelegramFinalItems(items) {
     }
 
     const targetReply = safe(aiParsed.target_reply, '未输出');
-    const hardNoSend = current.hard_no_send === true || current.hard_no_send === 'true';
+    const hardNoSend = boolFlag(current.hard_no_send);
+    const hasNotNowSignal = boolFlag(current.has_not_now_signal);
+    const manualHoldReasons = getManualHoldReasons(current);
 
     let usedAlternateActivation = false;
-    const hasNotNowSignal = current.has_not_now_signal === true || current.has_not_now_signal === 'true';
-    if (hardNoSend || hasNotNowSignal || shouldRewriteToAlternateActivation(finalMessage)) {
+    if (manualHoldReasons.length === 0 && shouldRewriteToAlternateActivation(finalMessage)) {
       const alternate = buildAlternateActivationMessage(current, customerName);
       finalMessage = alternate.en;
       finalMessageCn = alternate.cn;
@@ -857,19 +953,37 @@ function filterAndFormatTelegramFinalItems(items) {
     const repeatQualityHits = detectRepeatQualityHits(finalMessage, current, usedFallback);
 
     const missingChineseReference = hasIncompleteChineseReference(finalMessageCn);
-    const shouldBlock = emptyMessage;
+    const deterministicQualityHits = [
+      ...detectBannedPhrases(finalMessage),
+      ...(highRisk ? [{ name: 'high_risk_pattern', matched: 'high-risk or banned follow-up pattern' }] : []),
+      ...(genericRisk ? [{ name: 'generic_expression', matched: 'generic expression' }] : []),
+      ...(weakAnchorRisk && !hasConcreteContextAnchor(current) ? [{ name: 'weak_anchor', matched: 'weak anchor without concrete context' }] : []),
+      ...repeatQualityHits
+    ];
+    const bannedHits = uniqueHits(deterministicQualityHits);
+    const qualityIssueHits = uniqueHits([
+      ...bannedHits,
+      ...manualHoldReasons.map(reason => ({ name: 'manual_hold', matched: reason }))
+    ]);
+    const qualityBlock = highRisk || genericRisk || (weakAnchorRisk && !hasConcreteContextAnchor(current)) || repeatQualityHits.length > 0 || bannedHits.length > 0;
+    const shouldBlock = manualHoldReasons.length > 0 || emptyMessage || qualityBlock;
+
+    if (shouldBlock) {
+      finalMessage = '';
+      finalMessageCn = '';
+    }
 
     const multiRisk = multiQuestionRisk || orRisk ? '高' : '低';
     const thinkRisk = decisionRisk ? '高' : '低';
 
-    const enforceStatus = usedFallback
-      ? 'fallback_used'
+    const enforceStatus = manualHoldReasons.length > 0
+      ? 'manual_context_required'
       : emptyMessage
         ? 'empty_skip'
-        : shouldBlock
-          ? 'blocked'
-          : hardNoSend
-            ? 'hard_no_send_flagged'
+        : qualityBlock
+          ? 'quality_blocked'
+          : usedFallback
+            ? 'fallback_used'
             : 'pass';
 
     const analysisText = truncate([
@@ -924,6 +1038,7 @@ function filterAndFormatTelegramFinalItems(items) {
       `弱锚点拦截：${weakAnchorRisk ? '是' : '否'}`,
       `重复角度拦截：${repeatQualityHits.length > 0 ? '是' : '否'}`,
       `完整中文翻译缺失：${missingChineseReference ? '是' : '否'}`,
+      `人工上下文原因：${manualHoldReasons.length ? manualHoldReasons.join(', ') : '无'}`,
       '',
       '建议跟进话术（最终英文）：',
       finalMessage ? `✅ ${finalMessage}` : '⛔ 空消息，不发送',
@@ -932,16 +1047,10 @@ function filterAndFormatTelegramFinalItems(items) {
       finalMessageCn ? `✅ ${finalMessageCn}` : '⛔ 未提供中文对照'
     ].join('\n'), 3500);
 
-    const deterministicQualityHits = [
-      ...detectBannedPhrases(finalMessage),
-      ...(highRisk ? [{ name: 'high_risk_pattern', matched: 'high-risk or banned follow-up pattern' }] : []),
-      ...(genericRisk ? [{ name: 'generic_expression', matched: 'generic expression' }] : []),
-      ...repeatQualityHits
-    ];
-    const bannedHits = uniqueHits(deterministicQualityHits);
-
     const headerParts = [];
-    if (hardNoSend) {
+    if (manualHoldReasons.length > 0) {
+      headerParts.push(`⛔ MANUAL_CONTEXT_REQUIRED ⛔\n原因: ${manualHoldReasons.join(', ')}\n不输出客户可发话术。请人工核对最新对话、身份和阶段后再决定。`);
+    } else if (hardNoSend || hasNotNowSignal) {
       headerParts.push('⛔ HARD_NO_SEND ⛔\n客户曾发出"暂时不要联系"信号,默认不发,如确实要发请人工 review 客户最新消息后再决定。');
     }
     if (bannedHits.length > 0) {
@@ -976,11 +1085,12 @@ function filterAndFormatTelegramFinalItems(items) {
       telegram_messages: telegramMessages,
       enforce_status: enforceStatus,
       auto_send_pass: !shouldBlock,
-      banned_phrase_flagged: false,
-      banned_phrase_hits: [],
-      banned_phrase_details: '[]',
-      quality_issue_hits: bannedHits,
+      banned_phrase_flagged: bannedHits.length > 0,
+      banned_phrase_hits: bannedHits,
+      banned_phrase_details: JSON.stringify(bannedHits),
+      quality_issue_hits: qualityIssueHits,
       missing_chinese_reference: missingChineseReference,
+      manual_hold_reasons: manualHoldReasons,
       used_alternate_activation: usedAlternateActivation,
       used_fallback: usedFallback
     });
