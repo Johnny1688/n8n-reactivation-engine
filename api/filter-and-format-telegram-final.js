@@ -419,7 +419,10 @@ function displayNameForMessage(current, fallbackName) {
 }
 
 function shouldRewriteToAlternateActivation(message) {
-  if (!has(message)) return true;
+  // 2026-07-08: empty message must stay empty and route to manual review
+  // (enforce_status=empty_skip). Do not manufacture an alternate activation
+  // just to guarantee output.
+  if (!has(message)) return false;
   return /most popular studio setup options|studio setup options|good fit|short comparison checklist|main differences without going through the whole catalog|short starting-point guide|something concrete to review|next steps from confirmation to production and delivery|calculate the landed cost step by step/i.test(message);
 }
 
@@ -619,13 +622,11 @@ function buildAlternateActivationMessage(current, customerName) {
   const cnObject = objectForChinese(object);
 
   if (current.hard_no_send === true || current.hard_no_send === 'true' || current.has_not_now_signal === true || current.has_not_now_signal === 'true') {
-    const timing = /expansion|ready|overseas|trip|will reach out|let you know/i.test(signals.text)
-      ? 'when your expansion timing is clearer'
-      : 'when the timing is better on your side';
-    return {
-      en: withHumanCta(prefix, `I can keep the ${object} notes in one short recap for later, so they are easy to pick up ${timing}.`),
-      cn: `${prefix}，我可以先把 ${cnObject} 的要点整理成一条简短记录留着，这样等${timing === 'when your expansion timing is clearer' ? '你的扩张时间更明确时' : '你那边时间更合适时'}可以很容易接着看。`
-    };
+    // 2026-07-08: hard_no_send / not_now must never receive a manufactured
+    // "lighter care" activation. Return null so the caller blocks the row.
+    // (Normally unreachable because these flags already create manual hold
+    // reasons upstream; kept as defense in depth.)
+    return null;
   }
 
   if (/yes please|sure|ok|okay|thank/i.test(lastCustomerMessage) && /\b(photo|photos|video|videos)\b/i.test(lastMyMessage)) {
@@ -652,7 +653,11 @@ function buildAlternateActivationMessage(current, customerName) {
   }
 
   if (/\b(catalog|option|options|model|models|recommend|setup|compare|comparison)\b/i.test(lastMyMessage)) {
-    const modelPart = joinHumanList(signals.models, 'the models we discussed');
+    // 2026-07-08: never fabricate "the models we discussed" when no concrete
+    // model signal exists in this customer's own context. Without a model
+    // signal, return null so the caller routes the row to manual review.
+    if (!signals.models.length) return null;
+    const modelPart = joinHumanList(signals.models, '');
     return {
       en: withHumanCta(prefix, `I can pull ${modelPart} into a side-by-side note with the practical differences, so you can scan it without reopening the whole catalog.`),
       cn: `${prefix}，我可以把 ${objectForChinese(modelPart)} 整理成一条并排对比说明，重点放在实际差异上，这样你不用重新打开完整目录也能快速看。`
@@ -932,9 +937,15 @@ function filterAndFormatTelegramFinalItems(items) {
     let usedAlternateActivation = false;
     if (manualHoldReasons.length === 0 && shouldRewriteToAlternateActivation(finalMessage)) {
       const alternate = buildAlternateActivationMessage(current, customerName);
-      finalMessage = alternate.en;
-      finalMessageCn = alternate.cn;
-      usedAlternateActivation = true;
+      if (alternate) {
+        finalMessage = alternate.en;
+        finalMessageCn = alternate.cn;
+        usedAlternateActivation = true;
+      } else {
+        // 2026-07-08: alternate activation refused (no concrete model signal
+        // or protected no-send state). Block instead of manufacturing copy.
+        manualHoldReasons.push('alternate_activation_refused_no_concrete_signal');
+      }
     }
 
     finalMessage = sanitizeCustomerGreeting(finalMessage, current, customerName);
@@ -1087,7 +1098,10 @@ function filterAndFormatTelegramFinalItems(items) {
       auto_send_pass: !shouldBlock,
       banned_phrase_flagged: bannedHits.length > 0,
       banned_phrase_hits: bannedHits,
-      banned_phrase_details: JSON.stringify(bannedHits),
+      // 2026-07-08: include manual hold reasons as structured entries so
+      // blocked rows are operable (missing_summary / weak_identity /
+      // missing_customer_context ...) instead of a bare empty_message.
+      banned_phrase_details: JSON.stringify(qualityIssueHits),
       quality_issue_hits: qualityIssueHits,
       missing_chinese_reference: missingChineseReference,
       manual_hold_reasons: manualHoldReasons,

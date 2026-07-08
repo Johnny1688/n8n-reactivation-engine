@@ -1,3 +1,11 @@
+// ⚠️ STALE COPY WARNING (2026-07-08, Cowork review):
+// This file was last regenerated 2026-04-14 and does NOT contain the
+// 2026-07-02 copy-safety repair (manual_context_required gate, hard
+// no-send/not-now hard block, no forced output). Production now calls the
+// Vercel API endpoints (api/build-context.js). Do NOT paste this file into
+// an n8n Code node without regenerating it from src/context/* and re-running
+// the copy-safety fixtures first.
+//
 // Generated n8n Code node entry from src/context modules.
 // Keep source changes in src/context/*, then regenerate this file when needed.
 

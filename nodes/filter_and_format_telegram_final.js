@@ -1,3 +1,9 @@
+// ⚠️ STALE COPY WARNING (2026-07-08, Cowork review):
+// This legacy n8n Code node (last updated 2026-04-14) predates the
+// 2026-07-02 copy-safety repair. It only checks should_send + non-empty
+// message and has NO manual_context_required / hard_no_send / quality
+// blocking. Production now uses the Vercel endpoint
+// api/filter-and-format-telegram-final.js. Do NOT paste this file into n8n.
 function formatTelegramFinal(input) {
   const message = String(input.whatsapp_message || '').trim();
   const shouldSend = input.should_send === true && !!message;
