@@ -65,6 +65,23 @@ function roleMessageCount(result, role) {
   return messages.filter(message => message && message.role === role && safeString(message.message).trim()).length;
 }
 
+function hasSellerOnlyRoleAnomaly(result) {
+  if (roleMessageCount(result, 'customer') > 0) return false;
+  const sellerMessages = (Array.isArray(result.messages) ? result.messages : [])
+    .filter(message => message && message.role === 'me')
+    .map(message => normalizeText(message.message));
+
+  return sellerMessages.some(text => hasAny(text, [
+    /^not happening right now\b/,
+    /^how much is\b/,
+    /^do you have\b/,
+    /^can i (?:get|have|see)\b/,
+    /^is (?:this|that) part of\b/,
+    /\bit would be easier for me to pay\b/,
+    /\bif you had (?:alibaba|aliexpress)\b/
+  ]));
+}
+
 function deriveRuntimeConversationSummary(result, text) {
   if (hasUsableConversationSummary(result)) return null;
 
@@ -72,23 +89,30 @@ function deriveRuntimeConversationSummary(result, text) {
   const sellerMessageCount = roleMessageCount(result, 'me');
   const fullHistory = safeString(result.cleaned_full_conversation).trim();
 
-  // Runtime evidence may replace a missing persisted summary only when the
-  // complete loaded history contains both speakers and a concrete sales anchor.
-  if (!customerMessageCount || !sellerMessageCount || !fullHistory || !hasConcreteAnchorSignal(result, text)) {
+  // Runtime evidence may replace a missing persisted summary when the loaded
+  // history is grounded. Bilateral history is preferred; seller-only recovery
+  // is allowed only when it has a concrete anchor and no role anomaly.
+  if (!sellerMessageCount || !fullHistory || !hasConcreteAnchorSignal(result, text)) {
     return null;
   }
 
+  if (!customerMessageCount && (sellerMessageCount < 2 || hasSellerOnlyRoleAnomaly(result))) return null;
+
+  const sellerOnly = customerMessageCount === 0;
+
   return {
-    source: 'full_history_runtime',
+    source: sellerOnly ? 'seller_history_runtime' : 'full_history_runtime',
     message_count: customerMessageCount + sellerMessageCount,
     customer_message_count: customerMessageCount,
     seller_message_count: sellerMessageCount,
     last_customer_signal: safeString(result.last_customer_message).slice(0, 240),
     last_seller_action: safeString(result.last_my_message).slice(0, 240),
-    display_text: [
-      `Customer: ${safeString(result.last_customer_message).slice(0, 240)}`,
-      `Seller: ${safeString(result.last_my_message).slice(0, 240)}`
-    ].join(' | ')
+    display_text: sellerOnly
+      ? `Seller: ${safeString(result.last_my_message).slice(0, 240)}`
+      : [
+          `Customer: ${safeString(result.last_customer_message).slice(0, 240)}`,
+          `Seller: ${safeString(result.last_my_message).slice(0, 240)}`
+        ].join(' | ')
   };
 }
 
@@ -245,11 +269,14 @@ function hasWeakIdentity(result) {
 function deriveManualContextHold(result, text) {
   const reasons = [];
   const concreteAnchor = hasConcreteAnchorSignal(result, text);
+  const sellerHistoryRecovery = result.runtime_conversation_summary?.source === 'seller_history_runtime';
 
   if (isTruthy(result.is_my_turn_to_reply)) {
     reasons.push('my_turn_requires_manual_reply');
   }
-  if (hasMissingCustomerContext(result)) {
+  if (hasSellerOnlyRoleAnomaly(result)) {
+    reasons.push('seller_history_role_anomaly');
+  } else if (hasMissingCustomerContext(result) && !sellerHistoryRecovery) {
     reasons.push('missing_customer_context');
   }
   if (hasVeryShortCustomerContext(result) && !concreteAnchor) {
@@ -271,6 +298,13 @@ function deriveManualContextHold(result, text) {
   return reasons;
 }
 
+function canUseNoHistoryPermissionCheck(result) {
+  if (roleMessageCount(result, 'customer') > 0 || roleMessageCount(result, 'me') > 0) return false;
+  if (safeString(result.cleaned_full_conversation).trim()) return false;
+  if (!['engaged', 'outreach'].includes(normalizeText(result.stage))) return false;
+  return !hasWeakIdentity(result);
+}
+
 function deriveExecutionGuidance(result) {
   const text = buildContextText(result);
   const customerType = safeString(result.customer_last_message_type);
@@ -286,6 +320,17 @@ function deriveExecutionGuidance(result) {
       hardNoSend: true,
       primaryTrigger: 'no_send_not_now',
       triggerReason: 'explicit_not_now_or_do_not_push_signal'
+    };
+  }
+
+  if (canUseNoHistoryPermissionCheck(result)) {
+    return {
+      anchorObject: 'pilates_equipment_project_status',
+      allowedMicroTriggers: ['confirm_current_pilates_project_here'],
+      sendState: 'rewrite_needed',
+      hardNoSend: false,
+      primaryTrigger: 'confirm_current_pilates_project_here',
+      triggerReason: 'no_history_permission_check_only'
     };
   }
 

@@ -129,6 +129,49 @@ test('misclassified customer-like text cannot bypass missing customer context', 
 
   assert.equal(result.hard_no_send, false);
   assert.equal(result.send_state, 'manual_context_required');
+  assert.ok(result.manual_hold_reasons.includes('seller_history_role_anomaly'));
+});
+
+test('grounded seller-only history can produce an internal review context', async () => {
+  const result = await runBuildContext({
+    project_key: 'PK-SYNTHETIC-SELLER-HISTORY',
+    customer_name: 'Synthetic',
+    stage: 'outreach',
+    messages: [
+      message('me', 'I can send the AR011 specifications for your 6-unit studio.', 1),
+      message('me', 'The AR011 quote includes commercial springs and delivery options.', 2)
+    ]
+  });
+
+  assert.equal(result.runtime_conversation_summary?.source, 'seller_history_runtime');
+  assert.equal(result.full_history_evidence_used, true);
+  assert.notEqual(result.send_state, 'manual_context_required');
+  assert.equal(result.hard_no_send, false);
+});
+
+test('stable engaged identity with zero history uses permission-check recovery', async () => {
+  const result = await runBuildContext({
+    project_key: 'PK-SYNTHETIC-NO-HISTORY',
+    customer_name: 'Alex',
+    stage: 'engaged',
+    messages: []
+  });
+
+  assert.equal(result.send_state, 'rewrite_needed');
+  assert.equal(result.primary_reply_anchor, 'pilates_equipment_project_status');
+  assert.deepEqual(result.allowed_micro_triggers, ['confirm_current_pilates_project_here']);
+  assert.equal(result.hard_no_send, false);
+});
+
+test('weak identity with zero history stays manual hold', async () => {
+  const result = await runBuildContext({
+    project_key: '+15551234567',
+    customer_name: '+15551234567',
+    stage: 'engaged',
+    messages: []
+  });
+
+  assert.equal(result.send_state, 'manual_context_required');
   assert.ok(result.manual_hold_reasons.includes('missing_customer_context'));
 });
 
