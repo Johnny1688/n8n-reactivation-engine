@@ -70,6 +70,7 @@ test('latest customer soft deferral remains blocked', async () => {
   const result = await runBuildContext({
     project_key: 'PK-SYNTHETIC-DEFERRED',
     customer_name: 'Synthetic',
+    now_time: '2026-05-05T12:00:00.000Z',
     messages: [
       message('customer', 'Can you send the quote?', 1),
       message('me', 'Yes, I can send it here.', 2),
@@ -80,6 +81,25 @@ test('latest customer soft deferral remains blocked', async () => {
   assert.equal(result.has_not_now_signal, true);
   assert.equal(result.hard_no_send, true);
   assert.equal(result.send_state, 'no_send');
+});
+
+test('soft deferral expires after the 30-day follow-up SLA', async () => {
+  const result = await runBuildContext({
+    project_key: 'PK-SYNTHETIC-EXPIRED-DEFER',
+    customer_name: 'Synthetic',
+    now_time: '2026-06-15T12:00:00.000Z',
+    messages: [
+      message('customer', 'Can you send both product options?', 1),
+      message('me', 'Yes, I will send both options.', 2),
+      message('customer', 'Let me consult with my partner and get back to you.', 3),
+      message('me', 'Of course, take your time.', 4)
+    ]
+  });
+
+  assert.equal(result.last_customer_message, 'Let me consult with my partner and get back to you.');
+  assert.equal(result.has_not_now_signal, false);
+  assert.equal(result.hard_no_send, false);
+  assert.notEqual(result.send_state, 'no_send');
 });
 
 test('explicit opt-out remains sticky after a later positive phrase', async () => {

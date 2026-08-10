@@ -105,6 +105,13 @@ function customerHistoryText(result) {
     .join('\n');
 }
 
+function daysBetween(nowValue, pastValue) {
+  const now = new Date(nowValue);
+  const past = new Date(pastValue);
+  if (Number.isNaN(now.getTime()) || Number.isNaN(past.getTime())) return null;
+  return Math.floor((now.getTime() - past.getTime()) / 86400000);
+}
+
 function detectHardNoSend(result) {
   const customerHistory = customerHistoryText(result);
   const lastCustomerMessage = normalizeText(result.last_customer_message);
@@ -127,12 +134,11 @@ function detectHardNoSend(result) {
   }
 
   // Deferrals are stateful, not lifetime bans. Only the latest customer
-  // message may keep a soft not-now state active. Seller language and older
-  // customer messages cannot make the flag sticky forever.
+  // message may keep a soft not-now state active, and Hesure's follow-up SLA
+  // caps that pause at 30 days. Seller language and older customer messages
+  // cannot make the flag sticky forever.
   if (!lastCustomerMessage) return false;
-  if (result.has_not_now_signal === true) return true;
-
-  return hasAny(lastCustomerMessage, [
+  const latestSoftDeferral = result.has_not_now_signal === true || hasAny(lastCustomerMessage, [
     /\bi(?:'|’)?ll let you know\b/,
     /\bi will let you know\b/,
     /\bwill reach out\b/,
@@ -154,6 +160,10 @@ function detectHardNoSend(result) {
     /\bwent with another supplier\b/,
     /\balready\b.*\b(ordered|purchased|bought)\b.*\b(elsewhere|another supplier)\b/
   ]);
+  if (!latestSoftDeferral) return false;
+
+  const deferralAgeDays = daysBetween(result.now_time, result.last_customer_message_time);
+  return deferralAgeDays == null || deferralAgeDays <= 30;
 }
 
 function includesForbiddenTopic(result, topic) {
@@ -652,7 +662,7 @@ function enhanceBuildContextResult(result) {
   return {
     ...contextResult,
     customer_name_clean: cleanCustomerName(contextResult.customer_name || contextResult.project_key),
-    has_not_now_signal: contextResult.has_not_now_signal === true || guidance.hardNoSend,
+    has_not_now_signal: guidance.hardNoSend,
     // Legacy/debug compatibility only. Downstream execution should use send_state and hard_no_send.
     should_reactivate_now: contextResult.should_reactivate_now,
     primary_reply_anchor: guidance.anchorObject,
