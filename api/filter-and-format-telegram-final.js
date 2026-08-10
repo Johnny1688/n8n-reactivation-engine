@@ -554,11 +554,20 @@ function hasUsableConversationSummaryValue(value) {
 function hasUsableRuntimeConversationSummary(current) {
   const summary = current.runtime_conversation_summary;
   if (!summary || typeof summary !== 'object' || Array.isArray(summary)) return false;
+  const customerCount = Number(summary.customer_message_count);
+  const sellerCount = Number(summary.seller_message_count);
+  const messageCount = Number(summary.message_count);
+
+  if (summary.source === 'full_history_runtime') {
+    return customerCount > 0 && sellerCount > 0 && messageCount >= 2;
+  }
+
   return (
-    summary.source === 'full_history_runtime' &&
-    Number(summary.customer_message_count) > 0 &&
-    Number(summary.seller_message_count) > 0 &&
-    Number(summary.message_count) >= 2
+    summary.source === 'seller_history_runtime' &&
+    customerCount === 0 &&
+    sellerCount >= 2 &&
+    messageCount >= 2 &&
+    hasConcreteContextAnchor(current)
   );
 }
 
@@ -580,6 +589,54 @@ function hasWeakIdentity(current) {
   return /^(unknown|test|facebook|facebook business|meta|meta business|未命名客户)$/i.test(raw);
 }
 
+function hasNoHistoryPermissionCheck(current) {
+  const sendState = String(
+    current.send_state || current.reactivation_ai_payload?.decision?.send_state || ''
+  ).trim();
+  const anchor = String(
+    current.primary_reply_anchor ||
+    current.anchor_object ||
+    current.reactivation_ai_payload?.decision?.anchor_object ||
+    ''
+  ).trim();
+  const reason = String(
+    current.reactivation_ai_payload?.decision?.best_trigger_reason ||
+    current.reactivation_decision_basis?.best_trigger_reason ||
+    ''
+  ).trim();
+  const allowedTriggers = [
+    current.allowed_micro_triggers,
+    current.reactivation_ai_payload?.decision?.allowed_micro_triggers,
+    current.reactivation_v6_core?.allowed_micro_triggers
+  ].find(Array.isArray) || [];
+  const stage = normalizeText(current.stage);
+  const hasMessageEvidence = [
+    current.last_customer_message,
+    current.last_my_message,
+    current.customer_only_text,
+    current.customer_recent_only_text,
+    current.cleaned_full_conversation,
+    textFromMessages(current.messages),
+    textFromMessages(current.recent_messages)
+  ].some(value => has(value));
+  const hasRuntimeSummary = Boolean(
+    current.runtime_conversation_summary &&
+    typeof current.runtime_conversation_summary === 'object' &&
+    Object.keys(current.runtime_conversation_summary).length
+  );
+
+  return (
+    sendState === 'rewrite_needed' &&
+    anchor === 'pilates_equipment_project_status' &&
+    reason === 'no_history_permission_check_only' &&
+    allowedTriggers.includes('confirm_current_pilates_project_here') &&
+    ['engaged', 'outreach'].includes(stage) &&
+    !hasWeakIdentity(current) &&
+    !hasRuntimeSummary &&
+    !hasMessageEvidence
+  );
+}
+
 function getManualHoldReasons(current) {
   const directReasons = [
     ...normalizeReasonList(current.manual_hold_reasons),
@@ -595,6 +652,8 @@ function getManualHoldReasons(current) {
   const hasNotNowSignal = boolFlag(current.has_not_now_signal);
   const isMyTurnToReply = boolFlag(current.is_my_turn_to_reply);
   const concreteAnchor = hasConcreteContextAnchor(current);
+  const runtimeSummary = hasUsableRuntimeConversationSummary(current);
+  const noHistoryPermissionCheck = hasNoHistoryPermissionCheck(current);
   const lastCustomer = String(current.last_customer_message || '').trim();
   const customerText = [
     current.customer_only_text,
@@ -608,14 +667,17 @@ function getManualHoldReasons(current) {
   if (sendState === 'no_send') reasons.push('send_state_no_send');
   if (sendState === 'manual_context_required') reasons.push('send_state_manual_context_required');
   if (isMyTurnToReply) reasons.push('my_turn_requires_manual_reply');
-  if (!lastCustomer && !customerText) reasons.push('missing_customer_context');
+  if (!lastCustomer && !customerText && !runtimeSummary && !noHistoryPermissionCheck) {
+    reasons.push('missing_customer_context');
+  }
   if (lastCustomer && lastCustomer.length < 20 && customerText.length < 80 && !concreteAnchor) {
     reasons.push('very_short_customer_context_without_anchor');
   }
   if (
     !hasUsableConversationSummaryValue(current.conversation_summary) &&
-    !hasUsableRuntimeConversationSummary(current) &&
-    !concreteAnchor
+    !runtimeSummary &&
+    !concreteAnchor &&
+    !noHistoryPermissionCheck
   ) {
     reasons.push('missing_summary_without_concrete_anchor');
   }
@@ -721,6 +783,31 @@ function buildAlternateActivationMessage(current, customerName) {
     en: withHumanCta(prefix, `I can put together a simple first-step note for ${object}, so you have a clearer place to restart the conversation if it is still relevant.`),
     cn: `${prefix}，我可以先把 ${cnObject} 的第一步要点整理成一条简单说明，如果这个项目还相关，你就有一个更清楚的切入点。`
   };
+}
+
+function buildEvidenceLimitedRecoveryMessage(current, customerName) {
+  if (
+    boolFlag(current.hard_no_send) ||
+    boolFlag(current.has_not_now_signal) ||
+    boolFlag(current.is_my_turn_to_reply)
+  ) {
+    return null;
+  }
+
+  if (hasNoHistoryPermissionCheck(current)) {
+    const name = displayNameForMessage(current, customerName);
+    const prefix = name === 'Hi there' ? 'Hi there' : name;
+    return {
+      en: `${prefix}, are you currently working on a Pilates Reformer project? If yes, I can help with the next step here.`,
+      cn: `${prefix}，你目前是否正在推进普拉提 Reformer 项目？如果是，我可以在这里协助你处理下一步。`
+    };
+  }
+
+  if (hasUsableRuntimeConversationSummary(current)) {
+    return buildAlternateActivationMessage(current, customerName);
+  }
+
+  return null;
 }
 
 function synthesizeChineseReference(message) {
@@ -971,15 +1058,23 @@ function filterAndFormatTelegramFinalItems(items) {
       ''
     );
 
-    // If AI returned empty, keep it empty so n8n can route it to missing_ai_message
-    // or quality review. Do not fill with a repeated generic fallback.
+    // Empty AI output normally stays blocked. The only exceptions are the two
+    // evidence-limited lanes explicitly authorized by build-context.
     let usedFallback = false;
+    let usedEvidenceLimitedRecovery = false;
     if (isEmptyMessage(finalMessage)) {
-      const fallbackEn = generateFallbackMessage(customerName, current.hard_no_send);
-      if (fallbackEn) {
-        finalMessage = fallbackEn;
-        finalMessageCn = generateFallbackMessageCn(customerName, current.hard_no_send);
-        usedFallback = true;
+      const recovery = buildEvidenceLimitedRecoveryMessage(current, customerName);
+      if (recovery) {
+        finalMessage = recovery.en;
+        finalMessageCn = recovery.cn;
+        usedEvidenceLimitedRecovery = true;
+      } else {
+        const fallbackEn = generateFallbackMessage(customerName, current.hard_no_send);
+        if (fallbackEn) {
+          finalMessage = fallbackEn;
+          finalMessageCn = generateFallbackMessageCn(customerName, current.hard_no_send);
+          usedFallback = true;
+        }
       }
     }
 
@@ -1186,6 +1281,7 @@ function filterAndFormatTelegramFinalItems(items) {
       manual_hold_reasons: manualHoldReasons,
       used_alternate_activation: usedAlternateActivation,
       used_repeat_safe_rewrite: usedRepeatSafeRewrite,
+      used_evidence_limited_recovery: usedEvidenceLimitedRecovery,
       used_fallback: usedFallback
     });
   }
