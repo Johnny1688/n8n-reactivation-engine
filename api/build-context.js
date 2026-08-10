@@ -92,10 +92,47 @@ function deriveRuntimeConversationSummary(result, text) {
   };
 }
 
-function detectHardNoSend(result, text) {
+function customerHistoryText(result) {
+  const messageText = (Array.isArray(result.messages) ? result.messages : [])
+    .filter(message => message && message.role === 'customer')
+    .map(message => safeString(message.message))
+    .filter(Boolean)
+    .join('\n');
+
+  return [result.customer_only_text, messageText]
+    .map(normalizeText)
+    .filter(Boolean)
+    .join('\n');
+}
+
+function detectHardNoSend(result) {
+  const customerHistory = customerHistoryText(result);
+  const lastCustomerMessage = normalizeText(result.last_customer_message);
+
+  // Explicit opt-outs are sticky. A later ambiguous or positive-looking phrase
+  // must not silently erase a request to stop contact.
+  if (hasAny(customerHistory, [
+    /\bdo not contact\b/,
+    /\bdon['’]?t contact\b/,
+    /\bdo not message\b/,
+    /\bdon['’]?t message\b/,
+    /\bstop (?:contacting|messaging|texting)\b/,
+    /\bplease stop\b/,
+    /\bno more messages?\b/,
+    /\bunsubscribe\b/,
+    /\bremove me\b/,
+    /\bnot interested\b/
+  ])) {
+    return true;
+  }
+
+  // Deferrals are stateful, not lifetime bans. Only the latest customer
+  // message may keep a soft not-now state active. Seller language and older
+  // customer messages cannot make the flag sticky forever.
+  if (!lastCustomerMessage) return false;
   if (result.has_not_now_signal === true) return true;
 
-  return hasAny(text, [
+  return hasAny(lastCustomerMessage, [
     /\bi(?:'|’)?ll let you know\b/,
     /\bi will let you know\b/,
     /\bwill reach out\b/,
@@ -104,6 +141,7 @@ function detectHardNoSend(result, text) {
     /\bnot now\b/,
     /\bnot at the moment\b/,
     /\bnot currently\b/,
+    /\bnot happening\b.*\bright now\b/,
     /\bnot looking\b.*\bright now\b/,
     /\bnot ready\b.*\bright now\b/,
     /\bnot ready yet\b/,
@@ -228,7 +266,7 @@ function deriveExecutionGuidance(result) {
   const customerType = safeString(result.customer_last_message_type);
   const purchaseStage = safeString(result.purchase_stage);
   const productCode = detectProductCode(text);
-  const hardNoSend = detectHardNoSend(result, text);
+  const hardNoSend = detectHardNoSend(result);
 
   if (hardNoSend) {
     return {
