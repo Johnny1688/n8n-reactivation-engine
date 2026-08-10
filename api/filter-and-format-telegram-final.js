@@ -383,6 +383,44 @@ function detectRepeatQualityHits(message, current, usedFallback) {
   return hits;
 }
 
+function assessCandidateQuality(message, current, usedFallback) {
+  const emptyMessage = isEmptyMessage(message);
+  const highRisk = hasHighRiskPattern(message);
+  const multiQuestionRisk = hasTooManyQuestions(message);
+  const orRisk = hasOrRisk(message);
+  const decisionRisk = hasDecisionRisk(message);
+  const genericRisk = hasGenericRisk(message);
+  const weakAnchorRisk = hasWeakAnchorRisk(message);
+  const repeatQualityHits = detectRepeatQualityHits(message, current, usedFallback);
+  const deterministicQualityHits = [
+    ...detectBannedPhrases(message),
+    ...(highRisk ? [{ name: 'high_risk_pattern', matched: 'high-risk or banned follow-up pattern' }] : []),
+    ...(genericRisk ? [{ name: 'generic_expression', matched: 'generic expression' }] : []),
+    ...(weakAnchorRisk && !hasConcreteContextAnchor(current) ? [{ name: 'weak_anchor', matched: 'weak anchor without concrete context' }] : []),
+    ...repeatQualityHits
+  ];
+  const bannedHits = uniqueHits(deterministicQualityHits);
+  const qualityBlock =
+    highRisk ||
+    genericRisk ||
+    (weakAnchorRisk && !hasConcreteContextAnchor(current)) ||
+    repeatQualityHits.length > 0 ||
+    bannedHits.length > 0;
+
+  return {
+    emptyMessage,
+    highRisk,
+    multiQuestionRisk,
+    orRisk,
+    decisionRisk,
+    genericRisk,
+    weakAnchorRisk,
+    repeatQualityHits,
+    bannedHits,
+    qualityBlock
+  };
+}
+
 function cleanDisplayName(raw) {
   if (!raw) return '';
   const value = String(raw).trim();
@@ -513,6 +551,17 @@ function hasUsableConversationSummaryValue(value) {
   return Boolean(value);
 }
 
+function hasUsableRuntimeConversationSummary(current) {
+  const summary = current.runtime_conversation_summary;
+  if (!summary || typeof summary !== 'object' || Array.isArray(summary)) return false;
+  return (
+    summary.source === 'full_history_runtime' &&
+    Number(summary.customer_message_count) > 0 &&
+    Number(summary.seller_message_count) > 0 &&
+    Number(summary.message_count) >= 2
+  );
+}
+
 function hasConcreteContextAnchor(current) {
   const signals = extractContextSignals(current);
   if (signals.models.length || signals.prices.length || signals.quantities.length || signals.zips.length || signals.countries.length) {
@@ -563,7 +612,11 @@ function getManualHoldReasons(current) {
   if (lastCustomer && lastCustomer.length < 20 && customerText.length < 80 && !concreteAnchor) {
     reasons.push('very_short_customer_context_without_anchor');
   }
-  if (!hasUsableConversationSummaryValue(current.conversation_summary) && !concreteAnchor) {
+  if (
+    !hasUsableConversationSummaryValue(current.conversation_summary) &&
+    !hasUsableRuntimeConversationSummary(current) &&
+    !concreteAnchor
+  ) {
     reasons.push('missing_summary_without_concrete_anchor');
   }
   if (hasWeakIdentity(current) && !concreteAnchor) {
@@ -876,6 +929,7 @@ function filterAndFormatTelegramFinalItems(items) {
         current.dated_history_summary,
         current.timeline_summary,
         current.conversation_summary,
+        current.runtime_conversation_summary?.display_text,
         current.conversation_core
       ),
       '信息不足'
@@ -954,29 +1008,54 @@ function filterAndFormatTelegramFinalItems(items) {
       finalMessageCn = synthesizeChineseReference(finalMessage);
     }
 
-    const emptyMessage = isEmptyMessage(finalMessage);
-    const highRisk = hasHighRiskPattern(finalMessage);
-    const multiQuestionRisk = hasTooManyQuestions(finalMessage);
-    const orRisk = hasOrRisk(finalMessage);
-    const decisionRisk = hasDecisionRisk(finalMessage);
-    const genericRisk = hasGenericRisk(finalMessage);
-    const weakAnchorRisk = hasWeakAnchorRisk(finalMessage);
-    const repeatQualityHits = detectRepeatQualityHits(finalMessage, current, usedFallback);
+    let quality = assessCandidateQuality(finalMessage, current, usedFallback);
+    let usedRepeatSafeRewrite = false;
+
+    // A grounded draft that only fails because it repeats prior seller copy gets
+    // one deterministic alternate-angle attempt. The replacement must pass the
+    // same complete quality assessment; there is no retry loop or relaxed gate.
+    if (
+      manualHoldReasons.length === 0 &&
+      !usedAlternateActivation &&
+      hasConcreteContextAnchor(current) &&
+      quality.repeatQualityHits.some(hit => ['repeat_prior_message', 'repeat_same_question'].includes(hit.name))
+    ) {
+      const alternate = buildAlternateActivationMessage(current, customerName);
+      if (alternate) {
+        const alternateMessage = sanitizeCustomerGreeting(alternate.en, current, customerName);
+        const alternateChinese = hasIncompleteChineseReference(alternate.cn)
+          ? synthesizeChineseReference(alternateMessage)
+          : alternate.cn;
+        const alternateQuality = assessCandidateQuality(alternateMessage, current, false);
+
+        if (!alternateQuality.emptyMessage && !alternateQuality.qualityBlock) {
+          finalMessage = alternateMessage;
+          finalMessageCn = alternateChinese;
+          quality = alternateQuality;
+          usedAlternateActivation = true;
+          usedRepeatSafeRewrite = true;
+        }
+      }
+    }
+
+    const {
+      emptyMessage,
+      highRisk,
+      multiQuestionRisk,
+      orRisk,
+      decisionRisk,
+      genericRisk,
+      weakAnchorRisk,
+      repeatQualityHits,
+      bannedHits,
+      qualityBlock
+    } = quality;
 
     const missingChineseReference = hasIncompleteChineseReference(finalMessageCn);
-    const deterministicQualityHits = [
-      ...detectBannedPhrases(finalMessage),
-      ...(highRisk ? [{ name: 'high_risk_pattern', matched: 'high-risk or banned follow-up pattern' }] : []),
-      ...(genericRisk ? [{ name: 'generic_expression', matched: 'generic expression' }] : []),
-      ...(weakAnchorRisk && !hasConcreteContextAnchor(current) ? [{ name: 'weak_anchor', matched: 'weak anchor without concrete context' }] : []),
-      ...repeatQualityHits
-    ];
-    const bannedHits = uniqueHits(deterministicQualityHits);
     const qualityIssueHits = uniqueHits([
       ...bannedHits,
       ...manualHoldReasons.map(reason => ({ name: 'manual_hold', matched: reason }))
     ]);
-    const qualityBlock = highRisk || genericRisk || (weakAnchorRisk && !hasConcreteContextAnchor(current)) || repeatQualityHits.length > 0 || bannedHits.length > 0;
     const shouldBlock = manualHoldReasons.length > 0 || emptyMessage || qualityBlock;
 
     if (shouldBlock) {
@@ -1106,6 +1185,7 @@ function filterAndFormatTelegramFinalItems(items) {
       missing_chinese_reference: missingChineseReference,
       manual_hold_reasons: manualHoldReasons,
       used_alternate_activation: usedAlternateActivation,
+      used_repeat_safe_rewrite: usedRepeatSafeRewrite,
       used_fallback: usedFallback
     });
   }

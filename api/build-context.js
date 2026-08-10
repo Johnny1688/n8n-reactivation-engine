@@ -45,12 +45,51 @@ function buildContextText(result) {
     result.customer_only_text,
     result.customer_recent_only_text,
     result.last_customer_message,
+    result.seller_only_text,
+    result.last_my_message,
+    result.recent_conversation,
+    result.conversation_core,
+    result.cleaned_full_conversation,
+    result.timeline_summary,
+    result.dated_history_summary,
     result.project_key,
     result.product_interest,
     result.concerns,
     result.key_signals
   ];
   return parts.filter(Boolean).join('\n').toLowerCase();
+}
+
+function roleMessageCount(result, role) {
+  const messages = Array.isArray(result.messages) ? result.messages : [];
+  return messages.filter(message => message && message.role === role && safeString(message.message).trim()).length;
+}
+
+function deriveRuntimeConversationSummary(result, text) {
+  if (hasUsableConversationSummary(result)) return null;
+
+  const customerMessageCount = roleMessageCount(result, 'customer');
+  const sellerMessageCount = roleMessageCount(result, 'me');
+  const fullHistory = safeString(result.cleaned_full_conversation).trim();
+
+  // Runtime evidence may replace a missing persisted summary only when the
+  // complete loaded history contains both speakers and a concrete sales anchor.
+  if (!customerMessageCount || !sellerMessageCount || !fullHistory || !hasConcreteAnchorSignal(result, text)) {
+    return null;
+  }
+
+  return {
+    source: 'full_history_runtime',
+    message_count: customerMessageCount + sellerMessageCount,
+    customer_message_count: customerMessageCount,
+    seller_message_count: sellerMessageCount,
+    last_customer_signal: safeString(result.last_customer_message).slice(0, 240),
+    last_seller_action: safeString(result.last_my_message).slice(0, 240),
+    display_text: [
+      `Customer: ${safeString(result.last_customer_message).slice(0, 240)}`,
+      `Seller: ${safeString(result.last_my_message).slice(0, 240)}`
+    ].join(' | ')
+  };
 }
 
 function detectHardNoSend(result, text) {
@@ -102,7 +141,7 @@ function isSendableState(sendState) {
 }
 
 function hasUsableConversationSummary(result) {
-  const summary = result.conversation_summary;
+  const summary = result.conversation_summary || result.runtime_conversation_summary;
   if (summary == null) return false;
 
   if (typeof summary === 'string') {
@@ -546,19 +585,26 @@ function buildReactivationV6Core(result, guidance, stopPointAnalysis, forbiddenR
 }
 
 function enhanceBuildContextResult(result) {
-  const guidance = deriveExecutionGuidance(result);
-  const stopPointAnalysis = buildStopPoint(result, guidance);
-  const forbiddenRepeatZone = buildForbiddenRepeatZone(result, guidance);
-  const reactivationDecisionBasis = buildDecisionBasis(result, guidance, forbiddenRepeatZone);
+  const contextText = buildContextText(result);
+  const runtimeConversationSummary = deriveRuntimeConversationSummary(result, contextText);
+  const contextResult = {
+    ...result,
+    runtime_conversation_summary: runtimeConversationSummary,
+    full_history_evidence_used: Boolean(runtimeConversationSummary)
+  };
+  const guidance = deriveExecutionGuidance(contextResult);
+  const stopPointAnalysis = buildStopPoint(contextResult, guidance);
+  const forbiddenRepeatZone = buildForbiddenRepeatZone(contextResult, guidance);
+  const reactivationDecisionBasis = buildDecisionBasis(contextResult, guidance, forbiddenRepeatZone);
   const reactivationAiPayload = buildReactivationPayload(
-    result,
+    contextResult,
     guidance,
     stopPointAnalysis,
     forbiddenRepeatZone,
     reactivationDecisionBasis
   );
   const reactivationV6Core = buildReactivationV6Core(
-    result,
+    contextResult,
     guidance,
     stopPointAnalysis,
     forbiddenRepeatZone,
@@ -566,11 +612,11 @@ function enhanceBuildContextResult(result) {
   );
 
   return {
-    ...result,
-    customer_name_clean: cleanCustomerName(result.customer_name || result.project_key),
-    has_not_now_signal: result.has_not_now_signal === true || guidance.hardNoSend,
+    ...contextResult,
+    customer_name_clean: cleanCustomerName(contextResult.customer_name || contextResult.project_key),
+    has_not_now_signal: contextResult.has_not_now_signal === true || guidance.hardNoSend,
     // Legacy/debug compatibility only. Downstream execution should use send_state and hard_no_send.
-    should_reactivate_now: result.should_reactivate_now,
+    should_reactivate_now: contextResult.should_reactivate_now,
     primary_reply_anchor: guidance.anchorObject,
     anchor_object: guidance.anchorObject,
     allowed_micro_triggers: guidance.allowedMicroTriggers,
