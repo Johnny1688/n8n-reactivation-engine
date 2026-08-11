@@ -3,10 +3,16 @@
 // Returns formatted text ready for AI prompt injection.
 // Uses Node 18+ built-in fetch — no npm dependencies required.
 
+const { requireProfileAuth } = require('../src/profile/auth.js');
+
+const MAX_MESSAGES = 1000;
+const MAX_FORMATTED_CHARS = 60000;
+
 module.exports = async function (req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed', code: 'method_not_allowed' });
   }
+  if (!requireProfileAuth(req, res)) return;
 
   // ── Parameter validation ──────────────────────────────────
   const projectKey = (req.query.project_key || '').trim();
@@ -57,31 +63,65 @@ module.exports = async function (req, res) {
 
     const psRes = await fetch(psUrl, { headers: supabaseHeaders });
     if (!psRes.ok) {
-      console.error('customer-messages: pipeline_state check error:', await psRes.text());
+      console.error('customer-messages: pipeline_state check failed, status:', psRes.status);
       return res.status(500).json({ error: 'Database query failed', code: 'db_error' });
     }
 
     const psRows = await psRes.json();
     if (!psRows.length) {
       return res.status(404).json({
-        error: `Customer not found: ${projectKey}`,
+        error: 'Customer not found',
         code: 'customer_not_found'
       });
     }
 
-    // ── Fetch messages ──────────────────────────────────────
+    // ── Count and bound messages before fetching raw text ───
     let msgUrl = `${SUPABASE_URL}/rest/v1/messages` +
       `?project_key=eq.${encodeURIComponent(projectKey)}` +
       `&select=role,message,message_time` +
-      `&order=message_time.asc.nullslast,created_at.asc`;
+      `&order=message_time.asc.nullslast,created_at.asc` +
+      `&limit=${MAX_MESSAGES}`;
 
     if (scope === 'since') {
       msgUrl += `&message_time=gt.${encodeURIComponent(sinceIso)}`;
     }
 
+    let countUrl = `${SUPABASE_URL}/rest/v1/messages` +
+      `?project_key=eq.${encodeURIComponent(projectKey)}` +
+      `&select=id`;
+    if (scope === 'since') {
+      countUrl += `&message_time=gt.${encodeURIComponent(sinceIso)}`;
+    }
+
+    const countRes = await fetch(countUrl, {
+      method: 'HEAD',
+      headers: { ...supabaseHeaders, 'Prefer': 'count=exact' }
+    });
+    if (!countRes.ok) {
+      console.error('customer-messages: messages count failed, status:', countRes.status);
+      return res.status(500).json({ error: 'Database query failed', code: 'db_error' });
+    }
+
+    const range = countRes.headers.get('content-range');
+    const countMatch = range && range.match(/\/(\d+)$/);
+    if (!countMatch) {
+      console.error('customer-messages: messages count header missing');
+      return res.status(500).json({ error: 'Database query failed', code: 'db_error' });
+    }
+
+    const exactCount = parseInt(countMatch[1], 10);
+    if (exactCount > MAX_MESSAGES) {
+      return res.status(422).json({
+        error: 'Message history exceeds the safe profile limit',
+        code: 'history_too_large',
+        message_count: exactCount,
+        max_messages: MAX_MESSAGES
+      });
+    }
+
     const msgRes = await fetch(msgUrl, { headers: supabaseHeaders });
     if (!msgRes.ok) {
-      console.error('customer-messages: messages query error:', await msgRes.text());
+      console.error('customer-messages: messages query failed, status:', msgRes.status);
       return res.status(500).json({ error: 'Database query failed', code: 'db_error' });
     }
 
@@ -93,32 +133,49 @@ module.exports = async function (req, res) {
         project_key: projectKey,
         scope,
         message_count: 0,
+        role_counts: { customer: 0, me: 0, other: 0 },
+        formatted_chars: 0,
         earliest_message_at: null,
         latest_message_at: null,
         formatted_messages: ''
       });
     }
 
+    const roleCounts = { customer: 0, me: 0, other: 0 };
     const lines = messages.map(m => {
       const ts = formatTimestamp(m.message_time);
       const direction = mapDirection(m.role);
+      roleCounts[direction === 'inbound' ? 'customer' : direction === 'outbound' ? 'me' : 'other'] += 1;
       const text = m.message || '';
       return `${ts} | ${direction} | ${text}`;
     });
+
+    const formattedMessages = lines.join('\n');
+    if (formattedMessages.length > MAX_FORMATTED_CHARS) {
+      return res.status(422).json({
+        error: 'Message history exceeds the safe prompt limit',
+        code: 'history_too_large',
+        message_count: messages.length,
+        formatted_chars: formattedMessages.length,
+        max_formatted_chars: MAX_FORMATTED_CHARS
+      });
+    }
 
     return res.status(200).json({
       project_key: projectKey,
       scope,
       message_count: messages.length,
+      role_counts: roleCounts,
+      formatted_chars: formattedMessages.length,
       earliest_message_at: messages[0].message_time || null,
       latest_message_at: messages[messages.length - 1].message_time || null,
-      formatted_messages: lines.join('\n')
+      formatted_messages: formattedMessages
     });
 
   } catch (err) {
-    console.error('customer-messages error:', err);
+    console.error('customer-messages: unexpected failure');
     return res.status(500).json({
-      error: err.message || 'customer-messages failed',
+      error: 'Customer message fetch failed',
       code: 'db_error'
     });
   }
