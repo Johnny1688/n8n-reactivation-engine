@@ -3,7 +3,7 @@
 
 const { requireProfileAuth } = require('../src/profile/auth.js');
 
-const MAX_LIMIT = 10;
+const MAX_LIMIT = 50;
 const SCAN_LIMIT = 1000;
 const CLOSED_STAGES = new Set(['closed_won', 'closed_lost']);
 
@@ -32,7 +32,6 @@ module.exports = async function (req, res) {
   };
   const url = `${SUPABASE_URL}/rest/v1/pipeline_state` +
     `?select=project_key,customer_name,stage,status,follow_up_priority,conversation_summary,summary_updated_at,message_count,last_interaction_time` +
-    `&message_count=gt.0` +
     `&order=last_interaction_time.desc.nullslast` +
     `&limit=${SCAN_LIMIT}`;
 
@@ -44,19 +43,52 @@ module.exports = async function (req, res) {
     }
 
     const rows = await response.json();
-    const candidates = rows
+    const ranked = rows
       .filter(row => !CLOSED_STAGES.has(String(row.stage || '').toLowerCase()))
       .map(row => ({ ...row, profile_reason: profileReason(row) }))
       .filter(row => row.profile_reason)
-      .sort((left, right) => candidateScore(right) - candidateScore(left))
-      .slice(0, requestedLimit)
-      .map(row => ({
+      .sort((left, right) => candidateScore(right) - candidateScore(left));
+
+    // pipeline_state.message_count is a rollup and may be stale. Verify the
+    // canonical messages table before returning a candidate instead of using
+    // that rollup as a selection gate.
+    const candidates = [];
+    const seen = new Set();
+    for (const row of ranked) {
+      const projectKey = String(row.project_key || '').trim();
+      if (!projectKey || seen.has(projectKey)) continue;
+      seen.add(projectKey);
+
+      const countUrl = `${SUPABASE_URL}/rest/v1/messages` +
+        `?project_key=eq.${encodeURIComponent(projectKey)}` +
+        `&select=id`;
+      const countResponse = await fetch(countUrl, {
+        method: 'HEAD',
+        headers: { ...headers, Prefer: 'count=exact' }
+      });
+      if (!countResponse.ok) {
+        console.error('profile-candidates: message count failed, status:', countResponse.status);
+        return res.status(500).json({ error: 'Database query failed', code: 'db_error' });
+      }
+      const range = countResponse.headers.get('content-range');
+      const match = range && range.match(/\/(\d+)$/);
+      if (!match) {
+        console.error('profile-candidates: message count header missing');
+        return res.status(500).json({ error: 'Database query failed', code: 'db_error' });
+      }
+      const actualMessageCount = Number.parseInt(match[1], 10);
+      if (actualMessageCount === 0) continue;
+
+      candidates.push({
         project_key: row.project_key,
         customer_name: row.customer_name || '',
         stage: row.stage || '',
         status: row.status || '',
-        profile_reason: row.profile_reason
-      }));
+        profile_reason: row.profile_reason,
+        actual_message_count: actualMessageCount
+      });
+      if (candidates.length === requestedLimit) break;
+    }
 
     return res.status(200).json({
       requested_limit: requestedLimit,

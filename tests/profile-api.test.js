@@ -233,6 +233,23 @@ test('candidate routing prioritizes missing profiles and quoted stages', () => {
   assert.equal(profileCandidates.profileReason({ conversation_summary: null }), 'missing_profile');
 });
 
+test('candidate endpoint verifies canonical messages instead of stale rollup count', async () => {
+  const calls = queueFetch(
+    response([{
+      project_key: 'PK-SYNTHETIC', customer_name: 'Synthetic', stage: 'quoted',
+      status: 'open', follow_up_priority: 'high', conversation_summary: null,
+      summary_updated_at: null, message_count: 0, last_interaction_time: '2026-08-10T00:00:00.000Z'
+    }]),
+    response(null, 200, { 'content-range': '0-2/3' })
+  );
+  const result = await call(profileCandidates, { query: { limit: '1' } });
+  assert.equal(result.statusCode, 200);
+  assert.equal(result.payload.candidate_count, 1);
+  assert.equal(result.payload.candidates[0].actual_message_count, 3);
+  assert.equal(calls[1].options.method, 'HEAD');
+  assert.ok(!calls[0].url.includes('message_count=gt.0'));
+});
+
 test('profile APIs do not expose exception text or customer identity in errors', () => {
   const sources = [
     'api/profile-route.js',
