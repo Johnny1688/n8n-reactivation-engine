@@ -15,7 +15,9 @@
     "timeline",
     "state",
     "intelligence",
-    "narrative"
+    "narrative",
+    "key_quotes",
+    "extensions"
   ],
   "properties": {
     "schema_version": { "const": 1 },
@@ -172,6 +174,7 @@
 
     "key_quotes": {
       "type": "array",
+      "maxItems": 0,
       "default": [],
       "items": {
         "type": "object",

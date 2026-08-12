@@ -5,6 +5,7 @@ Status: **Approved for implementation (Day 1 start)**
 Owner: Johnny
 
 Change log:
+- v1.3 (2026-08-12): Canary persistence hardening. `key_quotes` is required to be an empty array and server-side validation rejects contact, credential, bank, or payment identifiers in every persisted string field. This is a release constraint; prompt instructions alone are not a privacy gate.
 - v1.2 (2026-04-20): DB infra deployed. conversation_summary migrated TEXT → JSONB (with view rebuild). 5 btree expression indexes created. Spec §2 corrected from "GIN" to "btree expression indexes" (->> returns scalar text, btree is the right tool).
 - v1.1 (2026-04-20): Added `sample_request_status` and `return_exchange_history` as first-class fields in `intelligence`. Added return/exchange safety gate in Reactivation Engine.
 - v1.0 (2026-04-20): Initial spec.
@@ -89,10 +90,7 @@ Stored as JSONB in `pipeline_state.conversation_summary`.
 
   "narrative": "Alex 是温哥华精品工作室老板,5 月开业,首批 12 台木制 Reformer,偏好 MR 系列。4/15 DDP 报价已发,等合伙人内部评估。竞品 Balanced Body 因交期 12 周处于劣势。主要未决点是运费。",
 
-  "key_quotes": [
-    {"date": "2026-04-10", "quote": "we need them by early May, no flexibility"},
-    {"date": "2026-04-15", "quote": "the wooden one looks much better for our brand"}
-  ],
+  "key_quotes": [],
 
   "extensions": {}
 }
@@ -167,6 +165,8 @@ CREATE INDEX IF NOT EXISTS idx_profile_has_return_history
 ### Extension strategy
 
 Unknown or future fields go into `extensions` (free-form object). Do **not** bump `schema_version` for additive changes. Only bump when a field is moved from `extensions` into a first-class slot, or when an enum value is removed.
+
+For the current canary/backfill release, `key_quotes` must be present and empty. Server-side validation recursively rejects contact details, credentials, bank identifiers, and payment-card identifiers from all persisted strings, including `narrative` and `extensions`. A prompt instruction is not considered enforcement.
 
 ---
 

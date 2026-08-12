@@ -7,6 +7,8 @@ const MAX_LIMIT = 50;
 const SCAN_LIMIT = 1000;
 const MAX_SELECTION_HOLDS = 3;
 const CLOSED_STAGES = new Set(['closed_won', 'closed_lost']);
+const CANARY_MODE = 'canary_missing_only';
+const RUN_ID_PATTERN = /^[a-z0-9][a-z0-9-]{7,79}$/;
 
 module.exports = async function (req, res) {
   if (req.method !== 'GET') {
@@ -17,6 +19,15 @@ module.exports = async function (req, res) {
   const requestedLimit = Number.parseInt(req.query.limit || '2', 10);
   if (!Number.isInteger(requestedLimit) || requestedLimit < 1 || requestedLimit > MAX_LIMIT) {
     return res.status(400).json({ error: `limit must be between 1 and ${MAX_LIMIT}`, code: 'invalid_limit' });
+  }
+
+  const mode = String(req.query.mode || '').trim();
+  const runId = String(req.query.run_id || '').trim();
+  if (mode && mode !== CANARY_MODE) {
+    return res.status(400).json({ error: 'Unsupported candidate mode', code: 'invalid_mode' });
+  }
+  if (mode === CANARY_MODE && (requestedLimit !== 2 || !RUN_ID_PATTERN.test(runId))) {
+    return res.status(400).json({ error: 'Canary request is invalid', code: 'invalid_canary_request' });
   }
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -37,6 +48,25 @@ module.exports = async function (req, res) {
     `&limit=${SCAN_LIMIT}`;
 
   try {
+    if (mode === CANARY_MODE) {
+      // A fixed canary run id is at-most-once for candidate data egress. Once
+      // any row carries the server-owned marker, another candidate load fails
+      // closed before new customer histories can be fetched.
+      const markerUrl = `${SUPABASE_URL}/rest/v1/pipeline_state` +
+        `?conversation_summary->extensions->canary_control->>run_id=eq.${encodeURIComponent(runId)}` +
+        `&select=project_key` +
+        `&limit=1`;
+      const markerResponse = await fetch(markerUrl, { headers });
+      if (!markerResponse.ok) {
+        console.error('profile-candidates: canary marker query failed, status:', markerResponse.status);
+        return res.status(500).json({ error: 'Database query failed', code: 'db_error' });
+      }
+      const markerRows = await markerResponse.json();
+      if (Array.isArray(markerRows) && markerRows.length > 0) {
+        return res.status(409).json({ error: 'Canary run is already consumed', code: 'canary_run_already_consumed' });
+      }
+    }
+
     const response = await fetch(url, { headers });
     if (!response.ok) {
       console.error('profile-candidates: pipeline_state query failed, status:', response.status);
@@ -48,6 +78,7 @@ module.exports = async function (req, res) {
       .filter(row => !CLOSED_STAGES.has(String(row.stage || '').toLowerCase()))
       .map(row => ({ ...row, profile_reason: profileReason(row) }))
       .filter(row => row.profile_reason)
+      .filter(row => mode !== CANARY_MODE || row.profile_reason === 'missing_profile')
       .sort((left, right) => candidateScore(right) - candidateScore(left));
 
     // pipeline_state.message_count is a rollup and may be stale. Verify the
@@ -104,6 +135,7 @@ module.exports = async function (req, res) {
 
     return res.status(200).json({
       requested_limit: requestedLimit,
+      mode: mode || 'standard',
       candidate_count: candidates.length,
       selection_checked_count: selectionCheckedCount,
       selection_hold_count: selectionHoldCount,

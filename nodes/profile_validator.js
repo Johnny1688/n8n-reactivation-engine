@@ -29,7 +29,9 @@ const SCHEMA = {
     "timeline",
     "state",
     "intelligence",
-    "narrative"
+    "narrative",
+    "key_quotes",
+    "extensions"
   ],
   "properties": {
     "schema_version": { "const": 1 },
@@ -186,6 +188,7 @@ const SCHEMA = {
 
     "key_quotes": {
       "type": "array",
+      "maxItems": 0,
       "default": [],
       "items": {
         "type": "object",
@@ -238,6 +241,15 @@ function validateBusinessRules(profile) {
     });
   }
 
+  // (d) Profiles are durable CRM data, so prompt-only privacy instructions
+  // are insufficient. Reject contact, credential, bank, or payment details in
+  // every persisted string field, including free-form extensions. Error text
+  // deliberately names only the JSON path and never echoes the matched value.
+  const privateDataPath = findForbiddenPrivateData(profile);
+  if (privateDataPath) {
+    errors.push(`forbidden private data at ${privateDataPath}`);
+  }
+
   // (b) profile_version >= 1  (schema already enforces, double-check)
   if (typeof profile.profile_version === 'number' && profile.profile_version < 1) {
     errors.push(`profile_version must be >= 1, got ${profile.profile_version}`);
@@ -258,6 +270,48 @@ function validateBusinessRules(profile) {
   //       history. Requires message data not available at validation time.
 
   return errors;
+}
+
+function findForbiddenPrivateData(value, path = '$') {
+  if (typeof value === 'string') {
+    return containsForbiddenPrivateData(value) ? path : null;
+  }
+  if (Array.isArray(value)) {
+    for (let index = 0; index < value.length; index += 1) {
+      const match = findForbiddenPrivateData(value[index], `${path}[${index}]`);
+      if (match) return match;
+    }
+    return null;
+  }
+  if (value && typeof value === 'object') {
+    for (const [key, child] of Object.entries(value)) {
+      const match = findForbiddenPrivateData(child, `${path}.${key}`);
+      if (match) return match;
+    }
+  }
+  return null;
+}
+
+function containsForbiddenPrivateData(value) {
+  const text = String(value);
+
+  // Email addresses and phone/contact handles.
+  if (/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(text)) return true;
+  if (/\+\s*\d[\d\s().-]{7,}\d/.test(text)) return true;
+  if (/(?:^|\D)\d{9,15}(?:\D|$)/.test(text)) return true;
+  if (/\b(?:phone|mobile|whats?app|wechat|telegram|line|contact)\s*(?:id|number|no\.?|handle)?\s*[:：=]\s*\S{4,}/i.test(text)) return true;
+
+  // Financial identifiers. Ordinary narrative such as "bank transfer asked"
+  // remains allowed; only identifier-shaped values are rejected.
+  if (/\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b/i.test(text)) return true; // IBAN
+  if (/\b(?:swift|bic)\s*(?:code)?\s*[:：=]\s*[A-Z0-9]{8}(?:[A-Z0-9]{3})?\b/i.test(text)) return true;
+  if (/\b(?:bank\s*)?(?:account|routing|sort)\s*(?:number|no\.?|code)?\s*[:：=]\s*[A-Z0-9 -]{6,}\b/i.test(text)) return true;
+  if (/\b(?:card|credit\s*card)\s*(?:number|no\.?)?\s*[:：=]\s*(?:\d[ -]?){13,19}\b/i.test(text)) return true;
+
+  // Credentials and one-time authentication values.
+  if (/\b(?:password|passcode|api[_ -]?key|access[_ -]?token|auth[_ -]?token|otp|verification[_ -]?code)\s*[:：=]\s*\S{4,}/i.test(text)) return true;
+
+  return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -308,9 +362,15 @@ function validateProfile(raw) {
 // Export for both require() and n8n Code node global scope
 // ---------------------------------------------------------------------------
 
-module.exports = { validateProfile, validateBusinessRules };
+module.exports = {
+  validateProfile,
+  validateBusinessRules,
+  findForbiddenPrivateData,
+  containsForbiddenPrivateData
+};
 
 if (typeof globalThis !== 'undefined') {
   globalThis.validateProfile = validateProfile;
   globalThis.validateBusinessRules = validateBusinessRules;
+  globalThis.findForbiddenPrivateData = findForbiddenPrivateData;
 }

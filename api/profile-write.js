@@ -6,6 +6,9 @@
 const { validateProfile } = require('../nodes/profile_validator.js');
 const { requireProfileAuth } = require('../src/profile/auth.js');
 
+const CANARY_MODE = 'missing_only';
+const RUN_ID_PATTERN = /^[a-z0-9][a-z0-9-]{7,79}$/;
+
 module.exports = async function (req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed', code: 'method_not_allowed' });
@@ -70,6 +73,11 @@ module.exports = async function (req, res) {
     return res.status(409).json({ error: 'Generated profile does not match source expectations', code: 'profile_expectation_mismatch' });
   }
 
+  const canary = parseCanaryExpectation(body, expectedSummaryUpdatedAt, result.profile);
+  if (canary.error) {
+    return res.status(canary.status).json({ error: canary.error, code: canary.code });
+  }
+
   // ── Supabase config ───────────────────────────────────────
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -86,10 +94,26 @@ module.exports = async function (req, res) {
   };
 
   try {
+    if (canary.enabled) {
+      const markerUrl = `${SUPABASE_URL}/rest/v1/pipeline_state` +
+        `?conversation_summary->extensions->canary_control->>run_id=eq.${encodeURIComponent(canary.runId)}` +
+        `&select=conversation_summary` +
+        `&limit=3`;
+      const markerRes = await fetch(markerUrl, { headers: supabaseHeaders });
+      if (!markerRes.ok) {
+        console.error('profile-write: canary marker query failed, status:', markerRes.status);
+        return res.status(500).json({ error: 'Database query failed', code: 'db_error' });
+      }
+      const markerRows = await markerRes.json();
+      if (!validCanaryProgress(markerRows, canary)) {
+        return res.status(409).json({ error: 'Canary write order is stale', code: 'canary_write_order_conflict' });
+      }
+    }
+
     // ── Verify customer exists ──────────────────────────────
     const checkUrl = `${SUPABASE_URL}/rest/v1/pipeline_state` +
       `?project_key=eq.${encodeURIComponent(projectKey)}` +
-      `&select=project_key,summary_updated_at,last_interaction_time` +
+      `&select=project_key,conversation_summary,summary_updated_at,last_interaction_time` +
       `&limit=2`;
 
     const checkRes = await fetch(checkUrl, { headers: supabaseHeaders });
@@ -116,14 +140,26 @@ module.exports = async function (req, res) {
     ) {
       return res.status(409).json({ error: 'Customer context changed before write', code: 'stale_profile_context' });
     }
+    if (canary.enabled && current.conversation_summary !== null) {
+      return res.status(409).json({ error: 'Canary rollback prestate changed', code: 'canary_prestate_conflict' });
+    }
 
     // ── Write profile via PATCH ─────────────────────────────
     const now = new Date().toISOString();
+    const profileToWrite = canary.enabled
+      ? withCanaryControl(result.profile, canary, expectedLastInteractionTime, now)
+      : result.profile;
+
+    const controlledProfile = validateProfile(profileToWrite);
+    if (!controlledProfile.valid) {
+      return res.status(500).json({ error: 'Server profile control validation failed', code: 'write_verification_failed' });
+    }
 
     const patchUrl = `${SUPABASE_URL}/rest/v1/pipeline_state` +
       `?project_key=eq.${encodeURIComponent(projectKey)}` +
       buildNullableFilter('summary_updated_at', expectedSummaryUpdatedAt) +
       buildNullableFilter('last_interaction_time', expectedLastInteractionTime) +
+      (canary.enabled ? `&conversation_summary=is.null` : '') +
       `&select=project_key,conversation_summary,summary_updated_at`;
 
     const patchRes = await fetch(patchUrl, {
@@ -133,7 +169,7 @@ module.exports = async function (req, res) {
         'Prefer': 'return=representation,count=exact'
       },
       body: JSON.stringify({
-        conversation_summary: result.profile,
+        conversation_summary: controlledProfile.profile,
         summary_updated_at: now
       })
     });
@@ -156,6 +192,7 @@ module.exports = async function (req, res) {
       !writtenProfile.valid ||
       writtenProfile.profile.profile_version !== result.profile.profile_version ||
       writtenProfile.profile.source_message_count !== result.profile.source_message_count ||
+      (canary.enabled && !matchesCanaryControl(writtenProfile.profile, canary, expectedLastInteractionTime, now)) ||
       !sameNullableInstant(writtenRows[0].summary_updated_at, now)
     ) {
       return res.status(500).json({ error: 'Database write verification failed', code: 'write_verification_failed' });
@@ -165,6 +202,7 @@ module.exports = async function (req, res) {
       written: true,
       profile_version: result.profile.profile_version,
       generation_mode: result.profile.generation_mode,
+      ...(canary.enabled ? { canary_slot: canary.slot } : {}),
       summary_updated_at: now
     });
 
@@ -194,3 +232,78 @@ function buildNullableFilter(column, value) {
     ? `&${column}=is.null`
     : `&${column}=eq.${encodeURIComponent(value)}`;
 }
+
+function parseCanaryExpectation(body, expectedSummaryUpdatedAt, profile) {
+  if (!Object.prototype.hasOwnProperty.call(body, 'canary_mode')) return { enabled: false };
+  const runId = String(body.canary_run_id || '').trim();
+  const slot = Number(body.canary_slot);
+  if (
+    body.canary_mode !== CANARY_MODE ||
+    body.expected_prior_summary_state !== 'missing_summary' ||
+    expectedSummaryUpdatedAt !== null ||
+    !RUN_ID_PATTERN.test(runId) ||
+    ![1, 2].includes(slot)
+  ) {
+    return {
+      error: 'Canary write expectations are invalid',
+      code: 'invalid_canary_expectation',
+      status: 400
+    };
+  }
+  if (
+    profile.generation_mode !== 'full' ||
+    profile.profile_version !== 1 ||
+    !Number.isInteger(profile.source_message_count) ||
+    profile.source_message_count < 1 ||
+    (profile.extensions && Object.prototype.hasOwnProperty.call(profile.extensions, 'canary_control'))
+  ) {
+    return {
+      error: 'Generated profile violates canary monotonicity',
+      code: 'canary_profile_expectation_mismatch',
+      status: 409
+    };
+  }
+  return { enabled: true, runId, slot };
+}
+
+function validCanaryProgress(rows, canary) {
+  if (!Array.isArray(rows)) return false;
+  const controls = rows.map(row => row?.conversation_summary?.extensions?.canary_control);
+  if (controls.some(control => !control || control.run_id !== canary.runId)) return false;
+  if (canary.slot === 1) return controls.length === 0;
+  return controls.length === 1 && controls[0].slot === 1;
+}
+
+function withCanaryControl(profile, canary, expectedLastInteractionTime, writtenAt) {
+  return {
+    ...profile,
+    extensions: {
+      ...(profile.extensions || {}),
+      canary_control: {
+        run_id: canary.runId,
+        slot: canary.slot,
+        prior_summary_state: 'missing_summary',
+        prior_summary_updated_at: null,
+        expected_last_interaction_time: expectedLastInteractionTime,
+        written_at: writtenAt
+      }
+    }
+  };
+}
+
+function matchesCanaryControl(profile, canary, expectedLastInteractionTime, writtenAt) {
+  const control = profile?.extensions?.canary_control;
+  return Boolean(
+    control &&
+    control.run_id === canary.runId &&
+    control.slot === canary.slot &&
+    control.prior_summary_state === 'missing_summary' &&
+    control.prior_summary_updated_at === null &&
+    sameNullableInstant(control.expected_last_interaction_time, expectedLastInteractionTime) &&
+    sameNullableInstant(control.written_at, writtenAt)
+  );
+}
+
+module.exports.parseCanaryExpectation = parseCanaryExpectation;
+module.exports.validCanaryProgress = validCanaryProgress;
+module.exports.matchesCanaryControl = matchesCanaryControl;
