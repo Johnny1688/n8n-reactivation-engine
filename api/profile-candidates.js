@@ -5,6 +5,7 @@ const { requireProfileAuth } = require('../src/profile/auth.js');
 
 const MAX_LIMIT = 50;
 const SCAN_LIMIT = 1000;
+const MAX_SELECTION_HOLDS = 3;
 const CLOSED_STAGES = new Set(['closed_won', 'closed_lost']);
 
 module.exports = async function (req, res) {
@@ -54,6 +55,8 @@ module.exports = async function (req, res) {
     // that rollup as a selection gate.
     const candidates = [];
     const seen = new Set();
+    let selectionHoldCount = 0;
+    let selectionCheckedCount = 0;
     for (const row of ranked) {
       const projectKey = String(row.project_key || '').trim();
       if (!projectKey || seen.has(projectKey)) continue;
@@ -66,15 +69,24 @@ module.exports = async function (req, res) {
         method: 'HEAD',
         headers: { ...headers, Prefer: 'count=exact' }
       });
+      selectionCheckedCount += 1;
       if (!countResponse.ok) {
         console.error('profile-candidates: message count failed, status:', countResponse.status);
-        return res.status(500).json({ error: 'Database query failed', code: 'db_error' });
+        selectionHoldCount += 1;
+        if (selectionHoldCount >= MAX_SELECTION_HOLDS) {
+          return res.status(500).json({ error: 'Candidate selection error ceiling reached', code: 'selection_error_ceiling' });
+        }
+        continue;
       }
       const range = countResponse.headers.get('content-range');
       const match = range && range.match(/\/(\d+)$/);
       if (!match) {
         console.error('profile-candidates: message count header missing');
-        return res.status(500).json({ error: 'Database query failed', code: 'db_error' });
+        selectionHoldCount += 1;
+        if (selectionHoldCount >= MAX_SELECTION_HOLDS) {
+          return res.status(500).json({ error: 'Candidate selection error ceiling reached', code: 'selection_error_ceiling' });
+        }
+        continue;
       }
       const actualMessageCount = Number.parseInt(match[1], 10);
       if (actualMessageCount === 0) continue;
@@ -93,6 +105,8 @@ module.exports = async function (req, res) {
     return res.status(200).json({
       requested_limit: requestedLimit,
       candidate_count: candidates.length,
+      selection_checked_count: selectionCheckedCount,
+      selection_hold_count: selectionHoldCount,
       candidates
     });
   } catch (error) {

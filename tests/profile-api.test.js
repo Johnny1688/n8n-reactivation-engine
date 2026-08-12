@@ -245,9 +245,53 @@ test('candidate endpoint verifies canonical messages instead of stale rollup cou
   const result = await call(profileCandidates, { query: { limit: '1' } });
   assert.equal(result.statusCode, 200);
   assert.equal(result.payload.candidate_count, 1);
+  assert.equal(result.payload.selection_checked_count, 1);
+  assert.equal(result.payload.selection_hold_count, 0);
   assert.equal(result.payload.candidates[0].actual_message_count, 3);
   assert.equal(calls[1].options.method, 'HEAD');
   assert.ok(!calls[0].url.includes('message_count=gt.0'));
+});
+
+test('candidate endpoint isolates one count failure and continues to a valid customer', async () => {
+  const calls = queueFetch(
+    response([
+      {
+        project_key: 'PK-HOLD', customer_name: 'Held', stage: 'quoted',
+        status: 'open', follow_up_priority: 'high', conversation_summary: null,
+        summary_updated_at: null, message_count: 0, last_interaction_time: '2026-08-11T00:00:00.000Z'
+      },
+      {
+        project_key: 'PK-SYNTHETIC', customer_name: 'Synthetic', stage: 'quoted',
+        status: 'open', follow_up_priority: 'high', conversation_summary: null,
+        summary_updated_at: null, message_count: 0, last_interaction_time: '2026-08-10T00:00:00.000Z'
+      }
+    ]),
+    response(null, 503),
+    response(null, 200, { 'content-range': '0-1/2' })
+  );
+  const result = await call(profileCandidates, { query: { limit: '1' } });
+  assert.equal(result.statusCode, 200);
+  assert.equal(result.payload.candidate_count, 1);
+  assert.equal(result.payload.selection_checked_count, 2);
+  assert.equal(result.payload.selection_hold_count, 1);
+  assert.equal(result.payload.candidates[0].project_key, 'PK-SYNTHETIC');
+  assert.equal(calls.length, 3);
+});
+
+test('candidate endpoint stops after the bounded selection error ceiling', async () => {
+  queueFetch(
+    response([1, 2, 3].map(index => ({
+      project_key: `PK-HOLD-${index}`, customer_name: 'Held', stage: 'quoted',
+      status: 'open', follow_up_priority: 'high', conversation_summary: null,
+      summary_updated_at: null, message_count: 0, last_interaction_time: `2026-08-${12 - index}T00:00:00.000Z`
+    }))),
+    response(null, 503),
+    response(null, 503),
+    response(null, 503)
+  );
+  const result = await call(profileCandidates, { query: { limit: '1' } });
+  assert.equal(result.statusCode, 500);
+  assert.equal(result.payload.code, 'selection_error_ceiling');
 });
 
 test('profile APIs do not expose exception text or customer identity in errors', () => {
