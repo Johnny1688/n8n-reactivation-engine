@@ -7,20 +7,39 @@ const { requireProfileAuth } = require('../src/profile/auth.js');
 
 const MAX_MESSAGES = 1000;
 const MAX_FORMATTED_CHARS = 60000;
+const RUN_ID_PATTERN = /^[a-z0-9][a-z0-9-]{7,79}$/;
 
 module.exports = async function (req, res) {
-  if (req.method !== 'GET') {
+  if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed', code: 'method_not_allowed' });
   }
   if (!requireProfileAuth(req, res)) return;
 
+  const isCanaryPost = req.method === 'POST';
+  let input = req.query || {};
+  if (isCanaryPost) {
+    try {
+      input = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    } catch {
+      return res.status(400).json({ error: 'Request body is not valid JSON', code: 'invalid_json' });
+    }
+    if (!input || typeof input !== 'object' || Array.isArray(input)) {
+      return res.status(400).json({ error: 'Request body is not valid JSON', code: 'invalid_json' });
+    }
+    const runId = String(input.canary_run_id || '').trim();
+    const slot = Number(input.canary_slot);
+    if (!RUN_ID_PATTERN.test(runId) || ![1, 2].includes(slot)) {
+      return res.status(400).json({ error: 'Canary control is invalid', code: 'invalid_canary_control' });
+    }
+  }
+
   // ── Parameter validation ──────────────────────────────────
-  const projectKey = (req.query.project_key || '').trim();
+  const projectKey = String(input.project_key || '').trim();
   if (!projectKey) {
     return res.status(400).json({ error: 'project_key is required', code: 'missing_project_key' });
   }
 
-  const scope = (req.query.scope || '').trim().toLowerCase();
+  const scope = String(input.scope || '').trim().toLowerCase();
   if (!scope) {
     return res.status(400).json({ error: 'scope is required', code: 'missing_scope' });
   }
@@ -28,7 +47,7 @@ module.exports = async function (req, res) {
     return res.status(400).json({ error: 'scope must be "all" or "since"', code: 'invalid_scope' });
   }
 
-  let sinceIso = (req.query.since_iso || '').trim();
+  let sinceIso = String(input.since_iso || '').trim();
   if (scope === 'since') {
     if (!sinceIso) {
       return res.status(400).json({ error: 'since_iso is required when scope=since', code: 'missing_since_iso' });
@@ -39,6 +58,9 @@ module.exports = async function (req, res) {
     }
     sinceIso = d.toISOString();
   }
+  const sendOk = payload => res.status(200).json(
+    isCanaryPost ? { message_response: payload } : payload
+  );
 
   // ── Supabase config ───────────────────────────────────────
   const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -129,7 +151,7 @@ module.exports = async function (req, res) {
 
     // ── Format ──────────────────────────────────────────────
     if (!messages.length) {
-      return res.status(200).json({
+      return sendOk({
         project_key: projectKey,
         scope,
         message_count: 0,
@@ -161,7 +183,7 @@ module.exports = async function (req, res) {
       });
     }
 
-    return res.status(200).json({
+    return sendOk({
       project_key: projectKey,
       scope,
       message_count: messages.length,

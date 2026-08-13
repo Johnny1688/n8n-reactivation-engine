@@ -127,6 +127,111 @@ test('profile validator scans extensions and allows ordinary commercial evidence
   assert.equal(safe.valid, true);
 });
 
+test('profile validator rejects unlabeled continuous and grouped payment card identifiers', () => {
+  for (const privateValue of ['4111111111111111', '4111-1111-1111-1111', '4111 1111 1111 1111']) {
+    const result = validateProfile(validProfile({ narrative: `Synthetic ${privateValue}` }));
+    assert.equal(result.valid, false);
+    assert.ok(result.errors.some(error => error === 'forbidden private data at $.narrative'));
+    assert.ok(result.errors.every(error => !error.includes(privateValue)));
+  }
+  assert.equal(validateProfile(validProfile({ narrative: 'Synthetic order ref 1234567890123456.' })).valid, true);
+});
+
+test('workflow artifact preserves control across real single-item loop rounds', () => {
+  const workflow = JSON.parse(fs.readFileSync(
+    path.join(__dirname, '..', 'workflows', 'customer_profile_generator_canary_v2.json'),
+    'utf8'
+  ));
+  const byName = new Map(workflow.nodes.map(node => [node.name, node]));
+  const runCode = (name, items) => new Function('items', byName.get(name).parameters.jsCode)(items);
+  const hasEdge = (source, output, target, input) => (
+    workflow.connections[source]?.main?.[output] || []
+  ).some(edge => edge.node === target && edge.index === input);
+  const control = (slot, projectKey) => ({
+    project_key: projectKey,
+    canary_run_id: 'profile-generator-canary-2026-08-12-v2',
+    canary_slot: slot,
+    candidate_identity_safe: true,
+    rollback_prestate: 'missing_summary',
+    requested_limit: 2,
+    candidate_count: 2,
+    selection_checked_count: 2,
+    selection_hold_count: 0
+  });
+  const safeRoute = projectKey => ({
+    project_key: projectKey,
+    decision: 'full',
+    reason: 'no_profile',
+    scope: 'all',
+    existing_profile: null,
+    current_stage: 'engaged',
+    expected_summary_updated_at: null,
+    expected_last_interaction_time: null
+  });
+
+  for (const node of workflow.nodes.filter(node => node.type === 'n8n-nodes-base.code')) {
+    assert.ok(!node.parameters.jsCode.includes('$runIndex'));
+    assert.ok(!node.parameters.jsCode.includes("$('"));
+  }
+  assert.equal(workflow.nodes.filter(node => node.type === 'n8n-nodes-base.merge').length, 4);
+  assert.ok(hasEdge('Loop Over Exact Two', 1, 'Merge Route With Control', 0));
+  assert.ok(hasEdge('Profile Route', 0, 'Merge Route With Control', 1));
+  assert.ok(hasEdge('Should Generate Profile?', 0, 'Merge Messages With Control', 0));
+  assert.ok(hasEdge('Fetch Customer Messages', 0, 'Merge Messages With Control', 1));
+  assert.ok(hasEdge('Prompt Safe?', 0, 'Merge AI With Control', 0));
+  assert.ok(hasEdge('Generate Customer Profile', 0, 'Merge AI With Control', 1));
+  assert.ok(hasEdge('Profile JSON Safe?', 0, 'Merge Write With Control', 0));
+  assert.ok(hasEdge('Write Profile With CAS', 0, 'Merge Write With Control', 1));
+  for (const name of ['Profile Route', 'Fetch Customer Messages']) {
+    assert.equal(byName.get(name).parameters.method, 'POST');
+    assert.ok(!String(byName.get(name).parameters.url).includes('project_key='));
+  }
+
+  const roundA = runCode('Validate Route', [{
+    json: {
+      control: control(1, 'SYN-A'),
+      route_response: { ...safeRoute('SYN-A'), reason: 'synthetic_hold' }
+    }
+  }])[0];
+  const terminalA = runCode('Redacted Hold Or Skip', [roundA])[0];
+  assert.equal(terminalA.json.canary_slot, 1);
+
+  const roundB = runCode('Validate Route', [{
+    json: { control: control(2, 'SYN-B'), route_response: safeRoute('SYN-B') }
+  }])[0];
+  const messageBody = 'SYN-B-BODY';
+  const contextB = runCode('Validate Message Context', [{
+    json: {
+      ...roundB.json,
+      message_response: {
+        project_key: 'SYN-B', scope: 'all', message_count: 1,
+        role_counts: { customer: 1, me: 0, other: 0 },
+        formatted_chars: messageBody.length, formatted_messages: messageBody
+      }
+    }
+  }])[0];
+  const promptB = runCode('Build Profile Prompt', [contextB])[0];
+  assert.equal(promptB.json.control.project_key, 'SYN-B');
+  assert.ok(promptB.json.ai_request.user_prompt.includes(messageBody));
+  assert.ok(!promptB.json.ai_request.user_prompt.includes('SYN-A'));
+
+  const parsedB = runCode('Parse Profile JSON', [{
+    json: { ...promptB.json, content: [{ text: '{"safe":true}' }] }
+  }])[0];
+  const terminalB = runCode('Redacted Success', [{
+    json: {
+      ...parsedB.json, written: true, canary_slot: 2,
+      profile_version: 1, generation_mode: 'full'
+    }
+  }])[0];
+  const aggregate = new Function('items', byName.get('Canary Aggregate - Redacted').parameters.jsCode);
+  const result = aggregate([terminalA, terminalB])[0].json;
+  assert.equal(result.verdict, 'CANARY_EXECUTION_HOLD');
+  assert.equal(result.distinct_candidate_count, 2);
+  assert.equal(result.isolated_hold_count, 1);
+  assert.ok(!JSON.stringify(result).includes('SYN-'));
+});
+
 test('profile endpoints require the internal token and disable caching', async () => {
   const result = await call(profileRoute, { query: { project_key: 'PK-SYNTHETIC' }, token: null });
   assert.equal(result.statusCode, 401);
@@ -143,6 +248,26 @@ test('route rebuilds a profile with a missing summary timestamp', async () => {
   assert.equal(result.statusCode, 200);
   assert.equal(result.payload.decision, 'full');
   assert.equal(result.payload.reason, 'missing_summary_timestamp');
+});
+
+test('route accepts canary POST and nests its response without customer name', async () => {
+  queueFetch(response([{
+    project_key: 'PK-SYNTHETIC', customer_name: 'Synthetic private identity', stage: 'engaged',
+    conversation_summary: null, summary_updated_at: null,
+    last_interaction_time: null, message_count: 2
+  }]));
+  const result = await call(profileRoute, {
+    method: 'POST',
+    body: {
+      project_key: 'PK-SYNTHETIC',
+      canary_run_id: 'profile-generator-canary-2026-08-12-v2',
+      canary_slot: 1
+    }
+  });
+  assert.equal(result.statusCode, 200);
+  assert.equal(result.payload.route_response.decision, 'full');
+  assert.equal(result.payload.route_response.reason, 'no_profile');
+  assert.ok(!Object.prototype.hasOwnProperty.call(result.payload.route_response, 'customer_name'));
 });
 
 test('route uses profile_version rather than schema_version for the cap', async () => {
@@ -196,6 +321,24 @@ test('customer messages returns bounded role counts', async () => {
   assert.equal(result.statusCode, 200);
   assert.deepEqual(result.payload.role_counts, { customer: 1, me: 1, other: 0 });
   assert.equal(result.payload.message_count, 2);
+});
+
+test('customer messages accepts canary POST and nests the bounded response', async () => {
+  queueFetch(
+    response([{ project_key: 'PK-SYNTHETIC' }]),
+    response(null, 200, { 'content-range': '0-0/1' }),
+    response([{ role: 'customer', message: 'Synthetic inbound.', message_time: '2026-08-01T00:00:00.000Z' }])
+  );
+  const result = await call(customerMessages, {
+    method: 'POST',
+    body: {
+      project_key: 'PK-SYNTHETIC', scope: 'all', since_iso: '',
+      canary_run_id: 'profile-generator-canary-2026-08-12-v2', canary_slot: 2
+    }
+  });
+  assert.equal(result.statusCode, 200);
+  assert.equal(result.payload.message_response.message_count, 1);
+  assert.deepEqual(result.payload.message_response.role_counts, { customer: 1, me: 0, other: 0 });
 });
 
 test('customer messages blocks histories above the safe message limit', async () => {

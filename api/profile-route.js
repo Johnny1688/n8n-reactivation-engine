@@ -5,16 +5,39 @@
 
 const { requireProfileAuth } = require('../src/profile/auth.js');
 
+const RUN_ID_PATTERN = /^[a-z0-9][a-z0-9-]{7,79}$/;
+
 module.exports = async function (req, res) {
-  if (req.method !== 'GET') {
+  if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed', code: 'method_not_allowed' });
   }
   if (!requireProfileAuth(req, res)) return;
 
-  const projectKey = (req.query.project_key || '').trim();
+  const isCanaryPost = req.method === 'POST';
+  let input = req.query || {};
+  if (isCanaryPost) {
+    try {
+      input = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    } catch {
+      return res.status(400).json({ error: 'Request body is not valid JSON', code: 'invalid_json' });
+    }
+    if (!input || typeof input !== 'object' || Array.isArray(input)) {
+      return res.status(400).json({ error: 'Request body is not valid JSON', code: 'invalid_json' });
+    }
+    const runId = String(input.canary_run_id || '').trim();
+    const slot = Number(input.canary_slot);
+    if (!RUN_ID_PATTERN.test(runId) || ![1, 2].includes(slot)) {
+      return res.status(400).json({ error: 'Canary control is invalid', code: 'invalid_canary_control' });
+    }
+  }
+
+  const projectKey = String(input.project_key || '').trim();
   if (!projectKey) {
     return res.status(400).json({ error: 'project_key is required', code: 'missing_project_key' });
   }
+  const sendOk = payload => res.status(200).json(
+    isCanaryPost ? { route_response: payload } : payload
+  );
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -88,7 +111,7 @@ module.exports = async function (req, res) {
 
     const base = {
       project_key: row.project_key,
-      customer_name: row.customer_name || '',
+      ...(isCanaryPost ? {} : { customer_name: row.customer_name || '' }),
       current_stage: row.stage || '',
       message_count: row.message_count || 0,
       today_iso: todayISO,
@@ -103,7 +126,7 @@ module.exports = async function (req, res) {
         Array.isArray(cases) &&
         cases.some(c => c.status === 'open' || c.status === 'disputed')
       ) {
-        return res.status(200).json({
+        return sendOk({
           ...base,
           decision: 'skip',
           reason: 'open_return_case',
@@ -117,7 +140,7 @@ module.exports = async function (req, res) {
 
     // ── Step 4a: no profile ───────────────────────────────────
     if (!hasProfile) {
-      return res.status(200).json({
+      return sendOk({
         ...base,
         decision: 'full',
         reason: invalidProfile ? 'invalid_existing_profile' : 'no_profile',
@@ -135,7 +158,7 @@ module.exports = async function (req, res) {
 
     // ── Step 4b: version cap ──────────────────────────────────
     if (profileVersion >= 10) {
-      return res.status(200).json({
+      return sendOk({
         ...base,
         decision: 'full',
         reason: 'profile_version_cap',
@@ -148,7 +171,7 @@ module.exports = async function (req, res) {
 
     // ── Step 4c: missing, invalid, or stale summary clock ──────
     if (!summaryUpdatedAt) {
-      return res.status(200).json({
+      return sendOk({
         ...base,
         decision: 'full',
         reason: 'missing_summary_timestamp',
@@ -161,7 +184,7 @@ module.exports = async function (req, res) {
 
     const summaryTime = new Date(summaryUpdatedAt);
     if (Number.isNaN(summaryTime.getTime())) {
-      return res.status(200).json({
+      return sendOk({
         ...base,
         decision: 'full',
         reason: 'invalid_summary_timestamp',
@@ -174,7 +197,7 @@ module.exports = async function (req, res) {
 
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     if (summaryTime < thirtyDaysAgo) {
-      return res.status(200).json({
+      return sendOk({
         ...base,
         decision: 'full',
         reason: 'stale_30_days',
@@ -187,7 +210,7 @@ module.exports = async function (req, res) {
 
     // ── Step 4d: new interactions since last update ───────────
     if (row.last_interaction_time && Number.isNaN(new Date(row.last_interaction_time).getTime())) {
-      return res.status(200).json({
+      return sendOk({
         ...base,
         decision: 'full',
         reason: 'invalid_last_interaction_time',
@@ -227,7 +250,7 @@ module.exports = async function (req, res) {
       const newMessages = parseInt(countMatch[1], 10);
 
       if (newMessages >= 3) {
-        return res.status(200).json({
+        return sendOk({
           ...base,
           decision: 'incremental',
           reason: 'enough_new_messages',
@@ -240,7 +263,7 @@ module.exports = async function (req, res) {
       }
 
       // < 3 new messages
-      return res.status(200).json({
+      return sendOk({
         ...base,
         decision: 'skip',
         reason: 'fresh_enough',
@@ -252,7 +275,7 @@ module.exports = async function (req, res) {
     }
 
     // ── Step 4e: default — fresh enough ───────────────────────
-    return res.status(200).json({
+    return sendOk({
       ...base,
       decision: 'skip',
       reason: 'fresh_enough',

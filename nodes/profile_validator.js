@@ -307,10 +307,31 @@ function containsForbiddenPrivateData(value) {
   if (/\b(?:swift|bic)\s*(?:code)?\s*[:：=]\s*[A-Z0-9]{8}(?:[A-Z0-9]{3})?\b/i.test(text)) return true;
   if (/\b(?:bank\s*)?(?:account|routing|sort)\s*(?:number|no\.?|code)?\s*[:：=]\s*[A-Z0-9 -]{6,}\b/i.test(text)) return true;
   if (/\b(?:card|credit\s*card)\s*(?:number|no\.?)?\s*[:：=]\s*(?:\d[ -]?){13,19}\b/i.test(text)) return true;
+  if (containsPaymentCardNumber(text)) return true;
 
   // Credentials and one-time authentication values.
   if (/\b(?:password|passcode|api[_ -]?key|access[_ -]?token|auth[_ -]?token|otp|verification[_ -]?code)\s*[:：=]\s*\S{4,}/i.test(text)) return true;
 
+  return false;
+}
+
+function containsPaymentCardNumber(text) {
+  const candidates = String(text).matchAll(/(?:^|[^\d])((?:\d[ -]?){12,18}\d)(?=$|[^\d])/g);
+  for (const match of candidates) {
+    const digits = match[1].replace(/[ -]/g, '');
+    if (digits.length < 13 || digits.length > 19) continue;
+    let sum = 0;
+    const parity = digits.length % 2;
+    for (let index = 0; index < digits.length; index += 1) {
+      let digit = Number(digits[index]);
+      if (index % 2 === parity) {
+        digit *= 2;
+        if (digit > 9) digit -= 9;
+      }
+      sum += digit;
+    }
+    if (sum % 10 === 0) return true;
+  }
   return false;
 }
 
@@ -366,7 +387,8 @@ module.exports = {
   validateProfile,
   validateBusinessRules,
   findForbiddenPrivateData,
-  containsForbiddenPrivateData
+  containsForbiddenPrivateData,
+  containsPaymentCardNumber
 };
 
 if (typeof globalThis !== 'undefined') {
