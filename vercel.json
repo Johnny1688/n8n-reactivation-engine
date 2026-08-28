@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/profile-canary-rollback",
+      "destination": "/api/profile-canary-status?__profile_canary_action=rollback"
+    }
+  ]
+}

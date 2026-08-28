@@ -10,8 +10,12 @@ const profileRoute = require('../api/profile-route.js');
 const profileWrite = require('../api/profile-write.js');
 const customerMessages = require('../api/customer-messages.js');
 const profileCandidates = require('../api/profile-candidates.js');
-const profileCanaryRollback = require('../api/profile-canary-rollback.js');
-const profileCanaryStatus = require('../api/profile-canary-status.js');
+const profileCanaryControl = require('../api/profile-canary-status.js');
+const profileCanaryStatus = profileCanaryControl;
+const profileCanaryRollback = (req, res) => profileCanaryControl({
+  ...req,
+  query: { ...(req.query || {}), __profile_canary_action: 'rollback' }
+}, res);
 const { validateProfile } = require('../nodes/profile_validator.js');
 
 const tests = [];
@@ -237,6 +241,52 @@ test('profile endpoints require the internal token and disable caching', async (
   assert.equal(result.statusCode, 401);
   assert.equal(result.payload.code, 'unauthorized');
   assert.equal(result.headers['cache-control'], 'no-store');
+});
+
+test('profile canary endpoints share one function without changing route contracts', async () => {
+  const apiDir = path.join(__dirname, '..', 'api');
+  const apiFunctions = fs.readdirSync(apiDir, { withFileTypes: true })
+    .filter(entry => entry.isFile() && entry.name.endsWith('.js'))
+    .map(entry => entry.name)
+    .sort();
+  const vercel = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'vercel.json'), 'utf8'));
+
+  assert.equal(apiFunctions.length, 12);
+  assert.ok(apiFunctions.includes('profile-canary-status.js'));
+  assert.ok(!apiFunctions.includes('profile-canary-rollback.js'));
+  assert.deepEqual(Object.keys(vercel), ['rewrites']);
+  assert.deepEqual(vercel.rewrites, [{
+    source: '/api/profile-canary-rollback',
+    destination: '/api/profile-canary-status?__profile_canary_action=rollback'
+  }]);
+
+  const statusUnauthorized = await call(profileCanaryControl, { token: null });
+  assert.equal(statusUnauthorized.statusCode, 401);
+  assert.equal(statusUnauthorized.payload.code, 'unauthorized');
+  assert.equal(statusUnauthorized.headers['cache-control'], 'no-store');
+
+  const statusPost = await call(profileCanaryControl, { method: 'POST' });
+  assert.equal(statusPost.statusCode, 405);
+  assert.equal(statusPost.payload.code, 'method_not_allowed');
+
+  const rollbackGet = await call(profileCanaryControl, {
+    method: 'GET', query: { __profile_canary_action: 'rollback' }
+  });
+  assert.equal(rollbackGet.statusCode, 405);
+  assert.equal(rollbackGet.payload.code, 'method_not_allowed');
+
+  const rollbackUnauthorized = await call(profileCanaryControl, {
+    method: 'POST', query: { __profile_canary_action: 'rollback' }, token: null
+  });
+  assert.equal(rollbackUnauthorized.statusCode, 401);
+  assert.equal(rollbackUnauthorized.payload.code, 'unauthorized');
+  assert.equal(rollbackUnauthorized.headers['cache-control'], 'no-store');
+
+  const unknownRoute = await call(profileCanaryControl, {
+    query: { __profile_canary_action: 'unknown' }
+  });
+  assert.equal(unknownRoute.statusCode, 404);
+  assert.equal(unknownRoute.payload.code, 'route_not_found');
 });
 
 test('route rebuilds a profile with a missing summary timestamp', async () => {
@@ -678,7 +728,6 @@ test('profile APIs do not expose exception text or customer identity in errors',
     'api/profile-route.js',
     'api/customer-messages.js',
     'api/profile-write.js',
-    'api/profile-canary-rollback.js',
     'api/profile-canary-status.js'
   ].map(file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8'));
   assert.ok(sources.every(source => !source.includes('error: err.message')));
