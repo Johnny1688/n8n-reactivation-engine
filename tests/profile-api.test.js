@@ -289,6 +289,41 @@ test('profile canary endpoints share one function without changing route contrac
   assert.equal(unknownRoute.payload.code, 'route_not_found');
 });
 
+test('missing-header canary requests precede server auth configuration checks', async () => {
+  const savedToken = process.env.PROFILE_INTERNAL_API_TOKEN;
+  const savedFetch = global.fetch;
+  let fetchCalled = false;
+  global.fetch = async () => {
+    fetchCalled = true;
+    throw new Error('unexpected fetch');
+  };
+  delete process.env.PROFILE_INTERNAL_API_TOKEN;
+
+  try {
+    const statusUnauthorized = await call(profileCanaryControl, { token: null });
+    assert.equal(statusUnauthorized.statusCode, 401);
+    assert.equal(statusUnauthorized.payload.code, 'unauthorized');
+    assert.equal(statusUnauthorized.headers['cache-control'], 'no-store');
+
+    const rollbackUnauthorized = await call(profileCanaryControl, {
+      method: 'POST', query: { __profile_canary_action: 'rollback' }, token: null
+    });
+    assert.equal(rollbackUnauthorized.statusCode, 401);
+    assert.equal(rollbackUnauthorized.payload.code, 'unauthorized');
+    assert.equal(rollbackUnauthorized.headers['cache-control'], 'no-store');
+
+    const configuredCaller = await call(profileCanaryControl, { token: 'synthetic-nonempty-token' });
+    assert.equal(configuredCaller.statusCode, 500);
+    assert.equal(configuredCaller.payload.code, 'missing_profile_auth');
+    assert.equal(configuredCaller.headers['cache-control'], 'no-store');
+    assert.equal(fetchCalled, false);
+  } finally {
+    if (savedToken === undefined) delete process.env.PROFILE_INTERNAL_API_TOKEN;
+    else process.env.PROFILE_INTERNAL_API_TOKEN = savedToken;
+    global.fetch = savedFetch;
+  }
+});
+
 test('route rebuilds a profile with a missing summary timestamp', async () => {
   queueFetch(response([{
     project_key: 'PK-SYNTHETIC', stage: 'engaged', conversation_summary: validProfile(),

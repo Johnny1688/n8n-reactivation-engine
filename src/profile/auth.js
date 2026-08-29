@@ -23,14 +23,19 @@ function safeEqual(left, right) {
 function requireProfileAuth(req, res) {
   setNoStore(res);
 
+  const provided = String(readHeader(req, 'x-profile-internal-token')).trim();
+  if (!provided) {
+    res.status(401).json({ error: 'Unauthorized', code: 'unauthorized' });
+    return false;
+  }
+
   const expected = process.env.PROFILE_INTERNAL_API_TOKEN || '';
   if (expected.length < 32) {
     res.status(500).json({ error: 'Server misconfiguration', code: 'missing_profile_auth' });
     return false;
   }
 
-  const provided = String(readHeader(req, 'x-profile-internal-token')).trim();
-  if (!provided || !safeEqual(provided, expected)) {
+  if (!safeEqual(provided, expected)) {
     res.status(401).json({ error: 'Unauthorized', code: 'unauthorized' });
     return false;
   }
