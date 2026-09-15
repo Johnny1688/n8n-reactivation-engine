@@ -289,7 +289,7 @@ function deriveManualContextHold(result, text) {
     reasons.push('weak_identity_without_concrete_anchor');
   }
   if (
-    /quote|quoted|pricing|price|payment|deposit|invoice|pi/i.test(text) &&
+    /\b(?:quote|quoted|pricing|price|payment|deposit|invoice|pi)\b/i.test(text) &&
     !/\$\s*\d|\busd\s*\d|\b(?:invoice|pi|deposit|payment|quote|pricing|price)\b/i.test(text)
   ) {
     reasons.push('quote_payment_context_gap');
