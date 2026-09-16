@@ -779,10 +779,8 @@ function buildAlternateActivationMessage(current, customerName) {
     };
   }
 
-  return {
-    en: withHumanCta(prefix, `I can put together a simple first-step note for ${object}, so you have a clearer place to restart the conversation if it is still relevant.`),
-    cn: `${prefix}，我可以先把 ${cnObject} 的第一步要点整理成一条简单说明，如果这个项目还相关，你就有一个更清楚的切入点。`
-  };
+  // No evidence-backed alternate angle: preserve the caller's hold path.
+  return null;
 }
 
 function buildEvidenceLimitedRecoveryMessage(current, customerName) {
