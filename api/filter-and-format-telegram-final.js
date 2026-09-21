@@ -1,17 +1,3 @@
-function parseJsonSafe(raw) {
-  if (!raw || typeof raw !== 'string') return {};
-  try {
-    return JSON.parse(
-      raw
-        .replace(/^```json/i, '')
-        .replace(/^```/i, '')
-        .replace(/```$/i, '')
-        .trim()
-    );
-  } catch {
-    return {};
-  }
-}
 
 function has(v) {
   return (
@@ -113,21 +99,150 @@ function compressSummary(text, maxLen = 400) {
   return `${head} ... ${tail}`;
 }
 
+// Bounded Enforce decoder: diagnostics contain fixed codes, never response text.
+function parseJsonSafe(raw) {
+  if (typeof raw !== 'string') return { error: 'ENFORCE_TEXT_TYPE' };
+  let text = raw.trim();
+  if (!text) return { error: 'ENFORCE_EMPTY_TEXT' };
+  if (text.startsWith('```')) {
+    const fence = text.match(/^```(?:json)?\s*\n?([\s\S]*?)\n?```$/i);
+    if (!fence) return { error: 'ENFORCE_INVALID_FENCE' };
+    text = fence[1].trim();
+  }
+  try {
+    return { value: JSON.parse(text) };
+  } catch {
+    return { error: 'ENFORCE_INVALID_JSON' };
+  }
+}
+
 function getEnforceParsed(item) {
-  const rawText =
-    item.json?.output?.[0]?.content?.[0]?.text ||
-    item.json?.content?.[0]?.text ||
-    '{}';
+  const current = item.json || {};
+  const own = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
+  const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+  const code = value => typeof value === 'string'
+    ? value.trim().toUpperCase().replace(/[ -]+/g, '_') : '';
+  const candidates = [];
+  const diagnostics = [];
+  const add = value => { if (!diagnostics.includes(value)) diagnostics.push(value); };
+  const reasonCodes = [];
+  const blockingReasons = new Set([
+    'NO_SEND', 'DO_NOT_SEND', 'SEND_STATE_NO_SEND', 'HARD_NO_SEND',
+    'NOT_NOW', 'HAS_NOT_NOW_SIGNAL', 'MANUAL_CONTEXT_REQUIRED',
+    'SEND_STATE_MANUAL_CONTEXT_REQUIRED', 'MY_TURN_REQUIRES_MANUAL_REPLY',
+    'MISSING_CUSTOMER_CONTEXT', 'MISSING_SOURCE_CONTEXT',
+    'MISSING_SUMMARY_WITHOUT_CONCRETE_ANCHOR', 'WEAK_IDENTITY_WITHOUT_CONCRETE_ANCHOR',
+    'VERY_SHORT_CUSTOMER_CONTEXT_WITHOUT_ANCHOR',
+    'ALTERNATE_ACTIVATION_REFUSED_NO_CONCRETE_SIGNAL', 'QUALITY_BLOCKED',
+    'BLOCKED', 'HOLD', 'REFUSAL', 'REFUSED', 'REJECTED', 'REJECT'
+  ]);
+  const recognizedReasons = new Set([
+    ...blockingReasons, 'EMPTY_MESSAGE', 'EMPTY_AI_MESSAGE', 'EMPTY_SKIP',
+    'MISSING_CHINESE_REFERENCE', 'PASS', 'OK', 'APPROVED'
+  ]);
+  let reasonUnmapped = false;
+  let blockedByEnforce = false;
 
-  const parsed = parseJsonSafe(rawText);
+  function inspectMetadata(value) {
+    if (!object(value)) return;
+    if (own(value, 'refusal') && value.refusal !== null && value.refusal !== false && value.refusal !== '') add('ENFORCE_REFUSAL');
+    if (code(value.type) === 'REFUSAL') add('ENFORCE_REFUSAL');
+    if (code(value.finish_reason) === 'CONTENT_FILTER') add('ENFORCE_REFUSAL');
+    if (code(value.stop_reason) === 'REFUSAL') add('ENFORCE_REFUSAL');
+    if (code(value.stop_reason) === 'MAX_TOKENS') add('ENFORCE_TRUNCATED_OUTPUT');
+    if (code(value.stop_reason) === 'PAUSE_TURN') add('ENFORCE_RESPONSE_NOT_COMPLETE');
+    if (['LENGTH', 'MAX_TOKENS', 'MAX_OUTPUT_TOKENS'].includes(code(value.finish_reason))) add('ENFORCE_TRUNCATED_OUTPUT');
+    if (code(value.status) === 'INCOMPLETE' || value.incomplete_details != null) add('ENFORCE_TRUNCATED_OUTPUT');
+    if (['FAILED', 'CANCELLED', 'CANCELED', 'IN_PROGRESS', 'QUEUED'].includes(code(value.status))) add('ENFORCE_RESPONSE_NOT_COMPLETE');
+    if (own(value, 'error') && value.error !== null && value.error !== false) add('ENFORCE_PROVIDER_ERROR');
+    for (const key of ['hard_no_send', 'has_not_now_signal', 'not_now', 'manual_context_required']) {
+      if (boolFlag(value[key])) {
+        const reason = code(key);
+        if (!reasonCodes.includes(reason)) reasonCodes.push(reason);
+        blockedByEnforce = true;
+      }
+    }
+    for (const key of ['send_state', 'enforce_status', 'status', 'action']) {
+      const reason = code(value[key]);
+      if (blockingReasons.has(reason)) {
+        if (!reasonCodes.includes(reason)) reasonCodes.push(reason);
+        blockedByEnforce = true;
+      }
+    }
+    if (own(value, 'reason') && value.reason != null && value.reason !== '') {
+      const reason = code(value.reason);
+      if (recognizedReasons.has(reason)) {
+        if (!reasonCodes.includes(reason)) reasonCodes.push(reason);
+        if (blockingReasons.has(reason)) blockedByEnforce = true;
+      } else {
+        reasonUnmapped = true;
+      }
+    }
+  }
 
-  const whatsapp_message = (parsed.whatsapp_message || '').trim();
+  function collectContent(content, shape) {
+    if (!Array.isArray(content)) { add('ENFORCE_CONTENT_SHAPE'); return; }
+    for (const part of content) {
+      if (!object(part)) { add('ENFORCE_CONTENT_SHAPE'); continue; }
+      inspectMetadata(part);
+      if (own(part, 'text')) {
+        if (part.type != null && !['TEXT', 'OUTPUT_TEXT'].includes(code(part.type))) add('ENFORCE_CONTENT_TYPE');
+        candidates.push({ value: part.text, shape });
+      }
+    }
+  }
 
+  inspectMetadata(current);
+  // The merged row can retain upstream draft fields. A chosen Enforce envelope
+  // is authoritative, even when malformed; never fall back to stale draft data.
+  if (own(current, 'output') && current.output !== undefined) {
+    if (!Array.isArray(current.output)) add('ENFORCE_OUTPUT_SHAPE');
+    else for (const output of current.output) {
+      if (!object(output)) { add('ENFORCE_OUTPUT_SHAPE'); continue; }
+      inspectMetadata(output);
+      if (own(output, 'content')) collectContent(output.content, 'output_content_text');
+      else if (code(output.type) !== 'REASONING') add('ENFORCE_OUTPUT_SHAPE');
+    }
+  } else if (own(current, 'content') && current.content !== undefined) {
+    collectContent(current.content, 'content_text');
+  } else if (own(current, 'output_text') && current.output_text !== undefined) {
+    candidates.push({ value: current.output_text, shape: 'output_text' });
+  } else if (own(current, 'whatsapp_message')) {
+    add('ENFORCE_DIRECT_OBJECT_NOT_SUPPORTED');
+  }
+  if (!candidates.length) add('ENFORCE_MISSING_OUTPUT');
+  if (candidates.length > 1) add('ENFORCE_AMBIGUOUS_OUTPUT');
+
+  let parsed;
+  if (candidates.length === 1) {
+    const candidate = candidates[0];
+    const result = parseJsonSafe(candidate.value);
+    if (result.error) add(result.error);
+    else if (!object(result.value)) add('ENFORCE_OBJECT_REQUIRED');
+    else {
+      parsed = result.value;
+      inspectMetadata(parsed);
+      if (!own(parsed, 'whatsapp_message')) add('ENFORCE_MESSAGE_FIELD_MISSING');
+      else if (typeof parsed.whatsapp_message !== 'string') add('ENFORCE_MESSAGE_TYPE');
+      else if (!parsed.whatsapp_message.trim() || parsed.whatsapp_message.trim().toLowerCase() === 'unknown') add('ENFORCE_EXPLICIT_EMPTY');
+      if (own(parsed, 'whatsapp_message_cn') && typeof parsed.whatsapp_message_cn !== 'string') add('ENFORCE_CHINESE_TYPE');
+    }
+  }
+  const inputBlocked = diagnostics.length > 0 || blockedByEnforce;
+  const rootReason = diagnostics.length ? diagnostics[0] : blockedByEnforce ? 'ENFORCE_EXPLICIT_HOLD' : 'PARSED_OK';
   return {
-    ...(parsed && typeof parsed === 'object' ? parsed : {}),
-    whatsapp_message
+    whatsapp_message: !inputBlocked && parsed ? parsed.whatsapp_message.trim() : '',
+    whatsapp_message_cn: !inputBlocked && parsed && typeof parsed.whatsapp_message_cn === 'string' ? parsed.whatsapp_message_cn.trim() : '',
+    parse_status: rootReason,
+    source_shape: candidates.length === 1 ? candidates[0].shape : 'unknown',
+    diagnostic_codes: diagnostics,
+    reason_codes: reasonCodes,
+    reason_unmapped: reasonUnmapped,
+    blocked_by_enforce: blockedByEnforce,
+    input_blocked: inputBlocked
   };
 }
+
 
 function getOriginalAiParsed(current) {
   if (current.ai_parsed && typeof current.ai_parsed === 'object') {
@@ -939,7 +1054,7 @@ function normalizeInputItems(body) {
         ...item,
         json: {
           ...item.json,
-          output: item.json.output || item.output
+          output: item.json.output !== undefined ? item.json.output : item.output
         }
       };
     }
@@ -1056,30 +1171,17 @@ function filterAndFormatTelegramFinalItems(items) {
       ''
     );
 
-    // Empty AI output normally stays blocked. The only exceptions are the two
-    // evidence-limited lanes explicitly authorized by build-context.
-    let usedFallback = false;
-    let usedEvidenceLimitedRecovery = false;
-    if (isEmptyMessage(finalMessage)) {
-      const recovery = buildEvidenceLimitedRecoveryMessage(current, customerName);
-      if (recovery) {
-        finalMessage = recovery.en;
-        finalMessageCn = recovery.cn;
-        usedEvidenceLimitedRecovery = true;
-      } else {
-        const fallbackEn = generateFallbackMessage(customerName, current.hard_no_send);
-        if (fallbackEn) {
-          finalMessage = fallbackEn;
-          finalMessageCn = generateFallbackMessageCn(customerName, current.hard_no_send);
-          usedFallback = true;
-        }
-      }
-    }
+    // Invalid, rejected, or empty Enforce output is never replaced by recovery copy.
+    const usedFallback = false;
+    const usedEvidenceLimitedRecovery = false;
 
     const targetReply = safe(aiParsed.target_reply, '未输出');
     const hardNoSend = boolFlag(current.hard_no_send);
     const hasNotNowSignal = boolFlag(current.has_not_now_signal);
-    const manualHoldReasons = getManualHoldReasons(current);
+    const manualHoldReasons = [...new Set([
+      ...getManualHoldReasons(current),
+      ...(enforceParsed.input_blocked ? [enforceParsed.parse_status, ...enforceParsed.reason_codes] : [])
+    ])];
 
     let usedAlternateActivation = false;
     if (manualHoldReasons.length === 0 && shouldRewriteToAlternateActivation(finalMessage)) {
@@ -1147,6 +1249,8 @@ function filterAndFormatTelegramFinalItems(items) {
     const missingChineseReference = hasIncompleteChineseReference(finalMessageCn);
     const qualityIssueHits = uniqueHits([
       ...bannedHits,
+      ...enforceParsed.diagnostic_codes.map(reason => ({ name: 'enforce_input', matched: reason })),
+      ...enforceParsed.reason_codes.filter(reason => !['PASS', 'OK', 'APPROVED'].includes(reason)).map(reason => ({ name: 'enforce_reason', matched: reason })),
       ...manualHoldReasons.map(reason => ({ name: 'manual_hold', matched: reason }))
     ]);
     const shouldBlock = manualHoldReasons.length > 0 || emptyMessage || qualityBlock;
@@ -1257,6 +1361,8 @@ function filterAndFormatTelegramFinalItems(items) {
       ...current,
       ai_parsed: aiParsed,
       enforce_parsed: enforceParsed,
+      enforce_parse_status: enforceParsed.parse_status,
+      enforce_reason_unmapped: enforceParsed.reason_unmapped,
       project_key: projectKey,
       customer_name: customerName,
       order_group: has(current.order_group) ? String(current.order_group).trim() : '',
