@@ -3,6 +3,36 @@
     {
       "source": "/api/profile-canary-rollback",
       "destination": "/api/profile-canary-status?__profile_canary_action=rollback"
+    },
+    {
+      "source": "/api/safe-v14-format-telegram-message-20260923",
+      "destination": "/api/format-telegram-message?__safe_v14_route=safe-v14-format-telegram-message-20260923",
+      "missing": [
+        {
+          "type": "query",
+          "key": "__safe_v14_route"
+        }
+      ]
+    },
+    {
+      "source": "/api/safe-v14-filter-and-format-telegram-final-20260923",
+      "destination": "/api/format-telegram-message?__safe_v14_route=safe-v14-filter-and-format-telegram-final-20260923",
+      "missing": [
+        {
+          "type": "query",
+          "key": "__safe_v14_route"
+        }
+      ]
+    },
+    {
+      "source": "/api/safe-v14-compile-enforce-prompt-20260923",
+      "destination": "/api/format-telegram-message?__safe_v14_route=safe-v14-compile-enforce-prompt-20260923",
+      "missing": [
+        {
+          "type": "query",
+          "key": "__safe_v14_route"
+        }
+      ]
     }
   ]
 }
