@@ -669,7 +669,7 @@ function getGeneratorParsed(item) {
       inspectMetadata(parsed);
       if (!own(parsed, 'whatsapp_message')) add('GENERATOR_MESSAGE_FIELD_MISSING');
       else if (typeof parsed.whatsapp_message !== 'string') add('GENERATOR_MESSAGE_TYPE');
-      else if (!parsed.whatsapp_message.trim() || parsed.whatsapp_message.trim().toLowerCase() === 'unknown') add('GENERATOR_EXPLICIT_EMPTY');
+      else if (!normalizeMessageValue(parsed.whatsapp_message) || parsed.whatsapp_message.trim().toLowerCase() === 'unknown') add('GENERATOR_EXPLICIT_EMPTY');
       if (own(parsed, 'whatsapp_message_cn') && typeof parsed.whatsapp_message_cn !== 'string') add('GENERATOR_CHINESE_TYPE');
     }
   }
@@ -733,10 +733,7 @@ function formatTelegramMessageItems(items) {
       const aiParsed = normalizeAiParsed(data, item);
       const en = normalizeMessageValue(aiParsed.whatsapp_message);
 
-      const projectKey = firstNonEmptyString(
-        data.project_key,
-        aiParsed.project_key
-      );
+      const projectKey = firstNonEmptyString(data.project_key);
 
       const orderGroup = firstNonEmptyString(
         data.order_group,
@@ -965,8 +962,70 @@ function parseJsonSafe(raw) {
   }
 }
 
+// Explicit Parse1 response contract. No legacy body or Generator fallback.
+const enforceContractField = 'safe_v14_enforce_v1';
+const enforceResponseFields = [
+  "content",
+  "output",
+  "output_text",
+  "ai_parsed",
+  "ai_output_parse_status",
+  "whatsapp_message",
+  "whatsapp_message_cn",
+  "should_send",
+  "refusal",
+  "type",
+  "finish_reason",
+  "stop_reason",
+  "status",
+  "incomplete_details",
+  "error",
+  "hard_no_send",
+  "has_not_now_signal",
+  "not_now",
+  "manual_context_required",
+  "send_state",
+  "enforce_status",
+  "action",
+  "reason"
+];
+const enforceSourceByItem = new WeakMap();
+const contractObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+const contractOwn = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
+
+function selectEnforceContract(outer, inner) {
+  const hasOuter = contractObject(outer) && contractOwn(outer, enforceContractField);
+  const hasInner = contractObject(inner) && contractOwn(inner, enforceContractField);
+  if (!hasOuter && !hasInner) return { error: 'ENFORCE_MISSING_OUTPUT' };
+  const outerContract = hasOuter ? outer[enforceContractField] : undefined;
+  const innerContract = hasInner ? inner[enforceContractField] : undefined;
+  if (hasOuter && hasInner && JSON.stringify(outerContract) !== JSON.stringify(innerContract)) {
+    return { error: 'ENFORCE_OUTPUT_SHAPE' };
+  }
+  const selected = hasOuter ? outerContract : innerContract;
+  if (!contractObject(selected) || Object.keys(selected).length !== 3 ||
+      !['schema_version', 'producer', 'response'].every(key => contractOwn(selected, key)) ||
+      selected.schema_version !== 1 || selected.producer !== 'Parse Anthropic Output1' ||
+      !contractObject(selected.response)) return { error: 'ENFORCE_OUTPUT_SHAPE' };
+  const response = selected.response;
+  if (Object.keys(response).some(key => !enforceResponseFields.includes(key)) ||
+      !['ai_parsed', 'ai_output_parse_status', 'whatsapp_message', 'whatsapp_message_cn'].every(key => contractOwn(response, key)) ||
+      !contractObject(response.ai_parsed) ||
+      !['PASS_PARSED_JSON', 'HOLD_INVALID_JSON'].includes(response.ai_output_parse_status) ||
+      typeof response.whatsapp_message !== 'string' || typeof response.whatsapp_message_cn !== 'string') {
+    return { error: 'ENFORCE_OUTPUT_SHAPE' };
+  }
+  return { response };
+}
+
 function getEnforceParsed(item) {
-  const current = item.json || {};
+  const source = enforceSourceByItem.get(item) || { error: 'ENFORCE_MISSING_OUTPUT' };
+  if (source.error) return {
+    whatsapp_message: '', whatsapp_message_cn: '', parse_status: source.error,
+    source_shape: 'unknown', diagnostic_codes: [source.error], reason_codes: [],
+    reason_unmapped: false, blocked_by_enforce: false, input_blocked: true
+  };
+  const current = source.response;
   const own = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
   const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
   const code = value => typeof value === 'string'
@@ -1908,23 +1967,18 @@ const zh = {
 
 function normalizeInputItems(body) {
   const rawItems = Array.isArray(body) ? body : [body || {}];
-
   return rawItems.map(item => {
-    if (item && typeof item === 'object' && !Array.isArray(item) && item.json) {
-      return {
-        ...item,
-        json: {
-          ...item.json,
-          output: item.json.output !== undefined ? item.json.output : item.output
-        }
-      };
-    }
-
-    return {
-      json: item && typeof item === 'object' && !Array.isArray(item) ? item : {}
-    };
+    const outer = contractObject(item) ? item : {};
+    const inner = contractObject(outer.json) ? outer.json : null;
+    const normalized = { json: { ...(inner || outer) } };
+    // This response envelope is transport-only; do not duplicate it into the
+    // downstream CN prompt, review payload, or stored context via ...current.
+    delete normalized.json[enforceContractField];
+    enforceSourceByItem.set(normalized, selectEnforceContract(outer, inner));
+    return normalized;
   });
 }
+
 
 function filterAndFormatTelegramFinalItems(items) {
   const out = [];
